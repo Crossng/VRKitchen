@@ -209,6 +209,15 @@ def assert_menu_progress(session, step, total, item_fragment, route_fragment, co
     require_text_contains(session.get_menu_route_text(), route_fragment, f"{context} menu route")
 
 
+def assert_player_objective(session, ingredients_fragment, action_fragment, recovery_fragment, context):
+    require_text_contains(session.get_current_required_ingredients_text(), ingredients_fragment, f"{context} required ingredients")
+    require_text_contains(session.get_current_action_step_text(), action_fragment, f"{context} action step")
+    require_text_contains(session.get_failure_recovery_text(), recovery_fragment, f"{context} recovery text")
+    require_text_contains(session.get_player_objective_text(), ingredients_fragment, f"{context} objective ingredients")
+    require_text_contains(session.get_player_objective_text(), action_fragment, f"{context} objective action")
+    require_text_contains(session.get_player_objective_text(), recovery_fragment, f"{context} objective recovery")
+
+
 order_manager = find_actor_by_label("BP_OrderManager_Playable")
 delivery_area = find_actor_by_label("BP_DeliveryArea")
 order_tablet = find_actor_by_label("BP_OrderTablet")
@@ -250,6 +259,7 @@ if order_manager and delivery_area:
 
         reset_session(session)
         assert_menu_progress(session, 1, 9, "经典汉堡", "经典汉堡 -> 2.香煎牛排", "initial menu progress")
+        assert_player_objective(session, "底部面包, 熟肉饼, 顶部面包", "煎熟肉饼", "保持当前节奏", "initial player objective")
         require_text_contains(session.get_menu_route_text(), "田园沙拉", "menu route includes salad")
         require_text_contains(session.get_menu_route_text(), "经典汉堡沙拉套餐", "menu route includes final combo")
         assert_session_guidance(
@@ -371,10 +381,16 @@ if order_manager and delivery_area:
         )
         require(not submit_tags(delivery_area, simple_order), "Third simple order should fail after steak stage starts")
         require_text_contains(session.get_tutorial_hint_text(), "刚才出错", "failure recovery tutorial")
+        require_text_contains(session.get_failure_recovery_text(), "清理盘子上的多余食材", "wrong dish recovery text")
+        require_text_contains(session.get_player_objective_text(), "所需食材: 熟牛肉", "steak objective required ingredient")
+        require_text_contains(session.get_player_objective_text(), "推荐步骤: 把生牛肉放进煎锅", "steak objective action")
         submit_tags_expect_feedback(session, delivery_area, ["Raw_Meat"], "牛肉还没煎熟", "raw meat steak order")
+        require_text_contains(session.get_failure_recovery_text(), "确认煎锅在灶台上", "raw meat recovery text")
         submit_tags_expect_feedback(session, delivery_area, ["Burnt_Meat"], "牛肉烧焦了", "burnt meat steak order")
+        require_text_contains(session.get_failure_recovery_text(), "丢弃烧焦食材", "burnt meat recovery text")
         require(submit_tags(delivery_area, steak_order), "Third progressive steak order should succeed")
         assert_menu_progress(session, 3, 9, "田园沙拉", "汉堡沙拉套餐", "salad menu progress")
+        assert_player_objective(session, "切好的生菜, 切好的番茄", "先切生菜", "保持当前节奏", "salad player objective")
         assert_session_guidance(
             session,
             3,
@@ -386,9 +402,12 @@ if order_manager and delivery_area:
             "salad stage guidance",
         )
         submit_tags_expect_feedback(session, delivery_area, ["Raw_Lettuce", "Chopped_Tomato"], "生菜还没切", "raw lettuce salad order")
+        require_text_contains(session.get_failure_recovery_text(), "切菜板处理", "raw lettuce recovery text")
         submit_tags_expect_feedback(session, delivery_area, ["Chopped_Lettuce", "Raw_Tomato"], "番茄还没切", "raw tomato salad order")
         submit_tags_expect_feedback(session, delivery_area, ["Chopped_Tomato", "Chopped_Lettuce"], "沙拉顺序错误", "reversed salad order")
+        require_text_contains(session.get_failure_recovery_text(), "重新叠放", "salad order recovery text")
         submit_tags_expect_feedback(session, delivery_area, ["Chopped_Lettuce", "Chopped_Tomato", "Top_Bun"], "多了食材：顶部面包", "salad with extra bun")
+        require_text_contains(session.get_failure_recovery_text(), "清理盘子上的多余食材", "extra food recovery text")
         require(submit_tags(delivery_area, salad_order), "Fourth progressive salad order should succeed")
         assert_session_guidance(
             session,
@@ -415,6 +434,7 @@ if order_manager and delivery_area:
         require(submit_tags(delivery_area, meat_order), "Combo probe seventh thick meat order should succeed")
         require(submit_tags(delivery_area, deluxe_order), "Combo probe eighth double meat order should succeed")
         assert_menu_progress(session, 8, 9, "牛排沙拉套餐", "经典汉堡沙拉套餐", "steak salad combo menu progress")
+        assert_player_objective(session, "熟牛肉, 切好的生菜, 切好的番茄", "先煎熟牛肉", "保持当前节奏", "steak salad combo player objective")
         assert_session_guidance(
             session,
             8,
@@ -430,6 +450,7 @@ if order_manager and delivery_area:
         submit_tags_expect_feedback(session, delivery_area, ["Cooked_Meat", "Chopped_Lettuce", "Chopped_Tomato", "Top_Bun"], "套餐多了食材：顶部面包", "steak salad combo with extra bun")
         require(submit_tags(delivery_area, steak_salad_combo_order), "Steak salad combo should succeed after probes")
         assert_menu_progress(session, 9, 9, "经典汉堡沙拉套餐", "牛排沙拉套餐", "burger salad combo menu progress")
+        assert_player_objective(session, "底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄", "先叠完整经典汉堡", "保持当前节奏", "burger salad combo player objective")
         assert_session_guidance(
             session,
             9,

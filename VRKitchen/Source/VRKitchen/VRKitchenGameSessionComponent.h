@@ -127,6 +127,18 @@ public:
 	FString GetMenuProgressText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetCurrentRequiredIngredientsText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetCurrentActionStepText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetFailureRecoveryText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetPlayerObjectiveText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	int32 GetOrderStageIndex() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")

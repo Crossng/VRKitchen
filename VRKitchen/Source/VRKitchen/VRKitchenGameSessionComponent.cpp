@@ -25,6 +25,7 @@ namespace
 		FString StageText;
 		FString NextGoalText;
 		FString TutorialText;
+		FString ActionStepText;
 		FDemoOrderSpec OrderSpec;
 	};
 
@@ -36,6 +37,7 @@ namespace
 				TEXT("基础汉堡训练"),
 				TEXT("先稳定完成 2 单经典汉堡"),
 				TEXT("经典汉堡：底部面包 + 熟肉饼 + 顶部面包。"),
+				TEXT("先取底部面包，再煎熟肉饼，最后盖上顶部面包后出餐。"),
 				{
 					TEXT("经典汉堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Top_Bun")},
@@ -47,6 +49,7 @@ namespace
 				TEXT("牛排煎制"),
 				TEXT("用煎锅和灶台做香煎牛排"),
 				TEXT("香煎牛排：把生牛肉放进煎锅，锅在灶台上加热到熟牛肉后再出餐。"),
+				TEXT("把生牛肉放进煎锅，确认锅在灶台上，变成熟牛肉后立刻装盘。"),
 				{
 					TEXT("香煎牛排"),
 					{TEXT("Cooked_Meat")},
@@ -58,6 +61,7 @@ namespace
 				TEXT("沙拉切配"),
 				TEXT("切生菜和番茄做田园沙拉"),
 				TEXT("田园沙拉：切好生菜和番茄后直接叠盘出餐，不需要煎锅。"),
+				TEXT("先切生菜，再切番茄，按生菜到番茄的顺序放盘。"),
 				{
 					TEXT("田园沙拉"),
 					{TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
@@ -69,6 +73,7 @@ namespace
 				TEXT("生菜汉堡进阶"),
 				TEXT("把切好的生菜加入汉堡"),
 				TEXT("生菜汉堡：先切生菜，再放到熟肉饼上方。"),
+				TEXT("先做底部面包和熟肉饼，再加入切好的生菜，最后盖顶部面包。"),
 				{
 					TEXT("生菜汉堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
@@ -80,6 +85,7 @@ namespace
 				TEXT("番茄切配"),
 				TEXT("切番茄，注意不要换顺序"),
 				TEXT("番茄汉堡：先切番茄，叠盘顺序仍然严格。"),
+				TEXT("先做底部面包和熟肉饼，再加入切好的番茄，最后盖顶部面包。"),
 				{
 					TEXT("番茄汉堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
@@ -91,6 +97,7 @@ namespace
 				TEXT("厚肉煎制"),
 				TEXT("煎熟牛肉再提交厚肉堡"),
 				TEXT("厚肉生菜堡：使用熟牛肉，不要提交生肉或烧焦肉。"),
+				TEXT("把牛肉煎熟，和切好的生菜夹进面包；不要让牛肉继续受热烧焦。"),
 				{
 					TEXT("厚肉生菜堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Meat"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
@@ -102,6 +109,7 @@ namespace
 				TEXT("豪华双肉挑战"),
 				TEXT("完成豪华双肉堡，准备套餐挑战"),
 				TEXT("豪华双肉堡：肉饼、生菜、熟牛肉、番茄都要按订单顺序。"),
+				TEXT("按顺序放底部面包、熟肉饼、生菜、熟牛肉、番茄、顶部面包。"),
 				{
 					TEXT("豪华双肉堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Cooked_Meat"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
@@ -113,6 +121,7 @@ namespace
 				TEXT("牛排沙拉套餐"),
 				TEXT("把牛排和沙拉按套餐顺序出餐"),
 				TEXT("牛排沙拉套餐：先放熟牛肉，再放切好的生菜和番茄。"),
+				TEXT("先煎熟牛肉放盘，再补切好的生菜和切好的番茄。"),
 				{
 					TEXT("牛排沙拉套餐"),
 					{TEXT("Cooked_Meat"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
@@ -124,6 +133,7 @@ namespace
 				TEXT("汉堡沙拉套餐"),
 				TEXT("完成经典汉堡沙拉套餐冲三星"),
 				TEXT("经典汉堡沙拉套餐：先完成经典汉堡，再补上沙拉配菜。"),
+				TEXT("先叠完整经典汉堡，再按生菜、番茄顺序补上沙拉配菜。"),
 				{
 					TEXT("经典汉堡沙拉套餐"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Top_Bun"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
@@ -607,6 +617,77 @@ FString UVRKitchenGameSessionComponent::GetMenuProgressText() const
 		*GetCurrentMenuItemText());
 }
 
+FString UVRKitchenGameSessionComponent::GetCurrentRequiredIngredientsText() const
+{
+	const FDemoOrderSpec& OrderSpec = GetDemoMenuStepForProgress(CorrectOrders).OrderSpec;
+	return FString::Printf(TEXT("所需食材: %s"), *OrderSpec.DisplayDetails);
+}
+
+FString UVRKitchenGameSessionComponent::GetCurrentActionStepText() const
+{
+	return FString::Printf(TEXT("推荐步骤: %s"), *GetDemoMenuStepForProgress(CorrectOrders).ActionStepText);
+}
+
+FString UVRKitchenGameSessionComponent::GetFailureRecoveryText() const
+{
+	if (LastFeedbackMessage.IsEmpty() || LastFeedbackMessage.Contains(TEXT("出餐成功")) || LastFeedbackMessage.Contains(TEXT("目标:")) || LastFeedbackMessage.Contains(TEXT("任务完成")))
+	{
+		return TEXT("修复建议: 保持当前节奏，按订单顺序继续出餐。");
+	}
+
+	if (LastFeedbackMessage.Contains(TEXT("请先放上食材")))
+	{
+		return TEXT("修复建议: 先查看所需食材，把第一项食材放到盘子或出餐区。");
+	}
+
+	if (LastFeedbackMessage.Contains(TEXT("还没切")))
+	{
+		return TEXT("修复建议: 把对应蔬菜放到切菜板处理，生成切好的生菜或番茄后再提交。");
+	}
+
+	if (LastFeedbackMessage.Contains(TEXT("还没煎熟")))
+	{
+		return TEXT("修复建议: 把生肉放进煎锅，并确认煎锅在灶台上加热到熟。");
+	}
+
+	if (LastFeedbackMessage.Contains(TEXT("烧焦")))
+	{
+		return TEXT("修复建议: 丢弃烧焦食材，重新煎一份；熟了就尽快离开灶台。");
+	}
+
+	if (LastFeedbackMessage.Contains(TEXT("缺少")))
+	{
+		return TEXT("修复建议: 对照所需食材补齐缺失项，再按当前订单顺序提交。");
+	}
+
+	if (LastFeedbackMessage.Contains(TEXT("多了")))
+	{
+		return TEXT("修复建议: 清理盘子上的多余食材，只保留订单需要的内容。");
+	}
+
+	if (LastFeedbackMessage.Contains(TEXT("顺序错误")))
+	{
+		return TEXT("修复建议: 清空后按订单从左到右、从下到上重新叠放。");
+	}
+
+	if (LastFeedbackMessage.Contains(TEXT("未知食材")))
+	{
+		return TEXT("修复建议: 移除未识别物体，只使用当前菜单里的正式食材。");
+	}
+
+	return TEXT("修复建议: 查看失败原因，按所需食材和推荐步骤重新制作。");
+}
+
+FString UVRKitchenGameSessionComponent::GetPlayerObjectiveText() const
+{
+	return FString::Printf(
+		TEXT("%s\n%s\n%s\n%s"),
+		*GetMenuProgressText(),
+		*GetCurrentRequiredIngredientsText(),
+		*GetCurrentActionStepText(),
+		*GetFailureRecoveryText());
+}
+
 int32 UVRKitchenGameSessionComponent::GetOrderStageIndex() const
 {
 	return GetCurrentMenuRouteStep();
@@ -685,10 +766,10 @@ FString UVRKitchenGameSessionComponent::GetTutorialHintText() const
 	}
 	else if (WrongOrders > 0 && CurrentStreak == 0)
 	{
-		Prefix = TEXT("刚才出错：先看红色失败原因。\n");
+		Prefix = FString::Printf(TEXT("刚才出错：%s\n"), *GetFailureRecoveryText());
 	}
 
-	return Prefix + GetDemoMenuStepForProgress(CorrectOrders).TutorialText;
+	return Prefix + GetDemoMenuStepForProgress(CorrectOrders).TutorialText + TEXT("\n") + GetCurrentActionStepText();
 }
 
 void UVRKitchenGameSessionComponent::EnsureTextComponents()
@@ -768,25 +849,27 @@ FString UVRKitchenGameSessionComponent::BuildStatusText() const
 	}
 
 	return FString::Printf(
-		TEXT("剩余时间: %02d:%02d  %s\n阶段: %s\n%s\n分数: %d / 目标: %d\n完成: %d  错误: %d  连击: %d\n下一目标: %s\n%s"),
+		TEXT("剩余时间: %02d:%02d  %s\n阶段: %s\n%s\n分数: %d / 目标: %d\n完成: %d  错误: %d  连击: %d\n下一目标: %s\n%s\n%s"),
 		Minutes,
 		Seconds,
 		*GetUrgencyText(),
 		*GetOrderStageText(),
-		*GetMenuProgressText(),
+		*GetPlayerObjectiveText(),
 		SessionScore,
 		TargetScore,
 		CorrectOrders,
 		WrongOrders,
 		CurrentStreak,
 		*GetNextGoalText(),
-		*LastFeedbackMessage);
+		*LastFeedbackMessage,
+		*GetFailureRecoveryText());
 }
 
 FString UVRKitchenGameSessionComponent::BuildTutorialText() const
 {
 	return FString::Printf(
-		TEXT("玩法提示\n%s\n步骤: 看订单 -> 切菜/煎肉 -> 按顺序叠盘 -> 出餐\n连续正确 3 单有奖励"),
+		TEXT("玩法提示\n%s\n%s\n步骤: 看订单 -> 切菜/煎肉 -> 按顺序叠盘 -> 出餐\n连续正确 3 单有奖励"),
+		*GetCurrentRequiredIngredientsText(),
 		*GetTutorialHintText());
 }
 
