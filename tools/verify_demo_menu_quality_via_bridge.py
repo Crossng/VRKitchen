@@ -51,7 +51,9 @@ if order_manager and delivery_area:
         require_text_contains(report, "菜单数量: 9", "menu health report")
         require_text_contains(report, "中文玩家文案", "menu health report")
         require_text_contains(report, "切菜/煎锅/调味区提示", "menu health report")
-        require_text_contains(report, "沙拉与套餐规则", "menu health report")
+        require_text_contains(report, "沙拉与套餐盘装规则", "menu health report")
+        require_text_contains(session.get_menu_route_text(), "田园沙拉", "menu route")
+        require_text_contains(session.get_demo_menu_route_quality_report_text(), "盘装", "menu health report plating rule")
         print(report)
 
 if failures:

@@ -52,8 +52,9 @@ EXPECTED_MENU = [
         "warning": "未切蔬菜或缺少沙拉酱不能提交，沙拉顺序不能颠倒",
         "action": "先切生菜",
         "route": "蔬菜区 -> 切菜板 -> 调味区 -> 装盘区 -> 出餐区",
-        "outcomes": ["切菜板产出切好的生菜和切好的番茄", "调味区拿到沙拉酱", "冷菜直接装盘不进煎锅"],
-        "checklist": ["生菜和番茄都已切好", "沙拉酱已加入", "顺序是切好的生菜、切好的番茄、沙拉酱"],
+        "outcomes": ["切菜板产出切好的生菜和切好的番茄", "调味区拿到沙拉酱", "冷菜直接装到盘子上"],
+        "checklist": ["生菜和番茄都已切好", "沙拉酱已加入", "沙拉也在盘子上装好", "顺序是切好的生菜、切好的番茄、沙拉酱"],
+        "plate": "沙拉也必须先在盘子上装好",
         "next_goal": "切生菜和番茄，加沙拉酱做田园沙拉",
     },
     {
@@ -132,8 +133,9 @@ EXPECTED_MENU = [
         "warning": "套餐先热菜后冷菜，缺少配菜或沙拉酱会失败",
         "action": "先煎熟牛肉",
         "route": "生牛肉区 -> 煎锅/灶台 -> 切菜板 -> 调味区 -> 装盘区 -> 出餐区",
-        "outcomes": ["煎锅/灶台产出熟牛肉", "调味区拿到沙拉酱", "先放热菜再放冷菜配菜"],
-        "checklist": ["牛肉已经煎熟且没有烧焦", "沙拉酱已加入", "套餐顺序是熟牛肉、生菜、番茄、沙拉酱"],
+        "outcomes": ["煎锅/灶台产出熟牛肉", "调味区拿到沙拉酱", "盘子上先放热菜再放冷菜配菜"],
+        "checklist": ["牛肉已经煎熟且没有烧焦", "沙拉酱已加入", "所有内容都在盘子上", "套餐顺序是熟牛肉、生菜、番茄、沙拉酱"],
+        "plate": "沙拉也必须先在盘子上装好",
         "next_goal": "把牛排和沙拉按套餐顺序出餐",
     },
     {
@@ -148,8 +150,9 @@ EXPECTED_MENU = [
         "warning": "不能把蔬菜或沙拉酱夹进汉堡中间",
         "action": "先叠完整经典汉堡",
         "route": "面包台 -> 煎锅/灶台 -> 切菜板 -> 调味区 -> 装盘区 -> 出餐区",
-        "outcomes": ["先产出完整经典汉堡", "调味区拿到沙拉酱", "最后补沙拉配菜"],
-        "checklist": ["先确认经典汉堡完整", "沙拉酱已加入", "沙拉配菜放在顶部面包之后"],
+        "outcomes": ["先产出完整经典汉堡", "调味区拿到沙拉酱", "同一个盘子上最后补沙拉配菜"],
+        "checklist": ["先确认经典汉堡完整", "沙拉酱已加入", "汉堡和沙拉配菜都在盘子上", "沙拉配菜放在顶部面包之后"],
+        "plate": "沙拉也必须先在盘子上装好",
         "next_goal": "完成经典汉堡沙拉套餐冲三星",
     },
 ]
@@ -274,7 +277,7 @@ def assert_menu_route_health(session, context):
     require(session.is_demo_menu_route_healthy(), f"{context}: demo menu route should be healthy\n{report}")
     require_text_contains(report, "菜单自检: 通过", f"{context} menu health report")
     require_text_contains(report, "菜单数量: 9", f"{context} menu health report")
-    require_text_contains(report, "沙拉与套餐规则", f"{context} menu health report")
+    require_text_contains(report, "沙拉与套餐盘装规则", f"{context} menu health report")
 
 
 def assert_stage_coaching(session, orders_until_next, unlock_fragment, preview_fragment, path_fragment, context):
@@ -302,6 +305,8 @@ def assert_player_objective(session, ingredients_fragment, action_fragment, stat
     require_text_contains(session.get_current_order_quick_card_text(), ingredients_fragment, f"{context} quick card ingredients")
     require_text_contains(session.get_current_order_quick_card_text(), action_fragment, f"{context} quick card action")
     require_text_contains(session.get_current_order_quick_card_text(), recovery_fragment, f"{context} quick card recovery")
+    require_text_contains(session.get_current_plate_assembly_guide_text(), "盘", f"{context} plate assembly guide")
+    require_text_contains(session.get_current_order_quick_card_text(), "盘子", f"{context} quick card plating")
 
 
 def assert_recipe_card(session, dish_type_fragment, process_fragment, assembly_fragment, warning_fragment, context):
@@ -371,6 +376,12 @@ def assert_menu_step_texts(session, step_index, spec, context):
     for fragment in spec["checklist"]:
         require_text_contains(session.get_current_pre_submit_checklist_text(), fragment, f"{context} checklist")
         require_text_contains(session.get_current_order_quick_card_text(), fragment, f"{context} quick card checklist")
+    if "plate" in spec:
+        require_text_contains(session.get_current_plate_assembly_guide_text(), spec["plate"], f"{context} plate guide")
+        require_text_contains(session.get_player_objective_text(), spec["plate"], f"{context} objective plate guide")
+        require_text_contains(session.get_current_order_board_text(), spec["plate"], f"{context} order board plate guide")
+        require_text_contains(session.get_current_order_quick_card_text(), spec["plate"], f"{context} quick card plate guide")
+        require_text_contains(session.get_tutorial_text(), spec["plate"], f"{context} tutorial plate guide")
     require_text_contains(session.get_current_dish_type_text(), spec["dish_type"], f"{context} dish type")
     require_text_contains(session.get_current_recipe_process_text(), spec["process"], f"{context} process")
     require_text_contains(session.get_current_recipe_assembly_text(), spec["assembly"], f"{context} assembly")
@@ -413,24 +424,27 @@ def validate_current_stage(session, spec, step_index, context):
         assert_stage_coaching(session, 1, "已完成 3 单正确订单", "解锁 4/9「生菜汉堡」", "3.田园沙拉[当前]", context)
         assert_player_objective(session, "切好的生菜, 切好的番茄, 沙拉酱", "先切生菜", "蔬菜区 -> 切菜板 -> 调味区", "保持当前节奏", context)
         assert_recipe_card(session, "冷菜 / 沙拉", "最后加入沙拉酱", "切好的生菜 -> 切好的番茄 -> 沙拉酱", "缺少沙拉酱不能提交", context)
-        assert_station_outcome(session, "切菜板产出切好的生菜", "调味区拿到沙拉酱", "冷菜直接装盘不进煎锅", context=context)
-        assert_pre_submit_checklist(session, "生菜和番茄都已切好", "沙拉酱已加入", "顺序是切好的生菜、切好的番茄、沙拉酱", context=context)
+        assert_station_outcome(session, "切菜板产出切好的生菜", "调味区拿到沙拉酱", "冷菜直接装到盘子上", context=context)
+        assert_pre_submit_checklist(session, "生菜和番茄都已切好", "沙拉酱已加入", "沙拉也在盘子上装好", "顺序是切好的生菜、切好的番茄、沙拉酱", context=context)
+        require_text_contains(session.get_current_plate_assembly_guide_text(), "沙拉也必须先在盘子上装好", f"{context} plate guide")
         require_text_contains(session.get_tutorial_hint_text(), "解锁 4/9「生菜汉堡」", f"{context} tutorial hint")
     elif step_index == 7:
         assert_menu_progress(session, 8, EXPECTED_MENU_TOTAL, "牛排沙拉套餐", "经典汉堡沙拉套餐", context)
         assert_stage_coaching(session, 1, "已完成 8 单正确订单", "解锁 9/9「经典汉堡沙拉套餐」", "8.牛排沙拉套餐[当前]", context)
         assert_player_objective(session, "熟牛肉, 切好的生菜, 切好的番茄, 沙拉酱", "先煎熟牛肉", "生牛肉区 -> 煎锅/灶台", "保持当前节奏", context)
         assert_recipe_card(session, "套餐 / 热菜加冷菜", "沙拉酱最后加入", "熟牛肉 -> 切好的生菜 -> 切好的番茄 -> 沙拉酱", "缺少配菜或沙拉酱会失败", context)
-        assert_station_outcome(session, "煎锅/灶台产出熟牛肉", "调味区拿到沙拉酱", "先放热菜再放冷菜配菜", context=context)
-        assert_pre_submit_checklist(session, "牛肉已经煎熟且没有烧焦", "沙拉酱已加入", "套餐顺序是熟牛肉、生菜、番茄、沙拉酱", context=context)
+        assert_station_outcome(session, "煎锅/灶台产出熟牛肉", "调味区拿到沙拉酱", "盘子上先放热菜再放冷菜配菜", context=context)
+        assert_pre_submit_checklist(session, "牛肉已经煎熟且没有烧焦", "沙拉酱已加入", "所有内容都在盘子上", "套餐顺序是熟牛肉、生菜、番茄、沙拉酱", context=context)
+        require_text_contains(session.get_current_plate_assembly_guide_text(), "沙拉也必须先在盘子上装好", f"{context} plate guide")
         require_text_contains(session.get_tutorial_hint_text(), "解锁 9/9「经典汉堡沙拉套餐」", f"{context} tutorial hint")
     elif step_index == 8:
         assert_menu_progress(session, 9, EXPECTED_MENU_TOTAL, "经典汉堡沙拉套餐", "牛排沙拉套餐", context)
         assert_stage_coaching(session, 0, "已完成 9 单正确订单", "已到最终菜单", "9.经典汉堡沙拉套餐[当前]", context)
         assert_player_objective(session, "底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄, 沙拉酱", "先叠完整经典汉堡", "面包台 -> 煎锅/灶台", "保持当前节奏", context)
         assert_recipe_card(session, "套餐 / 汉堡加沙拉", "沙拉酱最后加入", "底部面包 -> 熟肉饼 -> 顶部面包 -> 切好的生菜 -> 切好的番茄 -> 沙拉酱", "不能把蔬菜或沙拉酱夹进汉堡中间", context)
-        assert_station_outcome(session, "先产出完整经典汉堡", "调味区拿到沙拉酱", "最后补沙拉配菜", context=context)
-        assert_pre_submit_checklist(session, "先确认经典汉堡完整", "沙拉酱已加入", "沙拉配菜放在顶部面包之后", context=context)
+        assert_station_outcome(session, "先产出完整经典汉堡", "调味区拿到沙拉酱", "同一个盘子上最后补沙拉配菜", context=context)
+        assert_pre_submit_checklist(session, "先确认经典汉堡完整", "沙拉酱已加入", "汉堡和沙拉配菜都在盘子上", "沙拉配菜放在顶部面包之后", context=context)
+        require_text_contains(session.get_current_plate_assembly_guide_text(), "沙拉也必须先在盘子上装好", f"{context} plate guide")
         require_text_contains(session.get_tutorial_hint_text(), "已到最终菜单", f"{context} tutorial hint")
     else:
         require_text_contains(session.get_menu_route_text(), spec["name"], f"{context} route listing")

@@ -90,6 +90,11 @@ namespace
 		return RequiredTagsExactlyMatch(RequiredTags, BurgerSaladComboTags);
 	}
 
+	bool IsSaladRelatedOrder(const TArray<FName>& RequiredTags)
+	{
+		return RequiredTags.Contains(TagSaladDressing);
+	}
+
 	const TArray<FDemoMenuStep>& GetDemoMenuRoute()
 	{
 		static const TArray<FDemoMenuStep> Route = {
@@ -140,10 +145,10 @@ namespace
 				TEXT("沙拉切配"),
 				TEXT("切生菜和番茄，加沙拉酱做田园沙拉"),
 				TEXT("田园沙拉：切好生菜和番茄后直接叠盘，最后加沙拉酱出餐，不需要煎锅。"),
-				TEXT("先切生菜，再切番茄，按生菜、番茄、沙拉酱的顺序放盘。"),
+				TEXT("先切生菜，再切番茄，把沙拉按生菜、番茄、沙拉酱的顺序装到盘子上。"),
 				TEXT("工位路线: 蔬菜区 -> 切菜板 -> 调味区 -> 装盘区 -> 出餐区。冷菜，不用煎锅。"),
-				TEXT("工位结果: 蔬菜区拿到生菜和番茄；切菜板产出切好的生菜和切好的番茄；调味区拿到沙拉酱；冷菜直接装盘不进煎锅。"),
-				TEXT("出餐前检查: 生菜和番茄都已切好；沙拉酱已加入；冷菜不用煎锅；顺序是切好的生菜、切好的番茄、沙拉酱。"),
+				TEXT("工位结果: 蔬菜区拿到生菜和番茄；切菜板产出切好的生菜和切好的番茄；调味区拿到沙拉酱；冷菜直接装到盘子上，不进煎锅。"),
+				TEXT("出餐前检查: 生菜和番茄都已切好；沙拉酱已加入；沙拉也在盘子上装好；冷菜不用煎锅；顺序是切好的生菜、切好的番茄、沙拉酱。"),
 				{
 					TEXT("菜品类型: 冷菜 / 沙拉"),
 					TEXT("处理要求: 生菜和番茄都要先在切菜板切好，最后加入沙拉酱，不用煎锅"),
@@ -245,10 +250,10 @@ namespace
 				TEXT("牛排沙拉套餐"),
 				TEXT("把牛排和沙拉按套餐顺序出餐"),
 				TEXT("牛排沙拉套餐：先放熟牛肉，再放切好的生菜、番茄和沙拉酱。"),
-				TEXT("先煎熟牛肉放盘，再补切好的生菜、切好的番茄和沙拉酱。"),
+				TEXT("先煎熟牛肉放到盘子上，再在同一个盘子上补切好的生菜、切好的番茄和沙拉酱。"),
 				TEXT("工位路线: 生牛肉区 -> 煎锅/灶台 -> 切菜板 -> 调味区 -> 装盘区 -> 出餐区。先热菜，再冷菜配菜。"),
-				TEXT("工位结果: 煎锅/灶台产出熟牛肉；切菜板产出切好的生菜和切好的番茄；调味区拿到沙拉酱；装盘区先放热菜再放冷菜配菜。"),
-				TEXT("出餐前检查: 牛肉已经煎熟且没有烧焦；生菜和番茄都已切好；沙拉酱已加入；套餐顺序是熟牛肉、生菜、番茄、沙拉酱。"),
+				TEXT("工位结果: 煎锅/灶台产出熟牛肉；切菜板产出切好的生菜和切好的番茄；调味区拿到沙拉酱；装盘区在盘子上先放热菜再放冷菜配菜。"),
+				TEXT("出餐前检查: 牛肉已经煎熟且没有烧焦；生菜和番茄都已切好；沙拉酱已加入；所有内容都在盘子上；套餐顺序是熟牛肉、生菜、番茄、沙拉酱。"),
 				{
 					TEXT("菜品类型: 套餐 / 热菜加冷菜"),
 					TEXT("处理要求: 牛肉要煎熟，生菜和番茄要切好，沙拉酱最后加入"),
@@ -266,10 +271,10 @@ namespace
 				TEXT("汉堡沙拉套餐"),
 				TEXT("完成经典汉堡沙拉套餐冲三星"),
 				TEXT("经典汉堡沙拉套餐：先完成经典汉堡，再补上沙拉配菜。"),
-				TEXT("先叠完整经典汉堡，再按生菜、番茄、沙拉酱顺序补上沙拉配菜。"),
+				TEXT("先在盘子上叠完整经典汉堡，再按生菜、番茄、沙拉酱顺序补上沙拉配菜。"),
 				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 切菜板 -> 调味区 -> 装盘区 -> 出餐区。先完成汉堡，再补冷菜配菜。"),
-				TEXT("工位结果: 面包台和煎锅/灶台先产出完整经典汉堡；切菜板产出切好的生菜和切好的番茄；调味区拿到沙拉酱；装盘区最后补沙拉配菜。"),
-				TEXT("出餐前检查: 先确认经典汉堡完整；生菜和番茄都已切好；沙拉酱已加入；沙拉配菜放在顶部面包之后。"),
+				TEXT("工位结果: 面包台和煎锅/灶台先产出完整经典汉堡；切菜板产出切好的生菜和切好的番茄；调味区拿到沙拉酱；装盘区在同一个盘子上最后补沙拉配菜。"),
+				TEXT("出餐前检查: 先确认经典汉堡完整；生菜和番茄都已切好；沙拉酱已加入；汉堡和沙拉配菜都在盘子上；沙拉配菜放在顶部面包之后。"),
 				{
 					TEXT("菜品类型: 套餐 / 汉堡加沙拉"),
 					TEXT("处理要求: 肉饼要煎熟，生菜和番茄要切好，沙拉酱最后加入"),
@@ -491,6 +496,11 @@ namespace
 				{
 					AddMenuIssue(OutIssues, Index, Step, TEXT("含沙拉酱订单必须在出餐前检查里提示沙拉酱"));
 				}
+				const FString SaladPlatingText = Step.ActionStepText + Step.StationOutcomeText + Step.PreSubmitChecklistText;
+				if (!SaladPlatingText.Contains(TEXT("盘子")))
+				{
+					AddMenuIssue(OutIssues, Index, Step, TEXT("沙拉/套餐必须明确提示在盘子上完成装盘"));
+				}
 			}
 
 			if (bIsGardenSalad)
@@ -534,7 +544,7 @@ namespace
 		if (Issues.Num() == 0)
 		{
 			return FString::Printf(
-				TEXT("菜单自检: 通过\n菜单数量: %d\n检查项: 解锁顺序、菜名唯一、正式食材标签、中文玩家文案、切菜/煎锅/调味区提示、沙拉与套餐规则"),
+				TEXT("菜单自检: 通过\n菜单数量: %d\n检查项: 解锁顺序、菜名唯一、正式食材标签、中文玩家文案、切菜/煎锅/调味区提示、沙拉与套餐盘装规则"),
 				Route.Num());
 		}
 
@@ -586,14 +596,27 @@ namespace
 			*Step.RecipeCard.CommonMistakeText);
 	}
 
+	FString BuildPlateAssemblyGuideText(const FDemoMenuStep& Step)
+	{
+		const FString PlateRule = IsSaladRelatedOrder(Step.OrderSpec.RequiredTags)
+			? TEXT("盘面规则: 沙拉也必须先在盘子上装好，再整盘提交到出餐区。")
+			: TEXT("盘面规则: 所有食材都先放到盘子上，按顺序叠好后再提交到出餐区。");
+
+		return FString::Printf(
+			TEXT("%s\n装盘顺序: %s\n提交动作: 检查盘子上的食材状态和顺序正确后，再把整盘送到出餐区。"),
+			*PlateRule,
+			*Step.RecipeCard.AssemblyText);
+	}
+
 	FString BuildOrderBoardDetailsText(const FDemoMenuStep& Step)
 	{
 		return FString::Printf(
-			TEXT("%s\n推荐步骤: %s\n%s\n%s\n%s\n阶段目标: %s"),
+			TEXT("%s\n推荐步骤: %s\n%s\n%s\n%s\n%s\n阶段目标: %s"),
 			*BuildRecipeCardText(Step),
 			*Step.ActionStepText,
 			*Step.StationRouteText,
 			*Step.StationOutcomeText,
+			*BuildPlateAssemblyGuideText(Step),
 			*Step.PreSubmitChecklistText,
 			*Step.NextGoalText);
 	}
@@ -1287,14 +1310,20 @@ FString UVRKitchenGameSessionComponent::GetCurrentOrderQuickCardText() const
 {
 	const FDemoMenuStep& Step = GetDemoMenuStepForProgress(CorrectOrders);
 	return FString::Printf(
-		TEXT("订单速查\n当前: %d/%d %s\n食材: %s\n下一步: %s\n检查: %s\n失败修复: %s"),
+		TEXT("订单速查\n当前: %d/%d %s\n食材: %s\n下一步: %s\n盘子: %s\n检查: %s\n失败修复: %s"),
 		GetCurrentMenuRouteStep(),
 		GetMenuRouteTotal(),
 		*Step.OrderSpec.OrderName,
 		*Step.OrderSpec.DisplayDetails,
 		*Step.ActionStepText,
+		*GetCurrentPlateAssemblyGuideText(),
 		*Step.PreSubmitChecklistText,
 		*GetFailureRecoveryText());
+}
+
+FString UVRKitchenGameSessionComponent::GetCurrentPlateAssemblyGuideText() const
+{
+	return BuildPlateAssemblyGuideText(GetDemoMenuStepForProgress(CorrectOrders));
 }
 
 FString UVRKitchenGameSessionComponent::GetCurrentPreSubmitChecklistText() const
@@ -1363,6 +1392,7 @@ FString UVRKitchenGameSessionComponent::GetPlayerObjectiveText() const
 		*GetCurrentActionStepText(),
 		*GetCurrentStationRouteText(),
 		*GetCurrentStationOutcomeText(),
+		*GetCurrentPlateAssemblyGuideText(),
 		*GetCurrentPreSubmitChecklistText(),
 		*GetFailureRecoveryText());
 }
@@ -1552,10 +1582,11 @@ FString UVRKitchenGameSessionComponent::BuildStatusText() const
 FString UVRKitchenGameSessionComponent::BuildTutorialText() const
 {
 	return FString::Printf(
-		TEXT("玩法提示\n%s\n%s\n%s\n%s\n步骤: 看订单 -> 按工位路线处理食材 -> 按顺序叠盘 -> 出餐\n连续正确 3 单有奖励"),
+		TEXT("玩法提示\n%s\n%s\n%s\n%s\n%s\n步骤: 看订单 -> 按工位路线处理食材 -> 在盘子上按顺序叠好 -> 整盘出餐\n连续正确 3 单有奖励"),
 		*GetCurrentRequiredIngredientsText(),
 		*GetCurrentStationRouteText(),
 		*GetCurrentStationOutcomeText(),
+		*GetCurrentPlateAssemblyGuideText(),
 		*GetTutorialHintText());
 }
 

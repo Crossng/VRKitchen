@@ -199,6 +199,9 @@ public:
 	FString GetCurrentOrderQuickCardText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetCurrentPlateAssemblyGuideText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	FString GetCurrentPreSubmitChecklistText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
