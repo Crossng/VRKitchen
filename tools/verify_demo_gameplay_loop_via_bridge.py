@@ -250,6 +250,17 @@ def assert_recipe_card(session, dish_type_fragment, process_fragment, assembly_f
     require_text_contains(session.get_current_order_board_text(), warning_fragment, f"{context} order board warning")
 
 
+def assert_pre_submit_checklist(session, *fragments, context):
+    checklist = session.get_current_pre_submit_checklist_text()
+    require_text_contains(checklist, "出餐前检查", f"{context} checklist title")
+    require_text_contains(session.get_player_objective_text(), "出餐前检查", f"{context} objective checklist title")
+    require_text_contains(session.get_current_order_board_text(), "出餐前检查", f"{context} order board checklist title")
+    for fragment in fragments:
+        require_text_contains(checklist, fragment, f"{context} checklist")
+        require_text_contains(session.get_player_objective_text(), fragment, f"{context} objective checklist")
+        require_text_contains(session.get_current_order_board_text(), fragment, f"{context} order board checklist")
+
+
 def assert_performance_summary(session, attempts, accuracy, accuracy_fragment, mistake_fragment, focus_fragment, context):
     require(session.get_total_order_attempts() == attempts, f"{context}: expected attempts {attempts}, got {session.get_total_order_attempts()}")
     require(session.get_accuracy_percent() == accuracy, f"{context}: expected accuracy {accuracy}, got {session.get_accuracy_percent()}")
@@ -305,6 +316,7 @@ if order_manager and delivery_area:
         assert_stage_coaching(session, 2, "开局基础训练", "解锁 2/9「香煎牛排」", "1.经典汉堡[当前]", "initial stage coaching")
         assert_player_objective(session, "底部面包, 熟肉饼, 顶部面包", "煎熟肉饼", "面包台 -> 煎锅/灶台", "保持当前节奏", "initial player objective")
         assert_recipe_card(session, "汉堡 / 热菜", "肉饼必须用煎锅", "底部面包 -> 熟肉饼 -> 顶部面包", "生肉饼不能提交", "initial recipe card")
+        assert_pre_submit_checklist(session, "底部面包在最下方", "肉饼已经煎熟", "顶部面包最后盖上", context="initial pre-submit checklist")
         assert_performance_summary(session, 0, 0, "暂无提交", "没有错误订单", "第一单经典汉堡", "initial performance summary")
         require_text_contains(session.get_menu_route_text(), "田园沙拉", "menu route includes salad")
         require_text_contains(session.get_menu_route_text(), "经典汉堡沙拉套餐", "menu route includes final combo")
@@ -436,6 +448,7 @@ if order_manager and delivery_area:
         require_text_contains(session.get_player_objective_text(), "所需食材: 熟牛肉", "steak objective required ingredient")
         require_text_contains(session.get_player_objective_text(), "推荐步骤: 把生牛肉放进煎锅", "steak objective action")
         assert_recipe_card(session, "热菜 / 单品", "生牛肉必须", "熟牛肉单独装盘", "继续加热会烧焦", "steak recipe card")
+        assert_pre_submit_checklist(session, "盘上只有熟牛肉", "没有生牛肉或烧焦牛肉", "熟了就离开灶台", context="steak pre-submit checklist")
         submit_tags_expect_feedback(session, delivery_area, ["Raw_Meat"], "牛肉还没煎熟", "raw meat steak order")
         require_text_contains(session.get_failure_recovery_text(), "确认煎锅在灶台上", "raw meat recovery text")
         submit_tags_expect_feedback(session, delivery_area, ["Burnt_Meat"], "牛肉烧焦了", "burnt meat steak order")
@@ -445,6 +458,7 @@ if order_manager and delivery_area:
         assert_stage_coaching(session, 1, "已完成 3 单正确订单", "解锁 4/9「生菜汉堡」", "3.田园沙拉[当前]", "salad stage coaching")
         assert_player_objective(session, "切好的生菜, 切好的番茄", "先切生菜", "冷菜，不用煎锅", "保持当前节奏", "salad player objective")
         assert_recipe_card(session, "冷菜 / 沙拉", "切菜板切好，不用煎锅", "切好的生菜 -> 切好的番茄", "沙拉顺序不能颠倒", "salad recipe card")
+        assert_pre_submit_checklist(session, "生菜和番茄都已切好", "冷菜不用煎锅", "先放切好的生菜", context="salad pre-submit checklist")
         require_text_contains(session.get_current_station_route_text(), "蔬菜区 -> 切菜板 -> 装盘区 -> 出餐区", "salad station route path")
         assert_session_guidance(
             session,
@@ -492,6 +506,7 @@ if order_manager and delivery_area:
         assert_stage_coaching(session, 1, "已完成 8 单正确订单", "解锁 9/9「经典汉堡沙拉套餐」", "8.牛排沙拉套餐[当前]", "steak salad combo stage coaching")
         assert_player_objective(session, "熟牛肉, 切好的生菜, 切好的番茄", "先煎熟牛肉", "先热菜，再冷菜配菜", "保持当前节奏", "steak salad combo player objective")
         assert_recipe_card(session, "套餐 / 热菜加冷菜", "牛肉要煎熟", "熟牛肉 -> 切好的生菜 -> 切好的番茄", "缺少配菜会失败", "steak salad combo recipe card")
+        assert_pre_submit_checklist(session, "牛肉已经煎熟且没有烧焦", "生菜和番茄都已切好", "套餐顺序是熟牛肉、生菜、番茄", context="steak salad combo pre-submit checklist")
         assert_session_guidance(
             session,
             8,
@@ -510,6 +525,7 @@ if order_manager and delivery_area:
         assert_stage_coaching(session, 0, "已完成 9 单正确订单", "已到最终菜单", "9.经典汉堡沙拉套餐[当前]", "burger salad combo stage coaching")
         assert_player_objective(session, "底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄", "先叠完整经典汉堡", "先完成汉堡，再补冷菜配菜", "保持当前节奏", "burger salad combo player objective")
         assert_recipe_card(session, "套餐 / 汉堡加沙拉", "肉饼要煎熟", "顶部面包 -> 切好的生菜 -> 切好的番茄", "不能把蔬菜夹进汉堡中间", "burger salad combo recipe card")
+        assert_pre_submit_checklist(session, "先确认经典汉堡完整", "生菜和番茄都已切好", "沙拉配菜放在顶部面包之后", context="burger salad combo pre-submit checklist")
         assert_session_guidance(
             session,
             9,
