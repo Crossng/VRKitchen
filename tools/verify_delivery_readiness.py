@@ -29,6 +29,7 @@ REQUIRED_FULL_PROJECT_ITEMS = {
     "Plugins/UnrealBridge/UnrealBridge.uplugin": "UnrealBridge plugin manifest",
     "VRKitchen_DELIVERY.md": "project delivery document",
     "VRKitchen_ASSET_ORGANIZATION.md": "asset organization guide",
+    "VRKitchen_ASSET_MIGRATION_PLAN.md": "asset migration plan",
 }
 
 REQUIRED_CODE_REPO_ITEMS = {
@@ -44,8 +45,11 @@ REQUIRED_CODE_REPO_ITEMS = {
     "tools/verify_demo_gameplay_loop_via_bridge.py": "gameplay automation script",
     "tools/verify_delivery_readiness.py": "delivery readiness script",
     "tools/verify_asset_organization.py": "asset organization audit script",
+    "tools/migrate_asset_organization_via_editor.py": "staged asset migration script",
     "VRKitchen_ASSET_ORGANIZATION.md": "asset organization guide",
     "VRKitchen/VRKitchen_ASSET_ORGANIZATION.md": "project asset organization guide",
+    "VRKitchen_ASSET_MIGRATION_PLAN.md": "asset migration plan",
+    "VRKitchen/VRKitchen_ASSET_MIGRATION_PLAN.md": "project asset migration plan",
 }
 
 BANNED_TRACKED_PREFIXES = (
@@ -307,6 +311,36 @@ def check_asset_docs(root: Path, relative_paths: tuple[str, ...], results: list[
                 add_result(results, "WARN", f"{relative_path} does not mention {phrase}")
 
 
+def check_migration_docs(root: Path, relative_paths: tuple[str, ...], results: list[Check]) -> None:
+    required_phrases = (
+        "Phase 1",
+        "Phase 2",
+        "Phase 3",
+        "Phase 4",
+        "Fix Up Redirectors",
+        "Unreal Editor",
+        "不直接搬资产",
+        "--strict",
+    )
+
+    for relative_path in relative_paths:
+        path = root / relative_path
+        if not path.exists():
+            continue
+        try:
+            text = read_text(path)
+        except UnicodeDecodeError:
+            add_result(results, "FAIL", f"Asset migration plan is not valid UTF-8: {relative_path}")
+            continue
+
+        add_result(results, "PASS", f"Asset migration plan is UTF-8 readable: {relative_path}")
+        for phrase in required_phrases:
+            if phrase in text:
+                add_result(results, "PASS", f"{relative_path} mentions {phrase}")
+            else:
+                add_result(results, "WARN", f"{relative_path} does not mention {phrase}")
+
+
 def print_results(results: list[Check]) -> int:
     counts = {"INFO": 0, "PASS": 0, "WARN": 0, "FAIL": 0}
     for result in results:
@@ -368,6 +402,8 @@ def main() -> int:
     check_delivery_docs(code_repo_root, ("VRKitchen_DELIVERY.md", "VRKitchen/VRKitchen_DELIVERY.md"), results)
     check_asset_docs(full_project_root, ("VRKitchen_ASSET_ORGANIZATION.md",), results)
     check_asset_docs(code_repo_root, ("VRKitchen_ASSET_ORGANIZATION.md", "VRKitchen/VRKitchen_ASSET_ORGANIZATION.md"), results)
+    check_migration_docs(full_project_root, ("VRKitchen_ASSET_MIGRATION_PLAN.md",), results)
+    check_migration_docs(code_repo_root, ("VRKitchen_ASSET_MIGRATION_PLAN.md", "VRKitchen/VRKitchen_ASSET_MIGRATION_PLAN.md"), results)
 
     return print_results(results)
 

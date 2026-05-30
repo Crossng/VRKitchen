@@ -25,7 +25,8 @@
 - 运行时会显示中文新手提示、剩余时间、分数、完成数、错误数、当前阶段、紧张度和下一目标。
 - 时间进入 45 秒内会提示“注意时间”，进入 20 秒内会提示“最后冲刺”；教程文本会随订单阶段和错误恢复动态变化。
 - Demo 地图入口已经整理为 `/Game/_Project/Maps/VRKitchen_Demo`。
-- 资源整理规范已经写入 `VRKitchen_ASSET_ORGANIZATION.md`；当前先用扫描工具审计，不直接批量移动资产。
+- 资源整理规范已经写入 `VRKitchen_ASSET_ORGANIZATION.md`，第一阶段迁移路线写入 `VRKitchen_ASSET_MIGRATION_PLAN.md`；目标结构和 `Collections/Developers` 低风险清理已完成，当前剩余审计为 `7 pass / 22 warn / 0 fail`。
+- 后续迁移使用 `tools/migrate_asset_organization_via_editor.py` 先 dry-run，再小批量执行；命令行默认不执行 Fix Up Redirectors，真实迁移后需要在 Unreal Editor 的 Content Browser 中手动修复重定向器。
 
 ## 已验证项目
 
@@ -71,6 +72,21 @@ python tools\verify_asset_organization.py --full-project-root C:\Users\hp\Deskto
 ```
 
 该脚本默认只给出警告，不移动资源；等完成 Unreal Editor 内迁移和引用修复后，可加 `--strict` 作为最终项目结构门禁。
+
+如果需要输出可读迁移清单，可运行：
+
+```powershell
+python tools\verify_asset_organization.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_AUDIT.md
+```
+
+如果需要先预演下一批迁移，可运行：
+
+```powershell
+$env:VRKITCHEN_ASSET_MIGRATION_PHASES='phase-1,phase-2-prototypes'
+$env:VRKITCHEN_ASSET_MIGRATION_DRY_RUN='1'
+$env:VRKITCHEN_ASSET_MIGRATION_REPORT='C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN.json'
+& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\migrate_asset_organization_via_editor.py' -unattended -nop4 -nosplash -NullRHI
+```
 
 ## 未验证项目
 

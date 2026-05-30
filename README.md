@@ -31,13 +31,30 @@ The script checks that the full project still contains the demo map, source, con
 
 ## Asset organization audit
 
-Asset naming and folder rules are documented in `VRKitchen_ASSET_ORGANIZATION.md`. The current safe workflow is to audit first and only move assets later inside Unreal Editor:
+Asset naming and folder rules are documented in `VRKitchen_ASSET_ORGANIZATION.md`, and the staged migration plan is documented in `VRKitchen_ASSET_MIGRATION_PLAN.md`. The current safe workflow is to audit first and only move assets later inside Unreal Editor:
 
 ```powershell
 python tools/verify_asset_organization.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen
 ```
 
 The default audit is advisory. Use `--strict` only after project assets have been migrated and redirectors have been fixed.
+
+To create a Markdown migration report from the full project:
+
+```powershell
+python tools/verify_asset_organization.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_AUDIT.md
+```
+
+To dry-run a staged Unreal Editor migration:
+
+```powershell
+$env:VRKITCHEN_ASSET_MIGRATION_PHASES='phase-1,phase-2-prototypes'
+$env:VRKITCHEN_ASSET_MIGRATION_DRY_RUN='1'
+$env:VRKITCHEN_ASSET_MIGRATION_REPORT='C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN.json'
+& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\migrate_asset_organization_via_editor.py' -unattended -nop4 -nosplash -NullRHI
+```
+
+The migration script defaults to dry-run and does not run Fix Up Redirectors in unattended commandlets. After real asset moves, open Unreal Editor and run Fix Up Redirectors from the Content Browser before validation.
 
 ## What belongs in GitHub
 

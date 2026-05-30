@@ -63,12 +63,13 @@ Content/
 
 ## 迁移步骤
 
-1. 用 `tools/verify_asset_organization.py` 扫描当前资源分布。
-2. 先在 Unreal Editor 中移动资产，不要用文件管理器直接移动 `.uasset/.umap`。
-3. 每次只迁移一个小模块，例如 Food、Cooking、Orders、UI。
-4. 迁移后在 Content Browser 对旧目录执行 `Fix Up Redirectors`。
-5. 重新运行 C++ 构建、CompileAllBlueprints、DataValidation、玩法自动化和 Win64 打包。
-6. 确认引用无误后，再删除 `_Legacy` 或 `_Dev` 中不需要的资源。
+1. 阅读 `VRKitchen_ASSET_MIGRATION_PLAN.md`，确认本轮只处理哪个阶段。
+2. 用 `tools/verify_asset_organization.py` 扫描当前资源分布，并可用 `--report` 导出 Markdown 报告。
+3. 先在 Unreal Editor 中移动资产，不要用文件管理器直接移动 `.uasset/.umap`。
+4. 每次只迁移一个小模块，例如 Food、Cooking、Orders、UI。
+5. 迁移后在 Content Browser 对旧目录执行 `Fix Up Redirectors`。
+6. 重新运行 C++ 构建、CompileAllBlueprints、DataValidation、玩法自动化和 Win64 打包。
+7. 确认引用无误后，再删除 `_Legacy` 或 `_Dev` 中不需要的资源。
 
 ## GitHub 与网盘边界
 
