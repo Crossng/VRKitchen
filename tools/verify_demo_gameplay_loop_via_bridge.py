@@ -218,6 +218,17 @@ def assert_player_objective(session, ingredients_fragment, action_fragment, reco
     require_text_contains(session.get_player_objective_text(), recovery_fragment, f"{context} objective recovery")
 
 
+def assert_performance_summary(session, attempts, accuracy, accuracy_fragment, mistake_fragment, focus_fragment, context):
+    require(session.get_total_order_attempts() == attempts, f"{context}: expected attempts {attempts}, got {session.get_total_order_attempts()}")
+    require(session.get_accuracy_percent() == accuracy, f"{context}: expected accuracy {accuracy}, got {session.get_accuracy_percent()}")
+    require_text_contains(session.get_accuracy_text(), accuracy_fragment, f"{context} accuracy text")
+    require_text_contains(session.get_mistake_summary_text(), mistake_fragment, f"{context} mistake summary")
+    require_text_contains(session.get_next_run_focus_text(), focus_fragment, f"{context} next run focus")
+    require_text_contains(session.get_performance_summary_text(), accuracy_fragment, f"{context} performance accuracy")
+    require_text_contains(session.get_performance_summary_text(), mistake_fragment, f"{context} performance mistakes")
+    require_text_contains(session.get_performance_summary_text(), focus_fragment, f"{context} performance focus")
+
+
 order_manager = find_actor_by_label("BP_OrderManager_Playable")
 delivery_area = find_actor_by_label("BP_DeliveryArea")
 order_tablet = find_actor_by_label("BP_OrderTablet")
@@ -260,6 +271,7 @@ if order_manager and delivery_area:
         reset_session(session)
         assert_menu_progress(session, 1, 9, "经典汉堡", "经典汉堡 -> 2.香煎牛排", "initial menu progress")
         assert_player_objective(session, "底部面包, 熟肉饼, 顶部面包", "煎熟肉饼", "保持当前节奏", "initial player objective")
+        assert_performance_summary(session, 0, 0, "暂无提交", "没有错误订单", "第一单经典汉堡", "initial performance summary")
         require_text_contains(session.get_menu_route_text(), "田园沙拉", "menu route includes salad")
         require_text_contains(session.get_menu_route_text(), "经典汉堡沙拉套餐", "menu route includes final combo")
         assert_session_guidance(
@@ -339,6 +351,7 @@ if order_manager and delivery_area:
         assert_stats(session, 55, 5, 0, "mid-run score and streak bonus run")
         require(session_prop(session, "CurrentStreak") == 5, "Current streak should track five correct orders")
         require(session_prop(session, "BestStreak") == 5, "Best streak should track five correct orders")
+        assert_performance_summary(session, 5, 100, "100% (5/5)", "没有错误订单", "推进到第 5/9 阶段", "mid-run performance summary")
         require(session.get_star_rating() == 2, f"Expected two-star rating at 55 points, got {session.get_star_rating()}")
         require(str(session.get_result_title()) == "继续练习", f"Expected in-progress title before target, got {session.get_result_title()}")
         require(str(session.get_result_grade_text()) == "二星", f"Expected two-star grade text, got {session.get_result_grade_text()}")
@@ -360,9 +373,12 @@ if order_manager and delivery_area:
         assert_stats(session, 115, 10, 0, "extended steak salad combo and burger salad combo run")
         require(session_prop(session, "CurrentStreak") == 10, "Current streak should track ten correct orders")
         require(session_prop(session, "BestStreak") == 10, "Best streak should track ten correct orders")
+        assert_performance_summary(session, 10, 100, "100% (10/10)", "没有错误订单", "已完成三星路线", "extended run performance summary")
         require(session.get_star_rating() == 3, f"Expected three-star rating at 115 points, got {session.get_star_rating()}")
         require(str(session.get_result_grade_text()) == "三星", f"Expected three-star grade text, got {session.get_result_grade_text()}")
         require(bool(session.get_editor_property("bMissionCleared")), "Extended run should clear mission at 115 points")
+        require_text_contains(session.get_tutorial_hint_text(), "挑战完成", "completed run tutorial hint")
+        require_text_contains(session.get_tutorial_hint_text(), "已完成三星路线", "completed run next focus")
         print("PASS extended recipe case: steak, salad, thick meat, double meat, and combo orders work")
 
         reset_session(session)
@@ -466,6 +482,7 @@ if order_manager and delivery_area:
         submit_tags_expect_feedback(session, delivery_area, ["Bottom_Bun", "Cooked_Patty", "Top_Bun", "Chopped_Lettuce", "Chopped_Tomato", "Cooked_Meat"], "套餐多了食材：熟牛肉", "burger salad combo with extra steak")
         require(submit_tags(delivery_area, burger_salad_combo_order), "Burger salad combo should succeed after probes")
         assert_stats(session, 98, 10, 6, "combo order failure probes")
+        assert_performance_summary(session, 16, 63, "63% (10/16)", "共 6 次错误", "菜单路线已经跑完", "combo probe performance summary")
         require(not bool(session.get_editor_property("bMissionCleared")), "Combo probe run should not clear mission after deliberate penalties")
         print("PASS combo case: steak salad and burger salad combo orders reject missing, extra, and wrong-order submissions")
 

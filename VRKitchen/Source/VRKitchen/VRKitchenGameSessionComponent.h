@@ -112,6 +112,24 @@ public:
 	FString GetResultGradeText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	int32 GetTotalOrderAttempts() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	int32 GetAccuracyPercent() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetAccuracyText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetMistakeSummaryText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetNextRunFocusText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetPerformanceSummaryText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	int32 GetMenuRouteTotal() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")

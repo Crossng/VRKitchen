@@ -581,6 +581,97 @@ FString UVRKitchenGameSessionComponent::GetResultGradeText() const
 	}
 }
 
+int32 UVRKitchenGameSessionComponent::GetTotalOrderAttempts() const
+{
+	return CorrectOrders + WrongOrders;
+}
+
+int32 UVRKitchenGameSessionComponent::GetAccuracyPercent() const
+{
+	const int32 TotalAttempts = GetTotalOrderAttempts();
+	if (TotalAttempts <= 0)
+	{
+		return 0;
+	}
+	return FMath::RoundToInt(static_cast<float>(CorrectOrders) * 100.0f / static_cast<float>(TotalAttempts));
+}
+
+FString UVRKitchenGameSessionComponent::GetAccuracyText() const
+{
+	const int32 TotalAttempts = GetTotalOrderAttempts();
+	if (TotalAttempts <= 0)
+	{
+		return TEXT("准确率: 暂无提交");
+	}
+
+	return FString::Printf(
+		TEXT("准确率: %d%% (%d/%d)"),
+		GetAccuracyPercent(),
+		CorrectOrders,
+		TotalAttempts);
+}
+
+FString UVRKitchenGameSessionComponent::GetMistakeSummaryText() const
+{
+	if (WrongOrders <= 0)
+	{
+		return TEXT("错误复盘: 没有错误订单，节奏很稳。");
+	}
+
+	if (WrongOrders == 1)
+	{
+		return TEXT("错误复盘: 只有 1 次错误，下一局重点保持当前顺序和处理节奏。");
+	}
+
+	return FString::Printf(
+		TEXT("错误复盘: 共 %d 次错误，优先放慢提交前检查，确认食材状态和叠放顺序。"),
+		WrongOrders);
+}
+
+FString UVRKitchenGameSessionComponent::GetNextRunFocusText() const
+{
+	if (CorrectOrders <= 0)
+	{
+		return TEXT("下一局重点: 先完成第一单经典汉堡，熟悉拿取、煎肉和出餐。");
+	}
+
+	if (WrongOrders > CorrectOrders)
+	{
+		return TEXT("下一局重点: 先保证正确率，提交前逐项对照订单，不急着冲速度。");
+	}
+
+	if (BestStreak < StreakBonusEvery)
+	{
+		return TEXT("下一局重点: 争取连续正确 3 单，触发连击奖励。");
+	}
+
+	if (GetCurrentMenuRouteStep() < GetMenuRouteTotal())
+	{
+		return FString::Printf(
+			TEXT("下一局重点: 推进到第 %d/%d 阶段，练会 %s。"),
+			GetCurrentMenuRouteStep(),
+			GetMenuRouteTotal(),
+			*GetCurrentMenuItemText());
+	}
+
+	if (!bMissionCleared)
+	{
+		return TEXT("下一局重点: 菜单路线已经跑完，减少错误扣分冲三星目标。");
+	}
+
+	return TEXT("下一局重点: 已完成三星路线，可以挑战更少错误和更高连击。");
+}
+
+FString UVRKitchenGameSessionComponent::GetPerformanceSummaryText() const
+{
+	return FString::Printf(
+		TEXT("本局复盘\n%s\n%s\n最佳连击: %d\n%s"),
+		*GetAccuracyText(),
+		*GetMistakeSummaryText(),
+		BestStreak,
+		*GetNextRunFocusText());
+}
+
 int32 UVRKitchenGameSessionComponent::GetMenuRouteTotal() const
 {
 	return GetDemoMenuRoute().Num();
@@ -751,8 +842,8 @@ FString UVRKitchenGameSessionComponent::GetTutorialHintText() const
 	if (bSessionEnded)
 	{
 		return bMissionCleared
-			? TEXT("挑战完成：复盘最佳连击，按 R 可以再跑一局。")
-			: TEXT("时间到：按 R 重开，优先保持正确率。");
+			? FString::Printf(TEXT("挑战完成：%s 按 R 可以再跑一局。"), *GetNextRunFocusText())
+			: FString::Printf(TEXT("时间到：%s 按 R 重开。"), *GetNextRunFocusText());
 	}
 
 	FString Prefix;
@@ -837,7 +928,7 @@ FString UVRKitchenGameSessionComponent::BuildStatusText() const
 	{
 		const FString ResultStatus = bMissionCleared ? TEXT("任务完成") : TEXT("时间到");
 		return FString::Printf(
-			TEXT("%s - %s\n总分: %d / 目标: %d\n评级: %s\n完成: %d  错误: %d\n最佳连击: %d\n按 R 重新开始"),
+			TEXT("%s - %s\n总分: %d / 目标: %d\n评级: %s\n完成: %d  错误: %d\n%s\n按 R 重新开始"),
 			*ResultStatus,
 			*GetResultTitle(),
 			SessionScore,
@@ -845,7 +936,7 @@ FString UVRKitchenGameSessionComponent::BuildStatusText() const
 			*GetResultGradeText(),
 			CorrectOrders,
 			WrongOrders,
-			BestStreak);
+			*GetPerformanceSummaryText());
 	}
 
 	return FString::Printf(
