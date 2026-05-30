@@ -166,6 +166,9 @@ public:
 	FString GetCurrentActionStepText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetCurrentStationRouteText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	FString GetFailureRecoveryText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")

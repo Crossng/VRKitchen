@@ -26,6 +26,7 @@ namespace
 		FString NextGoalText;
 		FString TutorialText;
 		FString ActionStepText;
+		FString StationRouteText;
 		FDemoOrderSpec OrderSpec;
 	};
 
@@ -38,6 +39,7 @@ namespace
 				TEXT("先稳定完成 2 单经典汉堡"),
 				TEXT("经典汉堡：底部面包 + 熟肉饼 + 顶部面包。"),
 				TEXT("先取底部面包，再煎熟肉饼，最后盖上顶部面包后出餐。"),
+				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 装盘区 -> 出餐区。"),
 				{
 					TEXT("经典汉堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Top_Bun")},
@@ -50,6 +52,7 @@ namespace
 				TEXT("用煎锅和灶台做香煎牛排"),
 				TEXT("香煎牛排：把生牛肉放进煎锅，锅在灶台上加热到熟牛肉后再出餐。"),
 				TEXT("把生牛肉放进煎锅，确认锅在灶台上，变成熟牛肉后立刻装盘。"),
+				TEXT("工位路线: 生牛肉区 -> 煎锅/灶台 -> 装盘区 -> 出餐区。"),
 				{
 					TEXT("香煎牛排"),
 					{TEXT("Cooked_Meat")},
@@ -62,6 +65,7 @@ namespace
 				TEXT("切生菜和番茄做田园沙拉"),
 				TEXT("田园沙拉：切好生菜和番茄后直接叠盘出餐，不需要煎锅。"),
 				TEXT("先切生菜，再切番茄，按生菜到番茄的顺序放盘。"),
+				TEXT("工位路线: 蔬菜区 -> 切菜板 -> 装盘区 -> 出餐区。冷菜，不用煎锅。"),
 				{
 					TEXT("田园沙拉"),
 					{TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
@@ -74,6 +78,7 @@ namespace
 				TEXT("把切好的生菜加入汉堡"),
 				TEXT("生菜汉堡：先切生菜，再放到熟肉饼上方。"),
 				TEXT("先做底部面包和熟肉饼，再加入切好的生菜，最后盖顶部面包。"),
+				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区。"),
 				{
 					TEXT("生菜汉堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
@@ -86,6 +91,7 @@ namespace
 				TEXT("切番茄，注意不要换顺序"),
 				TEXT("番茄汉堡：先切番茄，叠盘顺序仍然严格。"),
 				TEXT("先做底部面包和熟肉饼，再加入切好的番茄，最后盖顶部面包。"),
+				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区。"),
 				{
 					TEXT("番茄汉堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
@@ -98,6 +104,7 @@ namespace
 				TEXT("煎熟牛肉再提交厚肉堡"),
 				TEXT("厚肉生菜堡：使用熟牛肉，不要提交生肉或烧焦肉。"),
 				TEXT("把牛肉煎熟，和切好的生菜夹进面包；不要让牛肉继续受热烧焦。"),
+				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区。熟牛肉要及时离火。"),
 				{
 					TEXT("厚肉生菜堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Meat"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
@@ -110,6 +117,7 @@ namespace
 				TEXT("完成豪华双肉堡，准备套餐挑战"),
 				TEXT("豪华双肉堡：肉饼、生菜、熟牛肉、番茄都要按订单顺序。"),
 				TEXT("按顺序放底部面包、熟肉饼、生菜、熟牛肉、番茄、顶部面包。"),
+				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区。双肉和蔬菜都要按层叠顺序。"),
 				{
 					TEXT("豪华双肉堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Cooked_Meat"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
@@ -122,6 +130,7 @@ namespace
 				TEXT("把牛排和沙拉按套餐顺序出餐"),
 				TEXT("牛排沙拉套餐：先放熟牛肉，再放切好的生菜和番茄。"),
 				TEXT("先煎熟牛肉放盘，再补切好的生菜和切好的番茄。"),
+				TEXT("工位路线: 生牛肉区 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区。先热菜，再冷菜配菜。"),
 				{
 					TEXT("牛排沙拉套餐"),
 					{TEXT("Cooked_Meat"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
@@ -134,6 +143,7 @@ namespace
 				TEXT("完成经典汉堡沙拉套餐冲三星"),
 				TEXT("经典汉堡沙拉套餐：先完成经典汉堡，再补上沙拉配菜。"),
 				TEXT("先叠完整经典汉堡，再按生菜、番茄顺序补上沙拉配菜。"),
+				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区。先完成汉堡，再补冷菜配菜。"),
 				{
 					TEXT("经典汉堡沙拉套餐"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Top_Bun"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
@@ -800,6 +810,11 @@ FString UVRKitchenGameSessionComponent::GetCurrentActionStepText() const
 	return FString::Printf(TEXT("推荐步骤: %s"), *GetDemoMenuStepForProgress(CorrectOrders).ActionStepText);
 }
 
+FString UVRKitchenGameSessionComponent::GetCurrentStationRouteText() const
+{
+	return GetDemoMenuStepForProgress(CorrectOrders).StationRouteText;
+}
+
 FString UVRKitchenGameSessionComponent::GetFailureRecoveryText() const
 {
 	if (LastFeedbackMessage.IsEmpty() || LastFeedbackMessage.Contains(TEXT("出餐成功")) || LastFeedbackMessage.Contains(TEXT("目标:")) || LastFeedbackMessage.Contains(TEXT("任务完成")))
@@ -853,11 +868,12 @@ FString UVRKitchenGameSessionComponent::GetFailureRecoveryText() const
 FString UVRKitchenGameSessionComponent::GetPlayerObjectiveText() const
 {
 	return FString::Printf(
-		TEXT("%s\n%s\n%s\n%s\n%s"),
+		TEXT("%s\n%s\n%s\n%s\n%s\n%s"),
 		*GetMenuProgressText(),
 		*GetStageCoachingText(),
 		*GetCurrentRequiredIngredientsText(),
 		*GetCurrentActionStepText(),
+		*GetCurrentStationRouteText(),
 		*GetFailureRecoveryText());
 }
 
@@ -1041,8 +1057,9 @@ FString UVRKitchenGameSessionComponent::BuildStatusText() const
 FString UVRKitchenGameSessionComponent::BuildTutorialText() const
 {
 	return FString::Printf(
-		TEXT("玩法提示\n%s\n%s\n步骤: 看订单 -> 切菜/煎肉 -> 按顺序叠盘 -> 出餐\n连续正确 3 单有奖励"),
+		TEXT("玩法提示\n%s\n%s\n%s\n步骤: 看订单 -> 按工位路线处理食材 -> 按顺序叠盘 -> 出餐\n连续正确 3 单有奖励"),
 		*GetCurrentRequiredIngredientsText(),
+		*GetCurrentStationRouteText(),
 		*GetTutorialHintText());
 }
 
