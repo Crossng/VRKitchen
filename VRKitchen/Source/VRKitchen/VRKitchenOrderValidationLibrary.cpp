@@ -20,6 +20,7 @@ namespace
 	const FName TagCookedMeat(TEXT("Cooked_Meat"));
 	const FName TagChoppedLettuce(TEXT("Chopped_Lettuce"));
 	const FName TagChoppedTomato(TEXT("Chopped_Tomato"));
+	const FName TagSaladDressing(TEXT("Salad_Dressing"));
 	const FName TagRawPatty(TEXT("Raw_Patty"));
 	const FName TagRawMeat(TEXT("Raw_Meat"));
 	const FName TagRawLettuce(TEXT("Raw_Lettuce"));
@@ -35,6 +36,7 @@ namespace
 			TagCookedMeat,
 			TagChoppedLettuce,
 			TagChoppedTomato,
+			TagSaladDressing,
 			TagTopBun,
 			TagRawPatty,
 			TagRawMeat,
@@ -420,6 +422,10 @@ namespace
 		{
 			return TEXT("切好的番茄");
 		}
+		if (FoodTag == TagSaladDressing)
+		{
+			return TEXT("沙拉酱");
+		}
 		if (FoodTag == TagRawPatty)
 		{
 			return TEXT("生肉饼");
@@ -486,19 +492,19 @@ namespace
 
 	bool IsGardenSaladOrder(const TArray<FName>& RequiredTags)
 	{
-		static const TArray<FName> GardenSaladTags = {TagChoppedLettuce, TagChoppedTomato};
+		static const TArray<FName> GardenSaladTags = {TagChoppedLettuce, TagChoppedTomato, TagSaladDressing};
 		return RequiredTagsExactlyMatch(RequiredTags, GardenSaladTags);
 	}
 
 	bool IsSteakSaladComboOrder(const TArray<FName>& RequiredTags)
 	{
-		static const TArray<FName> SteakSaladComboTags = {TagCookedMeat, TagChoppedLettuce, TagChoppedTomato};
+		static const TArray<FName> SteakSaladComboTags = {TagCookedMeat, TagChoppedLettuce, TagChoppedTomato, TagSaladDressing};
 		return RequiredTagsExactlyMatch(RequiredTags, SteakSaladComboTags);
 	}
 
 	bool IsBurgerSaladComboOrder(const TArray<FName>& RequiredTags)
 	{
-		static const TArray<FName> BurgerSaladComboTags = {TagBottomBun, TagCookedPatty, TagTopBun, TagChoppedLettuce, TagChoppedTomato};
+		static const TArray<FName> BurgerSaladComboTags = {TagBottomBun, TagCookedPatty, TagTopBun, TagChoppedLettuce, TagChoppedTomato, TagSaladDressing};
 		return RequiredTagsExactlyMatch(RequiredTags, BurgerSaladComboTags);
 	}
 
@@ -594,15 +600,15 @@ namespace
 	{
 		if (IsGardenSaladOrder(RequiredTags))
 		{
-			return TEXT("沙拉顺序错误：先放切好的生菜，再放切好的番茄");
+			return TEXT("沙拉顺序错误：先放切好的生菜，再放切好的番茄，最后加沙拉酱");
 		}
 		if (IsSteakSaladComboOrder(RequiredTags))
 		{
-			return TEXT("套餐顺序错误：先放熟牛肉，再放切好的生菜和切好的番茄");
+			return TEXT("套餐顺序错误：先放熟牛肉，再放切好的生菜、切好的番茄和沙拉酱");
 		}
 		if (IsBurgerSaladComboOrder(RequiredTags))
 		{
-			return TEXT("套餐顺序错误：先完成经典汉堡，再放切好的生菜和切好的番茄");
+			return TEXT("套餐顺序错误：先完成经典汉堡，再放切好的生菜、切好的番茄和沙拉酱");
 		}
 
 		const FString SubmittedText = JoinFoodTagDisplayNames(GetSubmittedFoodTags(SubmittedFoods));

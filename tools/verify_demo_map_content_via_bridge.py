@@ -40,6 +40,14 @@ REQUIRED_FOOD_CLASSES = {
     "raw_meat": "/Game/Blueprints/BP_Meat.BP_Meat_C",
     "raw_lettuce": "/Game/Blueprints/BP_Lettuce.BP_Lettuce_C",
     "raw_tomato": "/Game/BP_Tomato.BP_Tomato_C",
+    "salad_dressing": "/Game/Blueprints/BP_SaladDressing.BP_SaladDressing_C",
+}
+
+REQUIRED_FOOD_TAGS = {
+    "salad_dressing": {
+        "asset_path": "/Game/Blueprints/BP_SaladDressing",
+        "tag": "Salad_Dressing",
+    },
 }
 
 MIN_REASONABLE_DISTANCE = 35.0
@@ -102,6 +110,19 @@ def read_object_property(actor, property_name):
     return str(value)
 
 
+def read_blueprint_cdo_tags(asset_path):
+    asset = unreal.load_asset(asset_path)
+    if not asset or not asset.generated_class():
+        return set()
+    cdo = unreal.get_default_object(asset.generated_class())
+    if not cdo:
+        return set()
+    try:
+        return {str(tag) for tag in cdo.get_editor_property("Tags")}
+    except Exception:
+        return set()
+
+
 def require(condition, message, failures):
     if not condition:
         failures.append(message)
@@ -158,6 +179,16 @@ def main():
         require(
             expected_class in spawned_class_values,
             f"Food spawners do not cover {food_name}: expected {expected_class}, got {sorted(spawned_class_values)}",
+            failures,
+        )
+
+    report["food_tags"] = {}
+    for food_name, expected in REQUIRED_FOOD_TAGS.items():
+        tags = read_blueprint_cdo_tags(expected["asset_path"])
+        report["food_tags"][food_name] = sorted(tags)
+        require(
+            expected["tag"] in tags,
+            f"{food_name} asset should carry order tag {expected['tag']}, got {sorted(tags)}",
             failures,
         )
 

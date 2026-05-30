@@ -43,18 +43,18 @@ EXPECTED_MENU = [
     {
         "unlock_count": 3,
         "name": "田园沙拉",
-        "tags": ["Chopped_Lettuce", "Chopped_Tomato"],
-        "details": "切好的生菜, 切好的番茄",
+        "tags": ["Chopped_Lettuce", "Chopped_Tomato", "Salad_Dressing"],
+        "details": "切好的生菜, 切好的番茄, 沙拉酱",
         "stage": "沙拉切配",
         "dish_type": "冷菜 / 沙拉",
-        "process": "生菜和番茄都要先在切菜板切好，不用煎锅",
-        "assembly": "切好的生菜 -> 切好的番茄",
-        "warning": "未切蔬菜不能提交，沙拉顺序不能颠倒",
+        "process": "生菜和番茄都要先在切菜板切好，最后加入沙拉酱，不用煎锅",
+        "assembly": "切好的生菜 -> 切好的番茄 -> 沙拉酱",
+        "warning": "未切蔬菜或缺少沙拉酱不能提交，沙拉顺序不能颠倒",
         "action": "先切生菜",
-        "route": "蔬菜区 -> 切菜板 -> 装盘区 -> 出餐区",
-        "outcomes": ["切菜板产出切好的生菜和切好的番茄", "冷菜直接装盘不进煎锅"],
-        "checklist": ["生菜和番茄都已切好", "冷菜不用煎锅", "先放切好的生菜，再放切好的番茄"],
-        "next_goal": "切生菜和番茄做田园沙拉",
+        "route": "蔬菜区 -> 切菜板 -> 调味区 -> 装盘区 -> 出餐区",
+        "outcomes": ["切菜板产出切好的生菜和切好的番茄", "调味区拿到沙拉酱", "冷菜直接装盘不进煎锅"],
+        "checklist": ["生菜和番茄都已切好", "沙拉酱已加入", "顺序是切好的生菜、切好的番茄、沙拉酱"],
+        "next_goal": "切生菜和番茄，加沙拉酱做田园沙拉",
     },
     {
         "unlock_count": 4,
@@ -123,33 +123,33 @@ EXPECTED_MENU = [
     {
         "unlock_count": 8,
         "name": "牛排沙拉套餐",
-        "tags": ["Cooked_Meat", "Chopped_Lettuce", "Chopped_Tomato"],
-        "details": "熟牛肉, 切好的生菜, 切好的番茄",
+        "tags": ["Cooked_Meat", "Chopped_Lettuce", "Chopped_Tomato", "Salad_Dressing"],
+        "details": "熟牛肉, 切好的生菜, 切好的番茄, 沙拉酱",
         "stage": "牛排沙拉套餐",
         "dish_type": "套餐 / 热菜加冷菜",
-        "process": "牛肉要煎熟，生菜和番茄要切好",
-        "assembly": "熟牛肉 -> 切好的生菜 -> 切好的番茄",
-        "warning": "套餐先热菜后冷菜，缺少配菜会失败",
+        "process": "牛肉要煎熟，生菜和番茄要切好，沙拉酱最后加入",
+        "assembly": "熟牛肉 -> 切好的生菜 -> 切好的番茄 -> 沙拉酱",
+        "warning": "套餐先热菜后冷菜，缺少配菜或沙拉酱会失败",
         "action": "先煎熟牛肉",
-        "route": "生牛肉区 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区",
-        "outcomes": ["煎锅/灶台产出熟牛肉", "先放热菜再放冷菜配菜"],
-        "checklist": ["牛肉已经煎熟且没有烧焦", "生菜和番茄都已切好", "套餐顺序是熟牛肉、生菜、番茄"],
+        "route": "生牛肉区 -> 煎锅/灶台 -> 切菜板 -> 调味区 -> 装盘区 -> 出餐区",
+        "outcomes": ["煎锅/灶台产出熟牛肉", "调味区拿到沙拉酱", "先放热菜再放冷菜配菜"],
+        "checklist": ["牛肉已经煎熟且没有烧焦", "沙拉酱已加入", "套餐顺序是熟牛肉、生菜、番茄、沙拉酱"],
         "next_goal": "把牛排和沙拉按套餐顺序出餐",
     },
     {
         "unlock_count": 9,
         "name": "经典汉堡沙拉套餐",
-        "tags": ["Bottom_Bun", "Cooked_Patty", "Top_Bun", "Chopped_Lettuce", "Chopped_Tomato"],
-        "details": "底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄",
+        "tags": ["Bottom_Bun", "Cooked_Patty", "Top_Bun", "Chopped_Lettuce", "Chopped_Tomato", "Salad_Dressing"],
+        "details": "底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄, 沙拉酱",
         "stage": "汉堡沙拉套餐",
         "dish_type": "套餐 / 汉堡加沙拉",
-        "process": "肉饼要煎熟，生菜和番茄要切好",
-        "assembly": "底部面包 -> 熟肉饼 -> 顶部面包 -> 切好的生菜 -> 切好的番茄",
-        "warning": "不能把蔬菜夹进汉堡中间",
+        "process": "肉饼要煎熟，生菜和番茄要切好，沙拉酱最后加入",
+        "assembly": "底部面包 -> 熟肉饼 -> 顶部面包 -> 切好的生菜 -> 切好的番茄 -> 沙拉酱",
+        "warning": "不能把蔬菜或沙拉酱夹进汉堡中间",
         "action": "先叠完整经典汉堡",
-        "route": "面包台 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区",
-        "outcomes": ["先产出完整经典汉堡", "最后补沙拉配菜"],
-        "checklist": ["先确认经典汉堡完整", "生菜和番茄都已切好", "沙拉配菜放在顶部面包之后"],
+        "route": "面包台 -> 煎锅/灶台 -> 切菜板 -> 调味区 -> 装盘区 -> 出餐区",
+        "outcomes": ["先产出完整经典汉堡", "调味区拿到沙拉酱", "最后补沙拉配菜"],
+        "checklist": ["先确认经典汉堡完整", "沙拉酱已加入", "沙拉配菜放在顶部面包之后"],
         "next_goal": "完成经典汉堡沙拉套餐冲三星",
     },
 ]
@@ -396,26 +396,26 @@ def validate_current_stage(session, spec, step_index, context):
     elif step_index == 2:
         assert_menu_progress(session, 3, EXPECTED_MENU_TOTAL, "田园沙拉", "汉堡沙拉套餐", context)
         assert_stage_coaching(session, 1, "已完成 3 单正确订单", "解锁 4/9「生菜汉堡」", "3.田园沙拉[当前]", context)
-        assert_player_objective(session, "切好的生菜, 切好的番茄", "先切生菜", "蔬菜区 -> 切菜板", "保持当前节奏", context)
-        assert_recipe_card(session, "冷菜 / 沙拉", "切菜板切好，不用煎锅", "切好的生菜 -> 切好的番茄", "沙拉顺序不能颠倒", context)
-        assert_station_outcome(session, "切菜板产出切好的生菜", "切好的番茄", "冷菜直接装盘不进煎锅", context=context)
-        assert_pre_submit_checklist(session, "生菜和番茄都已切好", "冷菜不用煎锅", "先放切好的生菜", context=context)
+        assert_player_objective(session, "切好的生菜, 切好的番茄, 沙拉酱", "先切生菜", "蔬菜区 -> 切菜板 -> 调味区", "保持当前节奏", context)
+        assert_recipe_card(session, "冷菜 / 沙拉", "最后加入沙拉酱", "切好的生菜 -> 切好的番茄 -> 沙拉酱", "缺少沙拉酱不能提交", context)
+        assert_station_outcome(session, "切菜板产出切好的生菜", "调味区拿到沙拉酱", "冷菜直接装盘不进煎锅", context=context)
+        assert_pre_submit_checklist(session, "生菜和番茄都已切好", "沙拉酱已加入", "顺序是切好的生菜、切好的番茄、沙拉酱", context=context)
         require_text_contains(session.get_tutorial_hint_text(), "解锁 4/9「生菜汉堡」", f"{context} tutorial hint")
     elif step_index == 7:
         assert_menu_progress(session, 8, EXPECTED_MENU_TOTAL, "牛排沙拉套餐", "经典汉堡沙拉套餐", context)
         assert_stage_coaching(session, 1, "已完成 8 单正确订单", "解锁 9/9「经典汉堡沙拉套餐」", "8.牛排沙拉套餐[当前]", context)
-        assert_player_objective(session, "熟牛肉, 切好的生菜, 切好的番茄", "先煎熟牛肉", "生牛肉区 -> 煎锅/灶台", "保持当前节奏", context)
-        assert_recipe_card(session, "套餐 / 热菜加冷菜", "牛肉要煎熟", "熟牛肉 -> 切好的生菜 -> 切好的番茄", "缺少配菜会失败", context)
-        assert_station_outcome(session, "煎锅/灶台产出熟牛肉", "切菜板产出切好的生菜", "先放热菜再放冷菜配菜", context=context)
-        assert_pre_submit_checklist(session, "牛肉已经煎熟且没有烧焦", "生菜和番茄都已切好", "套餐顺序是熟牛肉、生菜、番茄", context=context)
+        assert_player_objective(session, "熟牛肉, 切好的生菜, 切好的番茄, 沙拉酱", "先煎熟牛肉", "生牛肉区 -> 煎锅/灶台", "保持当前节奏", context)
+        assert_recipe_card(session, "套餐 / 热菜加冷菜", "沙拉酱最后加入", "熟牛肉 -> 切好的生菜 -> 切好的番茄 -> 沙拉酱", "缺少配菜或沙拉酱会失败", context)
+        assert_station_outcome(session, "煎锅/灶台产出熟牛肉", "调味区拿到沙拉酱", "先放热菜再放冷菜配菜", context=context)
+        assert_pre_submit_checklist(session, "牛肉已经煎熟且没有烧焦", "沙拉酱已加入", "套餐顺序是熟牛肉、生菜、番茄、沙拉酱", context=context)
         require_text_contains(session.get_tutorial_hint_text(), "解锁 9/9「经典汉堡沙拉套餐」", f"{context} tutorial hint")
     elif step_index == 8:
         assert_menu_progress(session, 9, EXPECTED_MENU_TOTAL, "经典汉堡沙拉套餐", "牛排沙拉套餐", context)
         assert_stage_coaching(session, 0, "已完成 9 单正确订单", "已到最终菜单", "9.经典汉堡沙拉套餐[当前]", context)
-        assert_player_objective(session, "底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄", "先叠完整经典汉堡", "面包台 -> 煎锅/灶台", "保持当前节奏", context)
-        assert_recipe_card(session, "套餐 / 汉堡加沙拉", "肉饼要煎熟", "底部面包 -> 熟肉饼 -> 顶部面包 -> 切好的生菜 -> 切好的番茄", "不能把蔬菜夹进汉堡中间", context)
-        assert_station_outcome(session, "先产出完整经典汉堡", "最后补沙拉配菜", "切菜板产出切好的生菜", context=context)
-        assert_pre_submit_checklist(session, "先确认经典汉堡完整", "生菜和番茄都已切好", "沙拉配菜放在顶部面包之后", context=context)
+        assert_player_objective(session, "底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄, 沙拉酱", "先叠完整经典汉堡", "面包台 -> 煎锅/灶台", "保持当前节奏", context)
+        assert_recipe_card(session, "套餐 / 汉堡加沙拉", "沙拉酱最后加入", "底部面包 -> 熟肉饼 -> 顶部面包 -> 切好的生菜 -> 切好的番茄 -> 沙拉酱", "不能把蔬菜或沙拉酱夹进汉堡中间", context)
+        assert_station_outcome(session, "先产出完整经典汉堡", "调味区拿到沙拉酱", "最后补沙拉配菜", context=context)
+        assert_pre_submit_checklist(session, "先确认经典汉堡完整", "沙拉酱已加入", "沙拉配菜放在顶部面包之后", context=context)
         require_text_contains(session.get_tutorial_hint_text(), "已到最终菜单", f"{context} tutorial hint")
     else:
         require_text_contains(session.get_menu_route_text(), spec["name"], f"{context} route listing")

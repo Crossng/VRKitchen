@@ -49,6 +49,8 @@ REQUIRED_CODE_REPO_ITEMS = {
     "tools/verify_cleanup_recovery_via_bridge.py": "cleanup recovery validation script",
     "tools/verify_salad_cutting_assets_via_bridge.py": "salad cutting asset validation script",
     "tools/fix_salad_cutting_assets_via_bridge.py": "salad cutting asset repair script",
+    "tools/ensure_demo_raw_meat_spawner_via_bridge.py": "raw meat spawner repair script",
+    "tools/ensure_salad_dressing_assets_via_bridge.py": "salad dressing asset/spawner repair script",
     "tools/verify_delivery_readiness.py": "delivery readiness script",
     "tools/verify_asset_organization.py": "asset organization audit script",
     "tools/migrate_asset_organization_via_editor.py": "staged asset migration script",

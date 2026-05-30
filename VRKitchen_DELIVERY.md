@@ -25,24 +25,26 @@
 - 订单会随正确完成数递进：前期经典汉堡，中期加入香煎牛排、田园沙拉、生菜汉堡和番茄汉堡，后期进入厚肉生菜堡、豪华双肉堡、牛排沙拉套餐和经典汉堡沙拉套餐。
 - Demo 会话组件会暴露菜单路线、当前菜品和菜单进度文本，例如 `1/9 经典汉堡` 到 `9/9 经典汉堡沙拉套餐`，用于订单板/UI 展示和自动化验收。
 - Demo 会话组件还会暴露当前订单所需食材、推荐操作步骤、失败修复建议和综合玩家目标文本，用于把“下一步该做什么”直接显示给玩家。
-- Demo 会话组件会暴露当前菜品工位路线文本，提示玩家该去面包台、蔬菜区、切菜板、煎锅/灶台、装盘区还是出餐区；沙拉会明确提示“冷菜，不用煎锅”。
-- Demo 会话组件会暴露当前菜品工位结果文本，说明每个工位完成后应该产出什么，例如切菜板产出切好的生菜/番茄，煎锅/灶台产出熟肉，沙拉冷菜不进煎锅。
-- Demo 会话组件会暴露当前菜品配方卡文本，包含菜品类型、处理要求、叠盘顺序和常见错误；沙拉配方卡会说明它是冷菜，需要切菜板处理，不需要煎锅。
+- Demo 会话组件会暴露当前菜品工位路线文本，提示玩家该去面包台、蔬菜区、切菜板、调味区、煎锅/灶台、装盘区还是出餐区；沙拉会明确提示“冷菜，不用煎锅”。
+- Demo 会话组件会暴露当前菜品工位结果文本，说明每个工位完成后应该产出什么，例如切菜板产出切好的生菜/番茄，调味区拿到沙拉酱，煎锅/灶台产出熟肉，沙拉冷菜不进煎锅。
+- Demo 会话组件会暴露当前菜品配方卡文本，包含菜品类型、处理要求、叠盘顺序和常见错误；沙拉配方卡会说明它是冷菜，需要切菜板处理，最后加入沙拉酱，不需要煎锅。
 - Demo 会话组件会暴露当前菜品出餐前检查清单，提醒玩家提交前确认食材状态、冷/热菜工位、叠盘顺序和套餐主菜/配菜顺序。
 - 订单板详情文本会合并配方卡、推荐步骤、工位路线、工位结果、出餐前检查清单和阶段目标，用于让玩家直接从订单板理解当前菜品该怎么做。
 - Demo 会话组件会暴露阶段学习路径文本，包括当前阶段为什么解锁、还差几单进入下一阶段、下一阶段预告和整条菜单路线状态。
 - Demo 会话组件会暴露本局复盘文本，包括总提交数、准确率、错误复盘、最佳连击和下一局练习重点，结算后可直接显示给玩家。
 - 香煎牛排已经作为正式菜单接入，要求提交“熟牛肉”，用于教学煎锅和灶台烹饪。
-- 田园沙拉已经作为正式菜单接入，要求按顺序提交“切好的生菜, 切好的番茄”，不需要煎锅。
-- 沙拉真实食材链路已补齐：`/Game/Blueprints/BP_Lettuce`、`/Game/BP_Tomato`、`/Game/Blueprints/BP_ChoppedLettuce`、`/Game/Blueprints/BP_ChoppedTomato` 的切菜默认值和订单标签已通过只读脚本验证；本轮修复了 `/Game/BP_Tomato` 缺少 `Raw_Tomato` 标签的问题。
-- 套餐订单已经作为后期挑战接入：牛排沙拉套餐要求“熟牛肉, 切好的生菜, 切好的番茄”，经典汉堡沙拉套餐要求“底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄”。
+- 田园沙拉已经作为正式菜单接入，要求按顺序提交“切好的生菜, 切好的番茄, 沙拉酱”，不需要煎锅。
+- 沙拉真实食材链路已补齐：`/Game/Blueprints/BP_Lettuce`、`/Game/BP_Tomato`、`/Game/Blueprints/BP_ChoppedLettuce`、`/Game/Blueprints/BP_ChoppedTomato` 的切菜默认值和订单标签已通过只读脚本验证；沙拉酱通过 `/Game/Blueprints/BP_SaladDressing` 和 `BP_FoodSpawner_SaladDressing` 接入 Demo 地图，订单标签为 `Salad_Dressing`。
+- 套餐订单已经作为后期挑战接入：牛排沙拉套餐要求“熟牛肉, 切好的生菜, 切好的番茄, 沙拉酱”，经典汉堡沙拉套餐要求“底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄, 沙拉酱”。
 - 运行时会显示中文新手提示、剩余时间、分数、完成数、错误数、当前阶段、紧张度和下一目标。
 - 时间进入 45 秒内会提示“注意时间”，进入 20 秒内会提示“最后冲刺”；教程文本会随订单阶段和错误恢复动态变化。
 - Demo 地图入口已经整理为 `/Game/_Project/Maps/VRKitchen_Demo`。
-- `tools/verify_demo_map_content_via_bridge.py` 已加入交付门禁，用于只读验证 Demo 地图里订单管理器、订单板、出餐区、煎锅/灶台、切菜板/刀、盘子、食材刷新点、沙拉食材和基础空间关系都已摆放到位。
+- `tools/verify_demo_map_content_via_bridge.py` 已加入交付门禁，用于只读验证 Demo 地图里订单管理器、订单板、出餐区、煎锅/灶台、切菜板/刀、盘子、食材刷新点、沙拉食材、沙拉酱和基础空间关系都已摆放到位。
 - `tools/verify_demo_content_design_via_bridge.py` 已加入交付门禁，用真实提交推进完整 9 菜菜单，验证经典汉堡、香煎牛排、田园沙拉、进阶汉堡、套餐和最终汉堡沙拉套餐的订单标签、阶段文案、玩家目标、配方卡、工位路线、工位结果、检查清单和三星结算链路。
 - 当前 Demo 地图已补 `BP_FoodSpawner_RawPatty`，肉饼现在通过 `BP_FoodSpawner` 可重复刷新，不再依赖一次性摆放的 `BP_Patty` 覆盖汉堡练习。
-- `tools/ensure_demo_raw_patty_spawner_via_bridge.py` 可幂等修复 Demo 地图肉饼刷新点；如果地图回退或被误删，可重新运行该脚本再运行 Demo 地图内容验证。
+- 当前 Demo 地图已补 `BP_FoodSpawner_RawMeat`，生牛肉现在通过 `BP_FoodSpawner` 可重复刷新，用于香煎牛排、厚肉堡和牛排沙拉套餐。
+- 当前 Demo 地图已补 `BP_FoodSpawner_SaladDressing`，沙拉酱现在通过 `BP_SaladDressing` 可重复刷新，用于田园沙拉和两个沙拉套餐。
+- `tools/ensure_demo_raw_patty_spawner_via_bridge.py` 可幂等修复 Demo 地图肉饼刷新点；`tools/ensure_demo_raw_meat_spawner_via_bridge.py` 可幂等修复 Demo 地图生牛肉刷新点；`tools/ensure_salad_dressing_assets_via_bridge.py` 可幂等生成/修复 `BP_SaladDressing` 和沙拉酱刷新点；如果地图回退或被误删，可重新运行对应脚本再运行 Demo 地图内容验证。
 - 资源整理规范已经写入 `VRKitchen_ASSET_ORGANIZATION.md`，第一阶段迁移路线写入 `VRKitchen_ASSET_MIGRATION_PLAN.md`；当前剩余审计为 `7 pass / 24 warn / 0 fail`。
 - Phase 2 原型资源迁移已执行：`Content/_Dev/Prototypes/food_test` 下已有迁移后的资源本体；旧 `Content/food_test` 仍残留 redirector 和 `.fbx/.png` sidecar 文件，需要在可视化 Unreal Editor 中 Fix Up Redirectors 并人工确认后再清理。
 - 后续迁移使用 `tools/migrate_asset_organization_via_editor.py` 先 dry-run，再小批量执行；命令行默认不执行 Fix Up Redirectors，真实迁移后需要在 Unreal Editor 的 Content Browser 中手动修复重定向器。
@@ -53,8 +55,8 @@
 - `CompileAllBlueprints` 蓝图编译通过，要求保持 `0 errors / 0 warnings / 0 failed blueprints`。
 - `DataValidation` 资源数据验证通过，要求保持 `Success - 0 errors / 0 warnings`。
 - `BuildCookRun` Win64 Development 打包通过。
-- Demo 地图内容脚本 `tools/verify_demo_map_content_via_bridge.py` 已通过，确认核心演示 Actor、盘子、至少六个食材刷新点、沙拉所需生菜/番茄、可重复肉饼刷新点、煎锅到灶台距离、刀到切菜板距离和关键区域间距满足演示要求。
-- Demo 内容设计脚本 `tools/verify_demo_content_design_via_bridge.py` 已通过，确认 9 菜菜单可以按真实提交推进到田园沙拉、牛排沙拉套餐和经典汉堡沙拉套餐，并且每个阶段的订单详情、配方卡、工位提示、检查清单、学习路径和最终三星结算都可调用。
+- Demo 地图内容脚本 `tools/verify_demo_map_content_via_bridge.py` 已通过，确认核心演示 Actor、盘子、至少六个食材刷新点、沙拉所需生菜/番茄/沙拉酱、可重复肉饼刷新点、可重复生牛肉刷新点、煎锅到灶台距离、刀到切菜板距离和关键区域间距满足演示要求。
+- Demo 内容设计脚本 `tools/verify_demo_content_design_via_bridge.py` 已通过，确认 9 菜菜单可以按真实提交推进到带沙拉酱的田园沙拉、牛排沙拉套餐和经典汉堡沙拉套餐，并且每个阶段的订单详情、配方卡、工位提示、检查清单、学习路径和最终三星结算都可调用。
 - 自动化玩法脚本 `tools/verify_demo_gameplay_loop_via_bridge.py` 已覆盖核心 Demo 规则：
 - 正确订单成功加分。
 - 空盘提交失败并提示“请先放上食材”。
@@ -67,16 +69,17 @@
 - 结算复盘会显示准确率、错误次数解释、最佳连击和下一局重点；自动化会分别检查无提交、完美推进、三星完成和带错误通关尝试。
 - 连续完成至少 3 单后订单难度递进到香煎牛排，后续还能进入田园沙拉、生菜汉堡、番茄汉堡、厚肉、双肉和套餐订单。
 - 香煎牛排覆盖正确提交、生牛肉失败、烧焦牛肉失败和错误菜品失败。
-- 田园沙拉覆盖正确提交、未切生菜失败、未切番茄失败、沙拉顺序错误失败和多余面包失败，并检查反馈文本。
+- 田园沙拉覆盖正确提交、未切生菜失败、未切番茄失败、缺少沙拉酱失败、沙拉酱顺序错误失败、沙拉顺序错误失败和多余面包失败，并检查反馈文本。
 - `tools/verify_salad_cutting_assets_via_bridge.py` 只读验证沙拉切菜资产默认值：生菜/番茄必须各切 1 次并生成对应切好食材，生菜、番茄、切好生菜、切好番茄必须携带订单校验所需标签。
-- 牛排沙拉套餐和经典汉堡沙拉套餐覆盖正确提交、缺少配菜失败、套餐顺序错误失败和多余食材失败，并检查反馈文本。
+- `tools/ensure_salad_dressing_assets_via_bridge.py` 可幂等生成/修复沙拉酱食物蓝图和 Demo 地图刷新点；该脚本会保存 `.uasset/.umap`，完整工程资源仍走网盘，不进入 GitHub。
+- 牛排沙拉套餐和经典汉堡沙拉套餐覆盖正确提交、缺少配菜/沙拉酱失败、套餐顺序错误失败和多余食材失败，并检查反馈文本。
 - 煎锅离开灶台不烹饪，回到灶台后可以继续煎熟，熟肉继续受热会烧焦。
 - 会话组件暴露阶段文本、紧张度、下一目标和教程提示，自动化会检查这些信息可调用且会随进度变化。
 - 会话组件暴露完整菜单路线、当前菜单项和菜单进度，自动化会检查沙拉与套餐都在路线中，并检查进度会从经典汉堡推进到牛排、田园沙拉和最终套餐。
 - 自动化会检查玩家目标文本包含所需食材、推荐步骤和失败修复建议；例如未煎熟会提示确认煎锅在灶台上，未切蔬菜会提示去切菜板处理，顺序错误会提示重新叠放。
-- 自动化会检查工位路线文本会随菜单阶段变化：经典汉堡提示面包台和煎锅/灶台，田园沙拉提示蔬菜区、切菜板和“冷菜，不用煎锅”，套餐提示先热菜再补冷菜配菜。
-- 自动化会检查工位结果文本会随菜单阶段变化，并确认经典汉堡、香煎牛排、田园沙拉、牛排沙拉套餐和经典汉堡沙拉套餐的工位产出提示同时进入玩家目标、订单板和教程文本。
-- 自动化会检查配方卡文本会随菜单阶段变化：经典汉堡、香煎牛排、田园沙拉、牛排沙拉套餐和经典汉堡沙拉套餐都必须暴露菜品类型、处理要求、叠盘顺序和常见错误提醒。
+- 自动化会检查工位路线文本会随菜单阶段变化：经典汉堡提示面包台和煎锅/灶台，田园沙拉提示蔬菜区、切菜板、调味区和“冷菜，不用煎锅”，套餐提示先热菜再补冷菜配菜。
+- 自动化会检查工位结果文本会随菜单阶段变化，并确认经典汉堡、香煎牛排、田园沙拉、牛排沙拉套餐和经典汉堡沙拉套餐的工位产出提示同时进入玩家目标、订单板和教程文本；沙拉相关订单必须提示调味区拿到沙拉酱。
+- 自动化会检查配方卡文本会随菜单阶段变化：经典汉堡、香煎牛排、田园沙拉、牛排沙拉套餐和经典汉堡沙拉套餐都必须暴露菜品类型、处理要求、叠盘顺序和常见错误提醒；沙拉相关订单必须包含“沙拉酱最后加入”。
 - 自动化会检查订单板详情文本包含配方卡关键信息，确保沙拉和套餐的冷菜/热菜路线、处理要求、叠盘顺序和常见错误能被 UI 直接展示。
 - 自动化会检查出餐前检查清单会随菜单阶段变化，并确认经典汉堡、香煎牛排、田园沙拉、牛排沙拉套餐和经典汉堡沙拉套餐的检查清单同时进入玩家目标文本和订单板详情文本。
 - 自动化会检查阶段学习路径文本会随进度变化：开局预告香煎牛排，牛排阶段预告田园沙拉，套餐阶段预告最终菜单，最终阶段显示已到最终菜单。
@@ -117,6 +120,18 @@ Demo 菜单内容设计可单独验证：
 
 ```powershell
 & 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\ensure_demo_raw_patty_spawner_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
+```
+
+如果 Demo 地图生牛肉刷新点缺失，可先运行幂等修复脚本：
+
+```powershell
+& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\ensure_demo_raw_meat_spawner_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
+```
+
+如果 Demo 地图沙拉酱蓝图或刷新点缺失，可先运行幂等修复脚本；该脚本会保存 `.uasset/.umap`，完整工程资源仍走网盘：
+
+```powershell
+& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\ensure_salad_dressing_assets_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
 ```
 
 资源整理审计可以运行：
