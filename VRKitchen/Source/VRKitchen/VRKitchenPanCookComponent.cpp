@@ -174,7 +174,7 @@ namespace
 		FoodActor->Tags.AddUnique(CookedTag);
 		SetFoodStaticMesh(FoodActor, GetCookedMesh(FoodActor));
 		SetNumericProperty(FoodActor, TEXT("Cooktime"), CookTimeSeconds);
-		SpawnFloatingFeedback(FoodActor, TEXT("COOKED"), FColor::Orange);
+		SpawnFloatingFeedback(FoodActor, TEXT("已煎熟"), FColor::Orange);
 		return true;
 	}
 }

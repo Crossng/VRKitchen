@@ -269,6 +269,57 @@ namespace
 		return true;
 	}
 
+	bool IsRawOrUnprocessedFoodTag(const FName FoodTag)
+	{
+		return FoodTag == TagRawPatty
+			|| FoodTag == TagRawMeat
+			|| FoodTag == TagRawLettuce
+			|| FoodTag == TagRawTomato;
+	}
+
+	FString BuildSubmitFeedbackMessage(const bool bHasOrder, const TArray<FSubmittedFood>& SubmittedFoods, const TArray<FName>& RequiredTags, const bool bMatchesOrder)
+	{
+		if (bMatchesOrder)
+		{
+			return TEXT("出餐成功");
+		}
+
+		if (!bHasOrder)
+		{
+			return TEXT("没有当前订单");
+		}
+
+		if (SubmittedFoods.Num() == 0)
+		{
+			return TEXT("请先放上食材");
+		}
+
+		for (const FSubmittedFood& SubmittedFood : SubmittedFoods)
+		{
+			if (SubmittedFood.FoodTag.IsNone())
+			{
+				return TEXT("有未知食材");
+			}
+
+			if (IsRawOrUnprocessedFoodTag(SubmittedFood.FoodTag))
+			{
+				return TEXT("不能提交未处理食材");
+			}
+		}
+
+		if (SubmittedFoods.Num() < RequiredTags.Num())
+		{
+			return TEXT("缺少食材");
+		}
+
+		if (SubmittedFoods.Num() > RequiredTags.Num())
+		{
+			return TEXT("多了食材");
+		}
+
+		return TEXT("顺序错误");
+	}
+
 	void CallMakeClean(AActor* DeliveryArea)
 	{
 		if (!DeliveryArea)
@@ -313,7 +364,7 @@ namespace
 		CallMakeClean(DeliveryArea);
 	}
 
-	void SpawnFloatingFeedback(AActor* Anchor, const TCHAR* Message, const FColor& Color)
+	void SpawnFloatingFeedback(AActor* Anchor, const FString& Message, const FColor& Color)
 	{
 		if (!Anchor || !Anchor->GetWorld())
 		{
@@ -414,6 +465,7 @@ void UVRKitchenOrderValidationLibrary::SubmitCurrentPlateValidated(AActor* Deliv
 		OutOk = true;
 	}
 
+	const FString FeedbackMessage = BuildSubmitFeedbackMessage(bHasOrder, SubmittedFoods, RequiredTags, bMatchesOrder);
 	ClearSubmittedFoods(DeliveryArea, SubmittedFoods);
-	SpawnFloatingFeedback(DeliveryArea, OutOk ? TEXT("ORDER OK") : TEXT("WRONG ORDER"), OutOk ? FColor::Green : FColor::Red);
+	SpawnFloatingFeedback(DeliveryArea, FeedbackMessage, OutOk ? FColor::Green : FColor::Red);
 }
