@@ -1,0 +1,46 @@
+﻿# Unreal generated folders
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+
+# Generated folders inside project/plugin paths
+VRKitchen/Binaries/
+VRKitchen/Build/
+VRKitchen/DerivedDataCache/
+VRKitchen/Intermediate/
+VRKitchen/Saved/
+VRKitchen/Plugins/*/Binaries/
+VRKitchen/Plugins/*/Intermediate/
+
+# Large Unreal/game assets intentionally delivered by netdisk
+Content/
+VRKitchen/Content/
+*.uasset
+*.umap
+*.ubulk
+*.uexp
+*.fbx
+*.zip
+*.7z
+*.rar
+*.pdb
+*.exe
+
+# IDE/OS noise
+*.sln
+*.suo
+*.user
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.log
+*.tmp
+Thumbs.db
+Desktop.ini
+.DS_Store
+__pycache__/
+*.pyc
