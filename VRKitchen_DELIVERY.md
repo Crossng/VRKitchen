@@ -26,11 +26,26 @@
 
 ## 已验证项目
 
-- `VRKitchenEditor Win64 Development` C++ 构建。
-- `CompileAllBlueprints` 蓝图编译。
-- `DataValidation` 资源数据验证。
-- `BuildCookRun` Win64 Development 打包。
-- 基础玩法流程：正确订单、错误订单、缺少/多余食材、生食材失败、烧焦食材失败、连续订单、灶台烹饪状态、倒计时结束停止接单。
+- `VRKitchenEditor Win64 Development` C++ 构建通过。
+- `CompileAllBlueprints` 蓝图编译通过，要求保持 `0 errors / 0 warnings / 0 failed blueprints`。
+- `DataValidation` 资源数据验证通过，要求保持 `Success - 0 errors / 0 warnings`。
+- `BuildCookRun` Win64 Development 打包通过。
+- 自动化玩法脚本 `tools/verify_demo_gameplay_loop_via_bridge.py` 已覆盖核心 Demo 规则：
+- 正确订单成功加分。
+- 空盘提交失败并提示“请先放上食材”。
+- 生食材提交失败并提示“不能提交未处理食材”。
+- 烧焦食材提交失败并提示“食材烧焦了”。
+- 缺少食材、多余食材、顺序错误分别失败。
+- 倒计时结束后不能继续加分或增加正确订单数。
+- 连续完成至少 3 单后订单难度递进到包含切配食材。
+- 煎锅离开灶台不烹饪，回到灶台后可以继续煎熟，熟肉继续受热会烧焦。
+
+## 自动化验证说明
+
+- 最近一次增强玩法验证时间：2026-05-30。
+- Unreal 命令行返回 `Success - 0 error(s)`。
+- 命令行环境中可能出现 USD 插件路径、OpenXR/SteamVR Runtime 或 Steam 日志写入警告；这些属于当前无头显/无完整 SteamVR 运行环境下的环境噪声，不等同于玩法脚本失败。
+- 如果后续修改蓝图或地图，请至少重新运行 C++ 构建、蓝图编译、数据验证、玩法脚本和 Win64 打包。
 
 ## 未验证项目
 

@@ -217,6 +217,41 @@ void UVRKitchenPanCookComponent::TickComponent(float DeltaTime, ELevelTick TickT
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	ProcessCooking(DeltaTime);
+}
+
+void UVRKitchenPanCookComponent::ProcessCookingForDemoValidation(float DeltaTime)
+{
+	ProcessCooking(DeltaTime);
+}
+
+void UVRKitchenPanCookComponent::ProcessFoodActorForDemoValidation(AActor* FoodActor, bool bPanIsOnStove, float DeltaTime)
+{
+	if (!bPanIsOnStove || !FoodActor)
+	{
+		return;
+	}
+
+	if (CookFoodActor(FoodActor, TagRawMeat, TagCookedMeat, DeltaTime, CookTimeSeconds))
+	{
+		return;
+	}
+
+	if (CookFoodActor(FoodActor, TagRawPatty, TagCookedPatty, DeltaTime, CookTimeSeconds))
+	{
+		return;
+	}
+
+	if (OvercookFoodActor(FoodActor, TagCookedMeat, TagBurntMeat, DeltaTime, OvercookTimeSeconds, OvercookTimes))
+	{
+		return;
+	}
+
+	OvercookFoodActor(FoodActor, TagCookedPatty, TagBurntPatty, DeltaTime, OvercookTimeSeconds, OvercookTimes);
+}
+
+void UVRKitchenPanCookComponent::ProcessCooking(float DeltaTime)
+{
 	AActor* Owner = GetOwner();
 	if (!Owner || (!GetBoolProperty(Owner, TEXT("IsOnStove")) && !Owner->Tags.Contains(TagOnStove)))
 	{

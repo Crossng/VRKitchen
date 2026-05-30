@@ -14,6 +14,12 @@ class VRKITCHEN_API UVRKitchenPanCookComponent : public UActorComponent
 public:
 	UVRKitchenPanCookComponent();
 
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Cooking")
+	void ProcessCookingForDemoValidation(float DeltaTime);
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Cooking")
+	void ProcessFoodActorForDemoValidation(AActor* FoodActor, bool bPanIsOnStove, float DeltaTime);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cooking")
 	double CookTimeSeconds = 3.0;
 
@@ -25,5 +31,7 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	void ProcessCooking(float DeltaTime);
+
 	TMap<TWeakObjectPtr<AActor>, double> OvercookTimes;
 };
