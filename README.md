@@ -8,7 +8,7 @@ The full Unreal project assets are delivered separately through cloud storage/ne
 
 - Target: UE 5.5.4, Windows PCVR, SteamVR through OpenXR.
 - Demo map: `/Game/_Project/Maps/VRKitchen_Demo`.
-- Gameplay loop: Chinese order feedback, validated plate submission, pan/stove cooking, overcooked burnt food rejection, 3-minute session timer, score target, streak bonus, mission clear result, star rating, correct/wrong counters, progressive steak, garden salad, and burger orders, dynamic stage hints, urgency text, and next-goal guidance.
+- Gameplay loop: Chinese order feedback, validated plate submission, pan/stove cooking, overcooked burnt food rejection, 3-minute session timer, 115-point score target, streak bonus, mission clear result, star rating, correct/wrong counters, progressive steak, garden salad, burger, and combo orders, dynamic stage hints, urgency text, and next-goal guidance.
 - Not verified here: real SteamVR headset feel, controller hand feel, Quest/Android standalone runtime.
 
 ## How to use

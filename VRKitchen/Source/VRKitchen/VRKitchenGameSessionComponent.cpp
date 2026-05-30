@@ -75,10 +75,28 @@ namespace
 			};
 		}
 
+		if (CorrectOrders == 7)
+		{
+			return {
+				TEXT("豪华双肉堡"),
+				{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Cooked_Meat"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
+				TEXT("底部面包, 熟肉饼, 切好的生菜, 熟牛肉, 切好的番茄, 顶部面包"),
+			};
+		}
+
+		if (CorrectOrders == 8)
+		{
+			return {
+				TEXT("牛排沙拉套餐"),
+				{TEXT("Cooked_Meat"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
+				TEXT("熟牛肉, 切好的生菜, 切好的番茄"),
+			};
+		}
+
 		return {
-			TEXT("豪华双肉堡"),
-			{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Cooked_Meat"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
-			TEXT("底部面包, 熟肉饼, 切好的生菜, 熟牛肉, 切好的番茄, 顶部面包"),
+			TEXT("经典汉堡沙拉套餐"),
+			{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Top_Bun"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
+			TEXT("底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄"),
 		};
 	}
 
@@ -527,7 +545,17 @@ int32 UVRKitchenGameSessionComponent::GetOrderStageIndex() const
 		return 6;
 	}
 
-	return 7;
+	if (CorrectOrders == 7)
+	{
+		return 7;
+	}
+
+	if (CorrectOrders == 8)
+	{
+		return 8;
+	}
+
+	return 9;
 }
 
 FString UVRKitchenGameSessionComponent::GetOrderStageText() const
@@ -546,8 +574,12 @@ FString UVRKitchenGameSessionComponent::GetOrderStageText() const
 		return TEXT("番茄切配");
 	case 6:
 		return TEXT("厚肉煎制");
-	default:
+	case 7:
 		return TEXT("豪华双肉挑战");
+	case 8:
+		return TEXT("牛排沙拉套餐");
+	default:
+		return TEXT("汉堡沙拉套餐");
 	}
 }
 
@@ -610,8 +642,12 @@ FString UVRKitchenGameSessionComponent::GetNextGoalText() const
 		return FString::Printf(TEXT("%s；切番茄，注意不要换顺序"), *ScoreGoal);
 	case 6:
 		return FString::Printf(TEXT("%s；煎熟牛肉再提交厚肉堡"), *ScoreGoal);
+	case 7:
+		return FString::Printf(TEXT("%s；完成豪华双肉堡，准备套餐挑战"), *ScoreGoal);
+	case 8:
+		return FString::Printf(TEXT("%s；把牛排和沙拉按套餐顺序出餐"), *ScoreGoal);
 	default:
-		return FString::Printf(TEXT("%s；完成豪华双肉堡冲三星"), *ScoreGoal);
+		return FString::Printf(TEXT("%s；完成经典汉堡沙拉套餐冲三星"), *ScoreGoal);
 	}
 }
 
@@ -652,8 +688,12 @@ FString UVRKitchenGameSessionComponent::GetTutorialHintText() const
 		return Prefix + TEXT("番茄汉堡：先切番茄，叠盘顺序仍然严格。");
 	case 6:
 		return Prefix + TEXT("厚肉生菜堡：使用熟牛肉，不要提交生肉或烧焦肉。");
-	default:
+	case 7:
 		return Prefix + TEXT("豪华双肉堡：肉饼、生菜、熟牛肉、番茄都要按订单顺序。");
+	case 8:
+		return Prefix + TEXT("牛排沙拉套餐：先放熟牛肉，再放切好的生菜和番茄。");
+	default:
+		return Prefix + TEXT("经典汉堡沙拉套餐：先完成经典汉堡，再补上沙拉配菜。");
 	}
 }
 

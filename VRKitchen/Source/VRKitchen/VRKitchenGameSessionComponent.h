@@ -25,7 +25,7 @@ public:
 	int32 WrongOrderPenalty = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
-	int32 TargetScore = 90;
+	int32 TargetScore = 115;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
 	int32 OneStarScore = 30;
@@ -34,7 +34,7 @@ public:
 	int32 TwoStarScore = 55;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
-	int32 ThreeStarScore = 90;
+	int32 ThreeStarScore = 115;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
 	double WarningTimeSeconds = 45.0;

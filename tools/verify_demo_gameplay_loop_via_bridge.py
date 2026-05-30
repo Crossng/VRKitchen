@@ -157,7 +157,7 @@ def reset_session(session):
     require(session_prop(session, "WrongOrders") == 0, "Wrong order count did not reset to 0")
     require(session_prop(session, "CurrentStreak") == 0, "Current streak did not reset to 0")
     require(session_prop(session, "BestStreak") == 0, "Best streak did not reset to 0")
-    require(session_prop(session, "TargetScore") >= 90, "Target score should keep the full demo menu visible")
+    require(session_prop(session, "TargetScore") >= 115, "Target score should keep the full combo demo menu visible")
     require(session.can_accept_orders(), "Session should accept orders after reset")
 
 
@@ -225,6 +225,8 @@ if order_manager and delivery_area:
         tomato_order = ["Bottom_Bun", "Cooked_Patty", "Chopped_Tomato", "Top_Bun"]
         meat_order = ["Bottom_Bun", "Cooked_Meat", "Chopped_Lettuce", "Top_Bun"]
         deluxe_order = ["Bottom_Bun", "Cooked_Patty", "Chopped_Lettuce", "Cooked_Meat", "Chopped_Tomato", "Top_Bun"]
+        steak_salad_combo_order = ["Cooked_Meat", "Chopped_Lettuce", "Chopped_Tomato"]
+        burger_salad_combo_order = ["Bottom_Bun", "Cooked_Patty", "Top_Bun", "Chopped_Lettuce", "Chopped_Tomato"]
 
         reset_session(session)
         assert_session_guidance(
@@ -319,13 +321,15 @@ if order_manager and delivery_area:
         require(submit_tags(delivery_area, tomato_order), "Extended run sixth tomato burger should succeed")
         require(submit_tags(delivery_area, meat_order), "Extended run seventh thick meat order should succeed")
         require(submit_tags(delivery_area, deluxe_order), "Extended run eighth double meat order should succeed")
-        assert_stats(session, 90, 8, 0, "extended steak salad and double meat run")
-        require(session_prop(session, "CurrentStreak") == 8, "Current streak should track eight correct orders")
-        require(session_prop(session, "BestStreak") == 8, "Best streak should track eight correct orders")
-        require(session.get_star_rating() == 3, f"Expected three-star rating at 90 points, got {session.get_star_rating()}")
+        require(submit_tags(delivery_area, steak_salad_combo_order), "Extended run ninth steak salad combo should succeed")
+        require(submit_tags(delivery_area, burger_salad_combo_order), "Extended run tenth burger salad combo should succeed")
+        assert_stats(session, 115, 10, 0, "extended steak salad combo and burger salad combo run")
+        require(session_prop(session, "CurrentStreak") == 10, "Current streak should track ten correct orders")
+        require(session_prop(session, "BestStreak") == 10, "Best streak should track ten correct orders")
+        require(session.get_star_rating() == 3, f"Expected three-star rating at 115 points, got {session.get_star_rating()}")
         require(str(session.get_result_grade_text()) == "三星", f"Expected three-star grade text, got {session.get_result_grade_text()}")
-        require(bool(session.get_editor_property("bMissionCleared")), "Extended run should clear mission at 90 points")
-        print("PASS extended recipe case: steak, salad, thick meat, and double meat orders work")
+        require(bool(session.get_editor_property("bMissionCleared")), "Extended run should clear mission at 115 points")
+        print("PASS extended recipe case: steak, salad, thick meat, double meat, and combo orders work")
 
         reset_session(session)
         require(submit_tags(delivery_area, simple_order), "First simple order should succeed")
@@ -373,6 +377,47 @@ if order_manager and delivery_area:
         require(session_prop(session, "WrongOrders") == 6, "Steak and salad probe failures should be counted")
         require(session_prop(session, "SessionScore") == 28, f"Expected score 28 after steak and salad progression probes, got {session_prop(session, 'SessionScore')}")
         print("PASS progression case: steak and salad orders require processed ingredients")
+
+        reset_session(session)
+        require(submit_tags(delivery_area, simple_order), "Combo probe first simple order should succeed")
+        require(submit_tags(delivery_area, simple_order), "Combo probe second simple order should succeed")
+        require(submit_tags(delivery_area, steak_order), "Combo probe third steak order should succeed")
+        require(submit_tags(delivery_area, salad_order), "Combo probe fourth salad order should succeed")
+        require(submit_tags(delivery_area, lettuce_order), "Combo probe fifth lettuce burger should succeed")
+        require(submit_tags(delivery_area, tomato_order), "Combo probe sixth tomato burger should succeed")
+        require(submit_tags(delivery_area, meat_order), "Combo probe seventh thick meat order should succeed")
+        require(submit_tags(delivery_area, deluxe_order), "Combo probe eighth double meat order should succeed")
+        assert_session_guidance(
+            session,
+            8,
+            "牛排沙拉套餐",
+            0,
+            "节奏稳定",
+            "牛排和沙拉",
+            "牛排沙拉套餐",
+            "steak salad combo guidance",
+        )
+        require(not submit_tags(delivery_area, ["Cooked_Meat", "Chopped_Lettuce"]), "Steak salad combo missing tomato should fail")
+        require(not submit_tags(delivery_area, ["Chopped_Lettuce", "Cooked_Meat", "Chopped_Tomato"]), "Steak salad combo wrong order should fail")
+        require(not submit_tags(delivery_area, ["Cooked_Meat", "Chopped_Lettuce", "Chopped_Tomato", "Top_Bun"]), "Steak salad combo with extra bun should fail")
+        require(submit_tags(delivery_area, steak_salad_combo_order), "Steak salad combo should succeed after probes")
+        assert_session_guidance(
+            session,
+            9,
+            "汉堡沙拉套餐",
+            0,
+            "节奏稳定",
+            "经典汉堡沙拉套餐",
+            "经典汉堡沙拉套餐",
+            "burger salad combo guidance",
+        )
+        require(not submit_tags(delivery_area, simple_order), "Burger salad combo missing salad side should fail")
+        require(not submit_tags(delivery_area, ["Bottom_Bun", "Cooked_Patty", "Chopped_Lettuce", "Top_Bun", "Chopped_Tomato"]), "Burger salad combo wrong order should fail")
+        require(not submit_tags(delivery_area, ["Bottom_Bun", "Cooked_Patty", "Top_Bun", "Chopped_Lettuce", "Chopped_Tomato", "Cooked_Meat"]), "Burger salad combo with extra steak should fail")
+        require(submit_tags(delivery_area, burger_salad_combo_order), "Burger salad combo should succeed after probes")
+        assert_stats(session, 98, 10, 6, "combo order failure probes")
+        require(not bool(session.get_editor_property("bMissionCleared")), "Combo probe run should not clear mission after deliberate penalties")
+        print("PASS combo case: steak salad and burger salad combo orders reject missing, extra, and wrong-order submissions")
 
 destroy_spawned()
 
