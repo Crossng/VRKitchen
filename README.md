@@ -17,7 +17,7 @@ The full Unreal project assets are delivered separately through cloud storage/ne
 2. Overlay this repository's `VRKitchen/` folder onto the full project folder.
 3. Open `VRKitchen/VRKitchen.uproject` with Unreal Engine 5.5.4.
 4. Rebuild the `VRKitchen` C++ module if prompted.
-5. Run `CompileAllBlueprints`, `DataValidation`, and `tools/verify_demo_gameplay_loop_via_bridge.py` before sharing a release.
+5. Run `CompileAllBlueprints`, `DataValidation`, `tools/verify_demo_gameplay_loop_via_bridge.py`, and `tools/verify_demo_content_design_via_bridge.py` before sharing a release.
 
 ## Delivery self-check
 
@@ -28,6 +28,12 @@ python tools/verify_delivery_readiness.py --full-project-root C:\Users\hp\Deskto
 ```
 
 The script checks that the full project still contains the demo map, source, config, plugin, and delivery docs, and that the code-only GitHub repository does not track `Content`, `.uasset`, `.umap`, binaries, package outputs, or oversized files.
+
+To verify that the nine-dish demo menu, including garden salad and the salad combo orders, is still wired into the player-facing recipe card, order board, station guidance, checklist, and final three-star completion flow:
+
+```powershell
+& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\verify_demo_content_design_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
+```
 
 ## Asset organization audit
 

@@ -45,6 +45,7 @@ REQUIRED_CODE_REPO_ITEMS = {
     "tools/verify_demo_gameplay_loop_via_bridge.py": "gameplay automation script",
     "tools/ensure_demo_raw_patty_spawner_via_bridge.py": "raw patty spawner repair script",
     "tools/verify_demo_map_content_via_bridge.py": "demo map content validation script",
+    "tools/verify_demo_content_design_via_bridge.py": "demo content design validation script",
     "tools/verify_cleanup_recovery_via_bridge.py": "cleanup recovery validation script",
     "tools/verify_salad_cutting_assets_via_bridge.py": "salad cutting asset validation script",
     "tools/fix_salad_cutting_assets_via_bridge.py": "salad cutting asset repair script",
