@@ -46,6 +46,7 @@ REQUIRED_CODE_REPO_ITEMS = {
     "tools/verify_delivery_readiness.py": "delivery readiness script",
     "tools/verify_asset_organization.py": "asset organization audit script",
     "tools/migrate_asset_organization_via_editor.py": "staged asset migration script",
+    "tools/verify_asset_migration_report.py": "asset migration dry-run report verifier",
     "VRKitchen_ASSET_ORGANIZATION.md": "asset organization guide",
     "VRKitchen/VRKitchen_ASSET_ORGANIZATION.md": "project asset organization guide",
     "VRKitchen_ASSET_MIGRATION_PLAN.md": "asset migration plan",
@@ -320,6 +321,7 @@ def check_migration_docs(root: Path, relative_paths: tuple[str, ...], results: l
         "Fix Up Redirectors",
         "Unreal Editor",
         "不直接搬资产",
+        "verify_asset_migration_report.py",
         "--strict",
     )
 

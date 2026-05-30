@@ -79,6 +79,12 @@ $env:VRKITCHEN_ASSET_MIGRATION_REPORT='C:\Users\hp\Desktop\CrazyKitchen\VRKitche
 & 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\migrate_asset_organization_via_editor.py' -unattended -nop4 -nosplash -NullRHI
 ```
 
+dry-run 报告必须先通过安全门禁，确认报告仍是 `dry_run=true`、没有 `errors`、没有真实执行状态，并且下一批 phase-2 迁移动作都出现在报告里：
+
+```powershell
+python C:\Users\hp\Desktop\CrazyKitchen\tools\verify_asset_migration_report.py --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN.json
+```
+
 真实迁移时把 `VRKITCHEN_ASSET_MIGRATION_DRY_RUN` 改为 `0`。默认保持 `VRKITCHEN_ASSET_MIGRATION_FIXUP=0`，迁移后在 Unreal Editor 中手动执行 Fix Up Redirectors。
 
 ```powershell
