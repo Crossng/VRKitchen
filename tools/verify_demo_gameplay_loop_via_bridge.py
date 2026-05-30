@@ -167,6 +167,20 @@ def assert_stats(session, score, correct, wrong, context):
     require(session_prop(session, "WrongOrders") == wrong, f"{context}: expected wrong {wrong}, got {session_prop(session, 'WrongOrders')}")
 
 
+def require_text_contains(value, fragment, context):
+    text = str(value)
+    require(fragment in text, f"{context}: expected '{fragment}' in '{text}'")
+
+
+def assert_session_guidance(session, stage_index, stage_fragment, urgency_level, urgency_fragment, goal_fragment, hint_fragment, context):
+    require(session.get_order_stage_index() == stage_index, f"{context}: expected stage {stage_index}, got {session.get_order_stage_index()}")
+    require_text_contains(session.get_order_stage_text(), stage_fragment, f"{context} stage text")
+    require(session.get_urgency_level() == urgency_level, f"{context}: expected urgency {urgency_level}, got {session.get_urgency_level()}")
+    require_text_contains(session.get_urgency_text(), urgency_fragment, f"{context} urgency text")
+    require_text_contains(session.get_next_goal_text(), goal_fragment, f"{context} next goal")
+    require_text_contains(session.get_tutorial_hint_text(), hint_fragment, f"{context} tutorial hint")
+
+
 def run_failure_case(session, delivery_area, name, tags):
     reset_session(session)
     ok = submit_tags(delivery_area, tags)
@@ -210,6 +224,43 @@ if order_manager and delivery_area:
         meat_order = ["Bottom_Bun", "Cooked_Meat", "Chopped_Lettuce", "Top_Bun"]
         deluxe_order = ["Bottom_Bun", "Cooked_Patty", "Chopped_Lettuce", "Cooked_Meat", "Chopped_Tomato", "Top_Bun"]
 
+        reset_session(session)
+        assert_session_guidance(
+            session,
+            1,
+            "基础汉堡",
+            0,
+            "节奏稳定",
+            "经典汉堡",
+            "经典汉堡",
+            "initial guidance",
+        )
+        original_session_length = session_prop(session, "SessionLengthSeconds")
+        session.set_editor_property("SessionLengthSeconds", 44.0)
+        reset_session(session)
+        assert_session_guidance(
+            session,
+            1,
+            "基础汉堡",
+            1,
+            "注意时间",
+            "经典汉堡",
+            "注意时间",
+            "warning guidance",
+        )
+        session.set_editor_property("SessionLengthSeconds", 19.0)
+        reset_session(session)
+        assert_session_guidance(
+            session,
+            1,
+            "基础汉堡",
+            2,
+            "最后冲刺",
+            "经典汉堡",
+            "时间紧张",
+            "critical guidance",
+        )
+        session.set_editor_property("SessionLengthSeconds", original_session_length)
         reset_session(session)
         ok = submit_tags(delivery_area, simple_order)
         require(ok, "Correct simple order should succeed")
@@ -277,8 +328,29 @@ if order_manager and delivery_area:
         reset_session(session)
         require(submit_tags(delivery_area, simple_order), "First simple order should succeed")
         require(submit_tags(delivery_area, simple_order), "Second simple order should succeed")
+        assert_session_guidance(
+            session,
+            2,
+            "生菜切配",
+            0,
+            "节奏稳定",
+            "切生菜",
+            "生菜汉堡",
+            "lettuce stage guidance",
+        )
         require(not submit_tags(delivery_area, simple_order), "Third simple order should fail after difficulty increases")
+        require_text_contains(session.get_tutorial_hint_text(), "刚才出错", "failure recovery tutorial")
         require(submit_tags(delivery_area, lettuce_order), "Third progressive lettuce order should succeed")
+        assert_session_guidance(
+            session,
+            3,
+            "番茄切配",
+            0,
+            "节奏稳定",
+            "切番茄",
+            "番茄汉堡",
+            "tomato stage guidance",
+        )
         require(session_prop(session, "CorrectOrders") == 3, "Three completed orders were not recorded")
         require(session_prop(session, "WrongOrders") == 1, "Difficulty probe failure should be counted once")
         require(session_prop(session, "SessionScore") == 28, f"Expected score 28 after progression probe, got {session_prop(session, 'SessionScore')}")

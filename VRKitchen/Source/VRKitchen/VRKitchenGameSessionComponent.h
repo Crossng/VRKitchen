@@ -37,6 +37,12 @@ public:
 	int32 ThreeStarScore = 70;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
+	double WarningTimeSeconds = 45.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
+	double CriticalTimeSeconds = 20.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
 	int32 StreakBonusEvery = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
@@ -105,6 +111,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	FString GetResultGradeText() const;
 
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	int32 GetOrderStageIndex() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetOrderStageText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	int32 GetUrgencyLevel() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetUrgencyText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetNextGoalText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetTutorialHintText() const;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -122,4 +146,5 @@ private:
 	void UpdateStatusText();
 	FString BuildStatusText() const;
 	FString BuildTutorialText() const;
+	FColor GetStatusTextColor() const;
 };

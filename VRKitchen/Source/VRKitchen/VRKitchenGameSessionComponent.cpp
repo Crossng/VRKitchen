@@ -325,7 +325,7 @@ void UVRKitchenGameSessionComponent::StartSession()
 	WrongOrders = 0;
 	CurrentStreak = 0;
 	BestStreak = 0;
-	LastFeedbackMessage = TEXT("目标: 达到目标分并尽量保持连击");
+	LastFeedbackMessage = TEXT("目标: 达到目标分，连续正确 3 单有奖励");
 	bSessionEnded = false;
 	bMissionCleared = false;
 	bSessionActive = true;
@@ -477,6 +477,146 @@ FString UVRKitchenGameSessionComponent::GetResultGradeText() const
 	}
 }
 
+int32 UVRKitchenGameSessionComponent::GetOrderStageIndex() const
+{
+	if (CorrectOrders < 2)
+	{
+		return 1;
+	}
+
+	if (CorrectOrders == 2)
+	{
+		return 2;
+	}
+
+	if (CorrectOrders == 3)
+	{
+		return 3;
+	}
+
+	if (CorrectOrders == 4)
+	{
+		return 4;
+	}
+
+	return 5;
+}
+
+FString UVRKitchenGameSessionComponent::GetOrderStageText() const
+{
+	switch (GetOrderStageIndex())
+	{
+	case 1:
+		return TEXT("基础汉堡训练");
+	case 2:
+		return TEXT("生菜切配");
+	case 3:
+		return TEXT("番茄切配");
+	case 4:
+		return TEXT("厚肉煎制");
+	default:
+		return TEXT("豪华双肉挑战");
+	}
+}
+
+int32 UVRKitchenGameSessionComponent::GetUrgencyLevel() const
+{
+	if (!bSessionActive || bSessionEnded)
+	{
+		return 0;
+	}
+
+	if (CriticalTimeSeconds > 0.0 && RemainingSeconds <= CriticalTimeSeconds)
+	{
+		return 2;
+	}
+
+	if (WarningTimeSeconds > 0.0 && RemainingSeconds <= WarningTimeSeconds)
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
+FString UVRKitchenGameSessionComponent::GetUrgencyText() const
+{
+	switch (GetUrgencyLevel())
+	{
+	case 2:
+		return TEXT("最后冲刺");
+	case 1:
+		return TEXT("注意时间");
+	default:
+		return bSessionEnded ? TEXT("已结算") : TEXT("节奏稳定");
+	}
+}
+
+FString UVRKitchenGameSessionComponent::GetNextGoalText() const
+{
+	if (bSessionEnded)
+	{
+		return bMissionCleared ? TEXT("按 R 再挑战三星节奏") : TEXT("按 R 重新练习流程");
+	}
+
+	const int32 MissingScore = TargetScore > 0 ? FMath::Max(0, TargetScore - SessionScore) : 0;
+	const FString ScoreGoal = TargetScore > 0
+		? FString::Printf(TEXT("还差 %d 分达成目标"), MissingScore)
+		: TEXT("自由练习");
+
+	switch (GetOrderStageIndex())
+	{
+	case 1:
+		return FString::Printf(TEXT("%s；先稳定完成 2 单经典汉堡"), *ScoreGoal);
+	case 2:
+		return FString::Printf(TEXT("%s；切生菜并按顺序叠盘"), *ScoreGoal);
+	case 3:
+		return FString::Printf(TEXT("%s；切番茄，注意不要换顺序"), *ScoreGoal);
+	case 4:
+		return FString::Printf(TEXT("%s；煎熟牛肉再提交厚肉堡"), *ScoreGoal);
+	default:
+		return FString::Printf(TEXT("%s；完成豪华双肉堡冲三星"), *ScoreGoal);
+	}
+}
+
+FString UVRKitchenGameSessionComponent::GetTutorialHintText() const
+{
+	if (bSessionEnded)
+	{
+		return bMissionCleared
+			? TEXT("挑战完成：复盘最佳连击，按 R 可以再跑一局。")
+			: TEXT("时间到：按 R 重开，优先保持正确率。");
+	}
+
+	FString Prefix;
+	if (GetUrgencyLevel() == 2)
+	{
+		Prefix = TEXT("时间紧张：优先完成当前订单。\n");
+	}
+	else if (GetUrgencyLevel() == 1)
+	{
+		Prefix = TEXT("注意时间：动作保持连贯。\n");
+	}
+	else if (WrongOrders > 0 && CurrentStreak == 0)
+	{
+		Prefix = TEXT("刚才出错：先看红色失败原因。\n");
+	}
+
+	switch (GetOrderStageIndex())
+	{
+	case 1:
+		return Prefix + TEXT("经典汉堡：底部面包 + 熟肉饼 + 顶部面包。");
+	case 2:
+		return Prefix + TEXT("生菜汉堡：先切生菜，再放到熟肉饼上方。");
+	case 3:
+		return Prefix + TEXT("番茄汉堡：先切番茄，叠盘顺序仍然严格。");
+	case 4:
+		return Prefix + TEXT("厚肉生菜堡：使用熟牛肉，不要提交生肉或烧焦肉。");
+	default:
+		return Prefix + TEXT("豪华双肉堡：肉饼、生菜、熟牛肉、番茄都要按订单顺序。");
+	}
+}
+
 void UVRKitchenGameSessionComponent::EnsureTextComponents()
 {
 	AActor* Owner = GetOwner();
@@ -524,6 +664,11 @@ void UVRKitchenGameSessionComponent::UpdateStatusText()
 	if (StatusTextComponent)
 	{
 		StatusTextComponent->SetText(FText::FromString(BuildStatusText()));
+		StatusTextComponent->SetTextRenderColor(GetStatusTextColor());
+	}
+	if (TutorialTextComponent)
+	{
+		TutorialTextComponent->SetText(FText::FromString(BuildTutorialText()));
 	}
 }
 
@@ -549,18 +694,41 @@ FString UVRKitchenGameSessionComponent::BuildStatusText() const
 	}
 
 	return FString::Printf(
-		TEXT("剩余时间: %02d:%02d\n分数: %d / 目标: %d\n完成: %d  错误: %d  连击: %d\n%s"),
+		TEXT("剩余时间: %02d:%02d  %s\n阶段: %s\n分数: %d / 目标: %d\n完成: %d  错误: %d  连击: %d\n下一目标: %s\n%s"),
 		Minutes,
 		Seconds,
+		*GetUrgencyText(),
+		*GetOrderStageText(),
 		SessionScore,
 		TargetScore,
 		CorrectOrders,
 		WrongOrders,
 		CurrentStreak,
+		*GetNextGoalText(),
 		*LastFeedbackMessage);
 }
 
 FString UVRKitchenGameSessionComponent::BuildTutorialText() const
 {
-	return TEXT("玩法提示\n1. 查看订单\n2. 处理食材\n3. 煎熟肉饼\n4. 按顺序叠到盘子\n5. 放到出餐区提交\n连续正确 3 单有奖励");
+	return FString::Printf(
+		TEXT("玩法提示\n%s\n步骤: 看订单 -> 处理食材 -> 煎熟 -> 按顺序叠盘 -> 出餐\n连续正确 3 单有奖励"),
+		*GetTutorialHintText());
+}
+
+FColor UVRKitchenGameSessionComponent::GetStatusTextColor() const
+{
+	if (bSessionEnded)
+	{
+		return bMissionCleared ? FColor::Green : FColor::Yellow;
+	}
+
+	switch (GetUrgencyLevel())
+	{
+	case 2:
+		return FColor::Red;
+	case 1:
+		return FColor::Orange;
+	default:
+		return FColor::Cyan;
+	}
 }

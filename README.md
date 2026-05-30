@@ -8,7 +8,7 @@ The full Unreal project assets are delivered separately through cloud storage/ne
 
 - Target: UE 5.5.4, Windows PCVR, SteamVR through OpenXR.
 - Demo map: `/Game/_Project/Maps/VRKitchen_Demo`.
-- Gameplay loop: Chinese order feedback, validated plate submission, pan/stove cooking, overcooked burnt food rejection, 3-minute session timer, score target, streak bonus, mission clear result, star rating, correct/wrong counters, and progressive burger orders.
+- Gameplay loop: Chinese order feedback, validated plate submission, pan/stove cooking, overcooked burnt food rejection, 3-minute session timer, score target, streak bonus, mission clear result, star rating, correct/wrong counters, progressive burger orders, dynamic stage hints, urgency text, and next-goal guidance.
 - Not verified here: real SteamVR headset feel, controller hand feel, Quest/Android standalone runtime.
 
 ## How to use
@@ -28,6 +28,16 @@ python tools/verify_delivery_readiness.py --full-project-root C:\Users\hp\Deskto
 ```
 
 The script checks that the full project still contains the demo map, source, config, plugin, and delivery docs, and that the code-only GitHub repository does not track `Content`, `.uasset`, `.umap`, binaries, package outputs, or oversized files.
+
+## Asset organization audit
+
+Asset naming and folder rules are documented in `VRKitchen_ASSET_ORGANIZATION.md`. The current safe workflow is to audit first and only move assets later inside Unreal Editor:
+
+```powershell
+python tools/verify_asset_organization.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen
+```
+
+The default audit is advisory. Use `--strict` only after project assets have been migrated and redirectors have been fixed.
 
 ## What belongs in GitHub
 

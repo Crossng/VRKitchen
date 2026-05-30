@@ -28,6 +28,7 @@ REQUIRED_FULL_PROJECT_ITEMS = {
     "Source/VRKitchen/VRKitchenPanCookComponent.cpp": "pan cooking source",
     "Plugins/UnrealBridge/UnrealBridge.uplugin": "UnrealBridge plugin manifest",
     "VRKitchen_DELIVERY.md": "project delivery document",
+    "VRKitchen_ASSET_ORGANIZATION.md": "asset organization guide",
 }
 
 REQUIRED_CODE_REPO_ITEMS = {
@@ -42,6 +43,9 @@ REQUIRED_CODE_REPO_ITEMS = {
     "VRKitchen/Source/VRKitchen/VRKitchenPanCookComponent.cpp": "pan cooking source",
     "tools/verify_demo_gameplay_loop_via_bridge.py": "gameplay automation script",
     "tools/verify_delivery_readiness.py": "delivery readiness script",
+    "tools/verify_asset_organization.py": "asset organization audit script",
+    "VRKitchen_ASSET_ORGANIZATION.md": "asset organization guide",
+    "VRKitchen/VRKitchen_ASSET_ORGANIZATION.md": "project asset organization guide",
 }
 
 BANNED_TRACKED_PREFIXES = (
@@ -273,6 +277,36 @@ def check_delivery_docs(root: Path, relative_paths: tuple[str, ...], results: li
                 add_result(results, "WARN", f"{relative_path} does not mention {phrase}")
 
 
+def check_asset_docs(root: Path, relative_paths: tuple[str, ...], results: list[Check]) -> None:
+    required_phrases = (
+        "Content/_Project",
+        "Content/_External",
+        "Content/_Legacy",
+        "Content/_Dev",
+        "Fix Up Redirectors",
+        "不要用文件管理器直接移动",
+        "GitHub",
+        "网盘",
+    )
+
+    for relative_path in relative_paths:
+        path = root / relative_path
+        if not path.exists():
+            continue
+        try:
+            text = read_text(path)
+        except UnicodeDecodeError:
+            add_result(results, "FAIL", f"Asset organization doc is not valid UTF-8: {relative_path}")
+            continue
+
+        add_result(results, "PASS", f"Asset organization doc is UTF-8 readable: {relative_path}")
+        for phrase in required_phrases:
+            if phrase in text:
+                add_result(results, "PASS", f"{relative_path} mentions {phrase}")
+            else:
+                add_result(results, "WARN", f"{relative_path} does not mention {phrase}")
+
+
 def print_results(results: list[Check]) -> int:
     counts = {"INFO": 0, "PASS": 0, "WARN": 0, "FAIL": 0}
     for result in results:
@@ -332,6 +366,8 @@ def main() -> int:
     check_code_repo(code_repo_root, args.require_clean_git, results)
     check_delivery_docs(full_project_root, ("VRKitchen_DELIVERY.md",), results)
     check_delivery_docs(code_repo_root, ("VRKitchen_DELIVERY.md", "VRKitchen/VRKitchen_DELIVERY.md"), results)
+    check_asset_docs(full_project_root, ("VRKitchen_ASSET_ORGANIZATION.md",), results)
+    check_asset_docs(code_repo_root, ("VRKitchen_ASSET_ORGANIZATION.md", "VRKitchen/VRKitchen_ASSET_ORGANIZATION.md"), results)
 
     return print_results(results)
 
