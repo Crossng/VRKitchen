@@ -708,6 +708,87 @@ FString UVRKitchenGameSessionComponent::GetMenuProgressText() const
 		*GetCurrentMenuItemText());
 }
 
+FString UVRKitchenGameSessionComponent::GetCurrentStageUnlockText() const
+{
+	const FDemoMenuStep& Step = GetDemoMenuStepForProgress(CorrectOrders);
+	if (Step.FirstCorrectOrderCount <= 0)
+	{
+		return TEXT("阶段解锁: 开局基础训练，先熟悉拿取、煎肉、叠盘和出餐。");
+	}
+
+	return FString::Printf(
+		TEXT("阶段解锁: 已完成 %d 单正确订单，解锁「%s」。"),
+		Step.FirstCorrectOrderCount,
+		*Step.StageText);
+}
+
+int32 UVRKitchenGameSessionComponent::GetCorrectOrdersUntilNextStage() const
+{
+	const TArray<FDemoMenuStep>& Route = GetDemoMenuRoute();
+	const int32 CurrentStepIndex = GetMenuStepIndexForProgress(CorrectOrders);
+	for (int32 Index = CurrentStepIndex + 1; Index < Route.Num(); ++Index)
+	{
+		if (Route[Index].FirstCorrectOrderCount > CorrectOrders)
+		{
+			return Route[Index].FirstCorrectOrderCount - CorrectOrders;
+		}
+	}
+	return 0;
+}
+
+FString UVRKitchenGameSessionComponent::GetNextStagePreviewText() const
+{
+	const TArray<FDemoMenuStep>& Route = GetDemoMenuRoute();
+	const int32 CurrentStepIndex = GetMenuStepIndexForProgress(CorrectOrders);
+	for (int32 Index = CurrentStepIndex + 1; Index < Route.Num(); ++Index)
+	{
+		if (Route[Index].FirstCorrectOrderCount > CorrectOrders)
+		{
+			return FString::Printf(
+				TEXT("下一阶段: 再正确完成 %d 单，解锁 %d/%d「%s」-%s。"),
+				Route[Index].FirstCorrectOrderCount - CorrectOrders,
+				Index + 1,
+				Route.Num(),
+				*Route[Index].OrderSpec.OrderName,
+				*Route[Index].StageText);
+		}
+	}
+
+	return TEXT("下一阶段: 已到最终菜单，目标是减少错误并冲三星。");
+}
+
+FString UVRKitchenGameSessionComponent::GetLearningPathText() const
+{
+	TArray<FString> Items;
+	const TArray<FDemoMenuStep>& Route = GetDemoMenuRoute();
+	const int32 CurrentStepIndex = GetMenuStepIndexForProgress(CorrectOrders);
+	for (int32 Index = 0; Index < Route.Num(); ++Index)
+	{
+		FString StateText = TEXT("待解锁");
+		if (Index < CurrentStepIndex)
+		{
+			StateText = TEXT("已完成");
+		}
+		else if (Index == CurrentStepIndex)
+		{
+			StateText = TEXT("当前");
+		}
+
+		Items.Add(FString::Printf(TEXT("%d.%s[%s]"), Index + 1, *Route[Index].OrderSpec.OrderName, *StateText));
+	}
+
+	return FString::Printf(TEXT("学习路线: %s"), *FString::Join(Items, TEXT(" -> ")));
+}
+
+FString UVRKitchenGameSessionComponent::GetStageCoachingText() const
+{
+	return FString::Printf(
+		TEXT("%s\n%s\n%s"),
+		*GetCurrentStageUnlockText(),
+		*GetNextStagePreviewText(),
+		*GetLearningPathText());
+}
+
 FString UVRKitchenGameSessionComponent::GetCurrentRequiredIngredientsText() const
 {
 	const FDemoOrderSpec& OrderSpec = GetDemoMenuStepForProgress(CorrectOrders).OrderSpec;
@@ -772,8 +853,9 @@ FString UVRKitchenGameSessionComponent::GetFailureRecoveryText() const
 FString UVRKitchenGameSessionComponent::GetPlayerObjectiveText() const
 {
 	return FString::Printf(
-		TEXT("%s\n%s\n%s\n%s"),
+		TEXT("%s\n%s\n%s\n%s\n%s"),
 		*GetMenuProgressText(),
+		*GetStageCoachingText(),
 		*GetCurrentRequiredIngredientsText(),
 		*GetCurrentActionStepText(),
 		*GetFailureRecoveryText());
@@ -860,7 +942,7 @@ FString UVRKitchenGameSessionComponent::GetTutorialHintText() const
 		Prefix = FString::Printf(TEXT("刚才出错：%s\n"), *GetFailureRecoveryText());
 	}
 
-	return Prefix + GetDemoMenuStepForProgress(CorrectOrders).TutorialText + TEXT("\n") + GetCurrentActionStepText();
+	return Prefix + GetDemoMenuStepForProgress(CorrectOrders).TutorialText + TEXT("\n") + GetNextStagePreviewText() + TEXT("\n") + GetCurrentActionStepText();
 }
 
 void UVRKitchenGameSessionComponent::EnsureTextComponents()

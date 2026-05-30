@@ -209,6 +209,18 @@ def assert_menu_progress(session, step, total, item_fragment, route_fragment, co
     require_text_contains(session.get_menu_route_text(), route_fragment, f"{context} menu route")
 
 
+def assert_stage_coaching(session, orders_until_next, unlock_fragment, preview_fragment, path_fragment, context):
+    require(session.get_correct_orders_until_next_stage() == orders_until_next, f"{context}: expected {orders_until_next} orders until next stage, got {session.get_correct_orders_until_next_stage()}")
+    require_text_contains(session.get_current_stage_unlock_text(), unlock_fragment, f"{context} unlock text")
+    require_text_contains(session.get_next_stage_preview_text(), preview_fragment, f"{context} next stage preview")
+    require_text_contains(session.get_learning_path_text(), path_fragment, f"{context} learning path")
+    require_text_contains(session.get_stage_coaching_text(), unlock_fragment, f"{context} coaching unlock")
+    require_text_contains(session.get_stage_coaching_text(), preview_fragment, f"{context} coaching preview")
+    require_text_contains(session.get_stage_coaching_text(), path_fragment, f"{context} coaching path")
+    require_text_contains(session.get_player_objective_text(), preview_fragment, f"{context} objective stage preview")
+    require_text_contains(session.get_tutorial_hint_text(), preview_fragment, f"{context} tutorial stage preview")
+
+
 def assert_player_objective(session, ingredients_fragment, action_fragment, recovery_fragment, context):
     require_text_contains(session.get_current_required_ingredients_text(), ingredients_fragment, f"{context} required ingredients")
     require_text_contains(session.get_current_action_step_text(), action_fragment, f"{context} action step")
@@ -270,6 +282,7 @@ if order_manager and delivery_area:
 
         reset_session(session)
         assert_menu_progress(session, 1, 9, "经典汉堡", "经典汉堡 -> 2.香煎牛排", "initial menu progress")
+        assert_stage_coaching(session, 2, "开局基础训练", "解锁 2/9「香煎牛排」", "1.经典汉堡[当前]", "initial stage coaching")
         assert_player_objective(session, "底部面包, 熟肉饼, 顶部面包", "煎熟肉饼", "保持当前节奏", "initial player objective")
         assert_performance_summary(session, 0, 0, "暂无提交", "没有错误订单", "第一单经典汉堡", "initial performance summary")
         require_text_contains(session.get_menu_route_text(), "田园沙拉", "menu route includes salad")
@@ -385,6 +398,7 @@ if order_manager and delivery_area:
         require(submit_tags(delivery_area, simple_order), "First simple order should succeed")
         require(submit_tags(delivery_area, simple_order), "Second simple order should succeed")
         assert_menu_progress(session, 2, 9, "香煎牛排", "牛排沙拉套餐", "steak menu progress")
+        assert_stage_coaching(session, 1, "已完成 2 单正确订单", "解锁 3/9「田园沙拉」", "2.香煎牛排[当前]", "steak stage coaching")
         assert_session_guidance(
             session,
             2,
@@ -406,6 +420,7 @@ if order_manager and delivery_area:
         require_text_contains(session.get_failure_recovery_text(), "丢弃烧焦食材", "burnt meat recovery text")
         require(submit_tags(delivery_area, steak_order), "Third progressive steak order should succeed")
         assert_menu_progress(session, 3, 9, "田园沙拉", "汉堡沙拉套餐", "salad menu progress")
+        assert_stage_coaching(session, 1, "已完成 3 单正确订单", "解锁 4/9「生菜汉堡」", "3.田园沙拉[当前]", "salad stage coaching")
         assert_player_objective(session, "切好的生菜, 切好的番茄", "先切生菜", "保持当前节奏", "salad player objective")
         assert_session_guidance(
             session,
@@ -450,6 +465,7 @@ if order_manager and delivery_area:
         require(submit_tags(delivery_area, meat_order), "Combo probe seventh thick meat order should succeed")
         require(submit_tags(delivery_area, deluxe_order), "Combo probe eighth double meat order should succeed")
         assert_menu_progress(session, 8, 9, "牛排沙拉套餐", "经典汉堡沙拉套餐", "steak salad combo menu progress")
+        assert_stage_coaching(session, 1, "已完成 8 单正确订单", "解锁 9/9「经典汉堡沙拉套餐」", "8.牛排沙拉套餐[当前]", "steak salad combo stage coaching")
         assert_player_objective(session, "熟牛肉, 切好的生菜, 切好的番茄", "先煎熟牛肉", "保持当前节奏", "steak salad combo player objective")
         assert_session_guidance(
             session,
@@ -466,6 +482,7 @@ if order_manager and delivery_area:
         submit_tags_expect_feedback(session, delivery_area, ["Cooked_Meat", "Chopped_Lettuce", "Chopped_Tomato", "Top_Bun"], "套餐多了食材：顶部面包", "steak salad combo with extra bun")
         require(submit_tags(delivery_area, steak_salad_combo_order), "Steak salad combo should succeed after probes")
         assert_menu_progress(session, 9, 9, "经典汉堡沙拉套餐", "牛排沙拉套餐", "burger salad combo menu progress")
+        assert_stage_coaching(session, 0, "已完成 9 单正确订单", "已到最终菜单", "9.经典汉堡沙拉套餐[当前]", "burger salad combo stage coaching")
         assert_player_objective(session, "底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄", "先叠完整经典汉堡", "保持当前节奏", "burger salad combo player objective")
         assert_session_guidance(
             session,
