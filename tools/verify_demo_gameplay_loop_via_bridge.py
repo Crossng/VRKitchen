@@ -155,6 +155,9 @@ def reset_session(session):
     require(session_prop(session, "SessionScore") == 0, "Session score did not reset to 0")
     require(session_prop(session, "CorrectOrders") == 0, "Correct order count did not reset to 0")
     require(session_prop(session, "WrongOrders") == 0, "Wrong order count did not reset to 0")
+    require(session_prop(session, "CurrentStreak") == 0, "Current streak did not reset to 0")
+    require(session_prop(session, "BestStreak") == 0, "Best streak did not reset to 0")
+    require(session_prop(session, "TargetScore") >= 50, "Target score should keep the demo challenge goal visible")
     require(session.can_accept_orders(), "Session should accept orders after reset")
 
 
@@ -202,6 +205,9 @@ if order_manager and delivery_area:
 
     if session:
         simple_order = ["Bottom_Bun", "Cooked_Patty", "Top_Bun"]
+        lettuce_order = ["Bottom_Bun", "Cooked_Patty", "Chopped_Lettuce", "Top_Bun"]
+        tomato_order = ["Bottom_Bun", "Cooked_Patty", "Chopped_Tomato", "Top_Bun"]
+        deluxe_order = ["Bottom_Bun", "Cooked_Patty", "Chopped_Lettuce", "Chopped_Tomato", "Top_Bun"]
 
         reset_session(session)
         ok = submit_tags(delivery_area, simple_order)
@@ -233,6 +239,22 @@ if order_manager and delivery_area:
         require(session.can_accept_orders(), "Session should accept orders after reset")
         assert_stats(session, 0, 0, 0, "reset after timeout")
         print("PASS reset case: session can restart after time end")
+
+        reset_session(session)
+        require(submit_tags(delivery_area, simple_order), "Target run first simple order should succeed")
+        require(submit_tags(delivery_area, simple_order), "Target run second simple order should succeed")
+        require(submit_tags(delivery_area, lettuce_order), "Target run third lettuce order should succeed")
+        require(submit_tags(delivery_area, tomato_order), "Target run fourth tomato order should succeed")
+        require(submit_tags(delivery_area, deluxe_order), "Target run fifth deluxe order should succeed")
+        assert_stats(session, 55, 5, 0, "target score and streak bonus run")
+        require(session_prop(session, "CurrentStreak") == 5, "Current streak should track five correct orders")
+        require(session_prop(session, "BestStreak") == 5, "Best streak should track five correct orders")
+        require(session.get_star_rating() == 2, f"Expected two-star rating at 55 points, got {session.get_star_rating()}")
+        require(str(session.get_result_title()) == "挑战成功", f"Expected challenge success title, got {session.get_result_title()}")
+        require(str(session.get_result_grade_text()) == "二星", f"Expected two-star grade text, got {session.get_result_grade_text()}")
+        require(bool(session.get_editor_property("bMissionCleared")), "Mission should be cleared after reaching target score")
+        require(not session.can_accept_orders(), "Session should stop accepting orders after mission clear")
+        print("PASS target case: score target, streak bonus, and result grade work")
 
         reset_session(session)
         require(submit_tags(delivery_area, simple_order), "First simple order should succeed")

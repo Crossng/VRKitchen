@@ -312,7 +312,11 @@ void UVRKitchenGameSessionComponent::StartSession()
 	SessionScore = 0;
 	CorrectOrders = 0;
 	WrongOrders = 0;
+	CurrentStreak = 0;
+	BestStreak = 0;
+	LastFeedbackMessage = TEXT("目标: 达到目标分并尽量保持连击");
 	bSessionEnded = false;
+	bMissionCleared = false;
 	bSessionActive = true;
 
 	SetManagerIntProperty(GetOwner(), TEXT("GameScore"), SessionScore);
@@ -343,6 +347,16 @@ void UVRKitchenGameSessionComponent::EndSession()
 	UpdateStatusText();
 }
 
+void UVRKitchenGameSessionComponent::CompleteSession()
+{
+	bSessionActive = false;
+	bSessionEnded = true;
+	bMissionCleared = true;
+	RemainingSeconds = 0.0;
+	LastFeedbackMessage = TEXT("任务完成");
+	UpdateStatusText();
+}
+
 bool UVRKitchenGameSessionComponent::CanAcceptOrders() const
 {
 	return bSessionActive && !bSessionEnded && RemainingSeconds > 0.0;
@@ -358,20 +372,46 @@ void UVRKitchenGameSessionComponent::RecordOrderSubmission(bool bWasCorrect, con
 	if (bWasCorrect)
 	{
 		++CorrectOrders;
-		SessionScore += CorrectOrderScore;
+		++CurrentStreak;
+		BestStreak = FMath::Max(BestStreak, CurrentStreak);
+
+		int32 ScoreDelta = CorrectOrderScore;
+		const bool bEarnedStreakBonus = StreakBonusEvery > 0
+			&& StreakBonusScore > 0
+			&& CurrentStreak % StreakBonusEvery == 0;
+		if (bEarnedStreakBonus)
+		{
+			ScoreDelta += StreakBonusScore;
+		}
+
+		SessionScore += ScoreDelta;
+		LastFeedbackMessage = bEarnedStreakBonus
+			? FString::Printf(TEXT("%s  连击奖励 +%d"), *FeedbackMessage, StreakBonusScore)
+			: FeedbackMessage;
 	}
 	else
 	{
 		++WrongOrders;
+		CurrentStreak = 0;
 		SessionScore = FMath::Max(0, SessionScore - WrongOrderPenalty);
+		LastFeedbackMessage = FeedbackMessage;
 	}
 
 	SetManagerIntProperty(GetOwner(), TEXT("GameScore"), SessionScore);
+	if (bWasCorrect && TargetScore > 0 && !bMissionCleared && SessionScore >= TargetScore)
+	{
+		CompleteSession();
+	}
 	UpdateStatusText();
 }
 
 void UVRKitchenGameSessionComponent::ApplyDemoOrderForProgress()
 {
+	if (!CanAcceptOrders())
+	{
+		return;
+	}
+
 	AActor* OrderManager = GetOwner();
 	if (!OrderManager)
 	{
@@ -383,6 +423,46 @@ void UVRKitchenGameSessionComponent::ApplyDemoOrderForProgress()
 	{
 		SetManagerTextProperty(OrderManager, TEXT("TempIngredientsText"), OrderSpec.DisplayDetails);
 		CallTabletRefresh(OrderManager, OrderSpec);
+	}
+}
+
+int32 UVRKitchenGameSessionComponent::GetStarRating() const
+{
+	if (SessionScore >= ThreeStarScore)
+	{
+		return 3;
+	}
+
+	if (SessionScore >= TwoStarScore)
+	{
+		return 2;
+	}
+
+	if (SessionScore >= OneStarScore)
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
+FString UVRKitchenGameSessionComponent::GetResultTitle() const
+{
+	return SessionScore >= TargetScore ? TEXT("挑战成功") : TEXT("继续练习");
+}
+
+FString UVRKitchenGameSessionComponent::GetResultGradeText() const
+{
+	switch (GetStarRating())
+	{
+	case 3:
+		return TEXT("三星");
+	case 2:
+		return TEXT("二星");
+	case 1:
+		return TEXT("一星");
+	default:
+		return TEXT("未达标");
 	}
 }
 
@@ -444,23 +524,32 @@ FString UVRKitchenGameSessionComponent::BuildStatusText() const
 
 	if (bSessionEnded)
 	{
+		const FString ResultStatus = bMissionCleared ? TEXT("任务完成") : TEXT("时间到");
 		return FString::Printf(
-			TEXT("时间到\n总分: %d\n完成: %d\n错误: %d\n按 R 重新开始"),
+			TEXT("%s - %s\n总分: %d / 目标: %d\n评级: %s\n完成: %d  错误: %d\n最佳连击: %d\n按 R 重新开始"),
+			*ResultStatus,
+			*GetResultTitle(),
 			SessionScore,
+			TargetScore,
+			*GetResultGradeText(),
 			CorrectOrders,
-			WrongOrders);
+			WrongOrders,
+			BestStreak);
 	}
 
 	return FString::Printf(
-		TEXT("剩余时间: %02d:%02d\n分数: %d\n完成: %d  错误: %d"),
+		TEXT("剩余时间: %02d:%02d\n分数: %d / 目标: %d\n完成: %d  错误: %d  连击: %d\n%s"),
 		Minutes,
 		Seconds,
 		SessionScore,
+		TargetScore,
 		CorrectOrders,
-		WrongOrders);
+		WrongOrders,
+		CurrentStreak,
+		*LastFeedbackMessage);
 }
 
 FString UVRKitchenGameSessionComponent::BuildTutorialText() const
 {
-	return TEXT("玩法提示\n1. 查看订单\n2. 处理食材\n3. 煎熟肉饼\n4. 按顺序叠到盘子\n5. 放到出餐区提交");
+	return TEXT("玩法提示\n1. 查看订单\n2. 处理食材\n3. 煎熟肉饼\n4. 按顺序叠到盘子\n5. 放到出餐区提交\n连续正确 3 单有奖励");
 }

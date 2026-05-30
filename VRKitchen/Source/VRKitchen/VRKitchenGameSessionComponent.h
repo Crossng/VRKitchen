@@ -25,6 +25,24 @@ public:
 	int32 WrongOrderPenalty = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
+	int32 TargetScore = 50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
+	int32 OneStarScore = 30;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
+	int32 TwoStarScore = 50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
+	int32 ThreeStarScore = 70;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
+	int32 StreakBonusEvery = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
+	int32 StreakBonusScore = 5;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRKitchen|Session")
 	bool bAutoStart = true;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VRKitchen|Session")
@@ -40,10 +58,22 @@ public:
 	int32 WrongOrders = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VRKitchen|Session")
+	int32 CurrentStreak = 0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VRKitchen|Session")
+	int32 BestStreak = 0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VRKitchen|Session")
+	FString LastFeedbackMessage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VRKitchen|Session")
 	bool bSessionActive = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VRKitchen|Session")
 	bool bSessionEnded = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VRKitchen|Session")
+	bool bMissionCleared = false;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	void StartSession();
@@ -55,6 +85,9 @@ public:
 	void EndSession();
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	void CompleteSession();
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	bool CanAcceptOrders() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
@@ -62,6 +95,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	void ApplyDemoOrderForProgress();
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	int32 GetStarRating() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetResultTitle() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetResultGradeText() const;
 
 protected:
 	virtual void BeginPlay() override;
