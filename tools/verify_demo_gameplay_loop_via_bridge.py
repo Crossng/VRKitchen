@@ -172,6 +172,17 @@ def require_text_contains(value, fragment, context):
     require(fragment in text, f"{context}: expected '{fragment}' in '{text}'")
 
 
+def require_feedback_contains(session, fragment, context):
+    require_text_contains(session_prop(session, "LastFeedbackMessage"), fragment, f"{context} feedback")
+
+
+def submit_tags_expect_feedback(session, delivery_area, tags, expected_feedback_fragment, context):
+    ok = submit_tags(delivery_area, tags)
+    require(not ok, f"{context}: submission should fail")
+    require_feedback_contains(session, expected_feedback_fragment, context)
+    return ok
+
+
 def assert_session_guidance(session, stage_index, stage_fragment, urgency_level, urgency_fragment, goal_fragment, hint_fragment, context):
     require(session.get_order_stage_index() == stage_index, f"{context}: expected stage {stage_index}, got {session.get_order_stage_index()}")
     require_text_contains(session.get_order_stage_text(), stage_fragment, f"{context} stage text")
@@ -268,6 +279,7 @@ if order_manager and delivery_area:
         reset_session(session)
         ok = submit_tags(delivery_area, simple_order)
         require(ok, "Correct simple order should succeed")
+        require_feedback_contains(session, "出餐成功", "correct simple order")
         assert_stats(session, 10, 1, 0, "correct order")
         print("PASS success case: correct simple order adds score")
 
@@ -346,8 +358,8 @@ if order_manager and delivery_area:
         )
         require(not submit_tags(delivery_area, simple_order), "Third simple order should fail after steak stage starts")
         require_text_contains(session.get_tutorial_hint_text(), "刚才出错", "failure recovery tutorial")
-        require(not submit_tags(delivery_area, ["Raw_Meat"]), "Raw meat should fail for steak order")
-        require(not submit_tags(delivery_area, ["Burnt_Meat"]), "Burnt meat should fail for steak order")
+        submit_tags_expect_feedback(session, delivery_area, ["Raw_Meat"], "牛肉还没煎熟", "raw meat steak order")
+        submit_tags_expect_feedback(session, delivery_area, ["Burnt_Meat"], "牛肉烧焦了", "burnt meat steak order")
         require(submit_tags(delivery_area, steak_order), "Third progressive steak order should succeed")
         assert_session_guidance(
             session,
@@ -359,9 +371,10 @@ if order_manager and delivery_area:
             "田园沙拉",
             "salad stage guidance",
         )
-        require(not submit_tags(delivery_area, ["Raw_Lettuce", "Chopped_Tomato"]), "Raw lettuce should fail for salad order")
-        require(not submit_tags(delivery_area, ["Chopped_Tomato", "Chopped_Lettuce"]), "Reversed salad order should fail")
-        require(not submit_tags(delivery_area, ["Chopped_Lettuce", "Chopped_Tomato", "Top_Bun"]), "Salad with extra bun should fail")
+        submit_tags_expect_feedback(session, delivery_area, ["Raw_Lettuce", "Chopped_Tomato"], "生菜还没切", "raw lettuce salad order")
+        submit_tags_expect_feedback(session, delivery_area, ["Chopped_Lettuce", "Raw_Tomato"], "番茄还没切", "raw tomato salad order")
+        submit_tags_expect_feedback(session, delivery_area, ["Chopped_Tomato", "Chopped_Lettuce"], "沙拉顺序错误", "reversed salad order")
+        submit_tags_expect_feedback(session, delivery_area, ["Chopped_Lettuce", "Chopped_Tomato", "Top_Bun"], "多了食材：顶部面包", "salad with extra bun")
         require(submit_tags(delivery_area, salad_order), "Fourth progressive salad order should succeed")
         assert_session_guidance(
             session,
@@ -374,8 +387,8 @@ if order_manager and delivery_area:
             "lettuce burger stage guidance",
         )
         require(session_prop(session, "CorrectOrders") == 4, "Four completed orders were not recorded")
-        require(session_prop(session, "WrongOrders") == 6, "Steak and salad probe failures should be counted")
-        require(session_prop(session, "SessionScore") == 28, f"Expected score 28 after steak and salad progression probes, got {session_prop(session, 'SessionScore')}")
+        require(session_prop(session, "WrongOrders") == 7, "Steak and salad probe failures should be counted")
+        require(session_prop(session, "SessionScore") == 26, f"Expected score 26 after steak and salad progression probes, got {session_prop(session, 'SessionScore')}")
         print("PASS progression case: steak and salad orders require processed ingredients")
 
         reset_session(session)
@@ -397,9 +410,9 @@ if order_manager and delivery_area:
             "牛排沙拉套餐",
             "steak salad combo guidance",
         )
-        require(not submit_tags(delivery_area, ["Cooked_Meat", "Chopped_Lettuce"]), "Steak salad combo missing tomato should fail")
-        require(not submit_tags(delivery_area, ["Chopped_Lettuce", "Cooked_Meat", "Chopped_Tomato"]), "Steak salad combo wrong order should fail")
-        require(not submit_tags(delivery_area, ["Cooked_Meat", "Chopped_Lettuce", "Chopped_Tomato", "Top_Bun"]), "Steak salad combo with extra bun should fail")
+        submit_tags_expect_feedback(session, delivery_area, ["Cooked_Meat", "Chopped_Lettuce"], "套餐缺少配菜：切好的番茄", "steak salad combo missing tomato")
+        submit_tags_expect_feedback(session, delivery_area, ["Chopped_Lettuce", "Cooked_Meat", "Chopped_Tomato"], "套餐顺序错误：先放熟牛肉", "steak salad combo wrong order")
+        submit_tags_expect_feedback(session, delivery_area, ["Cooked_Meat", "Chopped_Lettuce", "Chopped_Tomato", "Top_Bun"], "套餐多了食材：顶部面包", "steak salad combo with extra bun")
         require(submit_tags(delivery_area, steak_salad_combo_order), "Steak salad combo should succeed after probes")
         assert_session_guidance(
             session,
@@ -411,9 +424,9 @@ if order_manager and delivery_area:
             "经典汉堡沙拉套餐",
             "burger salad combo guidance",
         )
-        require(not submit_tags(delivery_area, simple_order), "Burger salad combo missing salad side should fail")
-        require(not submit_tags(delivery_area, ["Bottom_Bun", "Cooked_Patty", "Chopped_Lettuce", "Top_Bun", "Chopped_Tomato"]), "Burger salad combo wrong order should fail")
-        require(not submit_tags(delivery_area, ["Bottom_Bun", "Cooked_Patty", "Top_Bun", "Chopped_Lettuce", "Chopped_Tomato", "Cooked_Meat"]), "Burger salad combo with extra steak should fail")
+        submit_tags_expect_feedback(session, delivery_area, simple_order, "套餐缺少配菜：切好的生菜, 切好的番茄", "burger salad combo missing salad side")
+        submit_tags_expect_feedback(session, delivery_area, ["Bottom_Bun", "Cooked_Patty", "Chopped_Lettuce", "Top_Bun", "Chopped_Tomato"], "套餐顺序错误：先完成经典汉堡", "burger salad combo wrong order")
+        submit_tags_expect_feedback(session, delivery_area, ["Bottom_Bun", "Cooked_Patty", "Top_Bun", "Chopped_Lettuce", "Chopped_Tomato", "Cooked_Meat"], "套餐多了食材：熟牛肉", "burger salad combo with extra steak")
         require(submit_tags(delivery_area, burger_salad_combo_order), "Burger salad combo should succeed after probes")
         assert_stats(session, 98, 10, 6, "combo order failure probes")
         require(not bool(session.get_editor_property("bMissionCleared")), "Combo probe run should not clear mission after deliberate penalties")

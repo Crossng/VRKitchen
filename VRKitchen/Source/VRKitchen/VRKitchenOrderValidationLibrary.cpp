@@ -312,6 +312,222 @@ namespace
 		return FoodTag == TagBurntPatty || FoodTag == TagBurntMeat;
 	}
 
+	FString GetFoodTagDisplayName(const FName FoodTag)
+	{
+		if (FoodTag == TagBottomBun)
+		{
+			return TEXT("底部面包");
+		}
+		if (FoodTag == TagTopBun)
+		{
+			return TEXT("顶部面包");
+		}
+		if (FoodTag == TagCookedPatty)
+		{
+			return TEXT("熟肉饼");
+		}
+		if (FoodTag == TagCookedMeat)
+		{
+			return TEXT("熟牛肉");
+		}
+		if (FoodTag == TagChoppedLettuce)
+		{
+			return TEXT("切好的生菜");
+		}
+		if (FoodTag == TagChoppedTomato)
+		{
+			return TEXT("切好的番茄");
+		}
+		if (FoodTag == TagRawPatty)
+		{
+			return TEXT("生肉饼");
+		}
+		if (FoodTag == TagRawMeat)
+		{
+			return TEXT("生牛肉");
+		}
+		if (FoodTag == TagRawLettuce)
+		{
+			return TEXT("未切生菜");
+		}
+		if (FoodTag == TagRawTomato)
+		{
+			return TEXT("未切番茄");
+		}
+		if (FoodTag == TagBurntPatty)
+		{
+			return TEXT("烧焦肉饼");
+		}
+		if (FoodTag == TagBurntMeat)
+		{
+			return TEXT("烧焦牛肉");
+		}
+		return FoodTag.IsNone() ? TEXT("未知食材") : FoodTag.ToString();
+	}
+
+	FString JoinFoodTagDisplayNames(const TArray<FName>& FoodTags)
+	{
+		TArray<FString> Names;
+		for (const FName FoodTag : FoodTags)
+		{
+			Names.Add(GetFoodTagDisplayName(FoodTag));
+		}
+		return FString::Join(Names, TEXT(", "));
+	}
+
+	TArray<FName> GetSubmittedFoodTags(const TArray<FSubmittedFood>& SubmittedFoods)
+	{
+		TArray<FName> SubmittedTags;
+		for (const FSubmittedFood& SubmittedFood : SubmittedFoods)
+		{
+			SubmittedTags.Add(SubmittedFood.FoodTag);
+		}
+		return SubmittedTags;
+	}
+
+	bool RequiredTagsExactlyMatch(const TArray<FName>& RequiredTags, const TArray<FName>& ExpectedTags)
+	{
+		if (RequiredTags.Num() != ExpectedTags.Num())
+		{
+			return false;
+		}
+
+		for (int32 Index = 0; Index < RequiredTags.Num(); ++Index)
+		{
+			if (RequiredTags[Index] != ExpectedTags[Index])
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool IsGardenSaladOrder(const TArray<FName>& RequiredTags)
+	{
+		static const TArray<FName> GardenSaladTags = {TagChoppedLettuce, TagChoppedTomato};
+		return RequiredTagsExactlyMatch(RequiredTags, GardenSaladTags);
+	}
+
+	bool IsSteakSaladComboOrder(const TArray<FName>& RequiredTags)
+	{
+		static const TArray<FName> SteakSaladComboTags = {TagCookedMeat, TagChoppedLettuce, TagChoppedTomato};
+		return RequiredTagsExactlyMatch(RequiredTags, SteakSaladComboTags);
+	}
+
+	bool IsBurgerSaladComboOrder(const TArray<FName>& RequiredTags)
+	{
+		static const TArray<FName> BurgerSaladComboTags = {TagBottomBun, TagCookedPatty, TagTopBun, TagChoppedLettuce, TagChoppedTomato};
+		return RequiredTagsExactlyMatch(RequiredTags, BurgerSaladComboTags);
+	}
+
+	bool IsComboOrder(const TArray<FName>& RequiredTags)
+	{
+		return IsSteakSaladComboOrder(RequiredTags) || IsBurgerSaladComboOrder(RequiredTags);
+	}
+
+	TArray<FName> GetMissingRequiredTags(const TArray<FSubmittedFood>& SubmittedFoods, const TArray<FName>& RequiredTags)
+	{
+		TArray<FName> RemainingRequiredTags = RequiredTags;
+		for (const FSubmittedFood& SubmittedFood : SubmittedFoods)
+		{
+			const int32 ExistingIndex = RemainingRequiredTags.IndexOfByKey(SubmittedFood.FoodTag);
+			if (ExistingIndex != INDEX_NONE)
+			{
+				RemainingRequiredTags.RemoveAt(ExistingIndex);
+			}
+		}
+		return RemainingRequiredTags;
+	}
+
+	TArray<FName> GetExtraSubmittedTags(const TArray<FSubmittedFood>& SubmittedFoods, const TArray<FName>& RequiredTags)
+	{
+		TArray<FName> RemainingRequiredTags = RequiredTags;
+		TArray<FName> ExtraTags;
+		for (const FSubmittedFood& SubmittedFood : SubmittedFoods)
+		{
+			const int32 ExistingIndex = RemainingRequiredTags.IndexOfByKey(SubmittedFood.FoodTag);
+			if (ExistingIndex != INDEX_NONE)
+			{
+				RemainingRequiredTags.RemoveAt(ExistingIndex);
+			}
+			else
+			{
+				ExtraTags.Add(SubmittedFood.FoodTag);
+			}
+		}
+		return ExtraTags;
+	}
+
+	FString BuildRawFoodFeedback(const FName FoodTag)
+	{
+		if (FoodTag == TagRawLettuce)
+		{
+			return TEXT("生菜还没切");
+		}
+		if (FoodTag == TagRawTomato)
+		{
+			return TEXT("番茄还没切");
+		}
+		if (FoodTag == TagRawPatty)
+		{
+			return TEXT("肉饼还没煎熟");
+		}
+		if (FoodTag == TagRawMeat)
+		{
+			return TEXT("牛肉还没煎熟");
+		}
+		return FString::Printf(TEXT("不能提交未处理食材：%s"), *GetFoodTagDisplayName(FoodTag));
+	}
+
+	FString BuildBurntFoodFeedback(const FName FoodTag)
+	{
+		if (FoodTag == TagBurntPatty)
+		{
+			return TEXT("肉饼烧焦了");
+		}
+		if (FoodTag == TagBurntMeat)
+		{
+			return TEXT("牛肉烧焦了");
+		}
+		return FString::Printf(TEXT("食材烧焦了：%s"), *GetFoodTagDisplayName(FoodTag));
+	}
+
+	FString BuildMissingFoodFeedback(const TArray<FName>& MissingTags, const TArray<FName>& RequiredTags)
+	{
+		const FString MissingText = JoinFoodTagDisplayNames(MissingTags);
+		return IsComboOrder(RequiredTags)
+			? FString::Printf(TEXT("套餐缺少配菜：%s"), *MissingText)
+			: FString::Printf(TEXT("缺少食材：%s"), *MissingText);
+	}
+
+	FString BuildExtraFoodFeedback(const TArray<FName>& ExtraTags, const TArray<FName>& RequiredTags)
+	{
+		const FString ExtraText = JoinFoodTagDisplayNames(ExtraTags);
+		return IsComboOrder(RequiredTags)
+			? FString::Printf(TEXT("套餐多了食材：%s"), *ExtraText)
+			: FString::Printf(TEXT("多了食材：%s"), *ExtraText);
+	}
+
+	FString BuildOrderMismatchFeedback(const TArray<FSubmittedFood>& SubmittedFoods, const TArray<FName>& RequiredTags)
+	{
+		if (IsGardenSaladOrder(RequiredTags))
+		{
+			return TEXT("沙拉顺序错误：先放切好的生菜，再放切好的番茄");
+		}
+		if (IsSteakSaladComboOrder(RequiredTags))
+		{
+			return TEXT("套餐顺序错误：先放熟牛肉，再放切好的生菜和切好的番茄");
+		}
+		if (IsBurgerSaladComboOrder(RequiredTags))
+		{
+			return TEXT("套餐顺序错误：先完成经典汉堡，再放切好的生菜和切好的番茄");
+		}
+
+		const FString SubmittedText = JoinFoodTagDisplayNames(GetSubmittedFoodTags(SubmittedFoods));
+		const FString RequiredText = JoinFoodTagDisplayNames(RequiredTags);
+		return FString::Printf(TEXT("顺序错误：当前是 %s；订单需要 %s"), *SubmittedText, *RequiredText);
+	}
+
 	FString BuildSubmitFeedbackMessage(const bool bHasOrder, const TArray<FSubmittedFood>& SubmittedFoods, const TArray<FName>& RequiredTags, const bool bMatchesOrder)
 	{
 		if (bMatchesOrder)
@@ -338,26 +554,26 @@ namespace
 
 			if (IsRawOrUnprocessedFoodTag(SubmittedFood.FoodTag))
 			{
-				return TEXT("不能提交未处理食材");
+				return BuildRawFoodFeedback(SubmittedFood.FoodTag);
 			}
 
 			if (IsBurntFoodTag(SubmittedFood.FoodTag))
 			{
-				return TEXT("食材烧焦了");
+				return BuildBurntFoodFeedback(SubmittedFood.FoodTag);
 			}
 		}
 
 		if (SubmittedFoods.Num() < RequiredTags.Num())
 		{
-			return TEXT("缺少食材");
+			return BuildMissingFoodFeedback(GetMissingRequiredTags(SubmittedFoods, RequiredTags), RequiredTags);
 		}
 
 		if (SubmittedFoods.Num() > RequiredTags.Num())
 		{
-			return TEXT("多了食材");
+			return BuildExtraFoodFeedback(GetExtraSubmittedTags(SubmittedFoods, RequiredTags), RequiredTags);
 		}
 
-		return TEXT("顺序错误");
+		return BuildOrderMismatchFeedback(SubmittedFoods, RequiredTags);
 	}
 
 	void CallMakeClean(AActor* DeliveryArea)
