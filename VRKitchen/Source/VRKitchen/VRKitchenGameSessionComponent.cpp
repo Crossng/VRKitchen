@@ -33,13 +33,22 @@ namespace
 		if (CorrectOrders == 2)
 		{
 			return {
+				TEXT("香煎牛排"),
+				{TEXT("Cooked_Meat")},
+				TEXT("熟牛肉"),
+			};
+		}
+
+		if (CorrectOrders == 3)
+		{
+			return {
 				TEXT("田园沙拉"),
 				{TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
 				TEXT("切好的生菜, 切好的番茄"),
 			};
 		}
 
-		if (CorrectOrders == 3)
+		if (CorrectOrders == 4)
 		{
 			return {
 				TEXT("生菜汉堡"),
@@ -48,7 +57,7 @@ namespace
 			};
 		}
 
-		if (CorrectOrders == 4)
+		if (CorrectOrders == 5)
 		{
 			return {
 				TEXT("番茄汉堡"),
@@ -57,7 +66,7 @@ namespace
 			};
 		}
 
-		if (CorrectOrders == 5)
+		if (CorrectOrders == 6)
 		{
 			return {
 				TEXT("厚肉生菜堡"),
@@ -513,7 +522,12 @@ int32 UVRKitchenGameSessionComponent::GetOrderStageIndex() const
 		return 5;
 	}
 
-	return 6;
+	if (CorrectOrders == 6)
+	{
+		return 6;
+	}
+
+	return 7;
 }
 
 FString UVRKitchenGameSessionComponent::GetOrderStageText() const
@@ -523,12 +537,14 @@ FString UVRKitchenGameSessionComponent::GetOrderStageText() const
 	case 1:
 		return TEXT("基础汉堡训练");
 	case 2:
-		return TEXT("沙拉切配");
+		return TEXT("牛排煎制");
 	case 3:
-		return TEXT("生菜汉堡进阶");
+		return TEXT("沙拉切配");
 	case 4:
-		return TEXT("番茄切配");
+		return TEXT("生菜汉堡进阶");
 	case 5:
+		return TEXT("番茄切配");
+	case 6:
 		return TEXT("厚肉煎制");
 	default:
 		return TEXT("豪华双肉挑战");
@@ -585,12 +601,14 @@ FString UVRKitchenGameSessionComponent::GetNextGoalText() const
 	case 1:
 		return FString::Printf(TEXT("%s；先稳定完成 2 单经典汉堡"), *ScoreGoal);
 	case 2:
-		return FString::Printf(TEXT("%s；切生菜和番茄做田园沙拉"), *ScoreGoal);
+		return FString::Printf(TEXT("%s；用煎锅和灶台做香煎牛排"), *ScoreGoal);
 	case 3:
-		return FString::Printf(TEXT("%s；把切好的生菜加入汉堡"), *ScoreGoal);
+		return FString::Printf(TEXT("%s；切生菜和番茄做田园沙拉"), *ScoreGoal);
 	case 4:
-		return FString::Printf(TEXT("%s；切番茄，注意不要换顺序"), *ScoreGoal);
+		return FString::Printf(TEXT("%s；把切好的生菜加入汉堡"), *ScoreGoal);
 	case 5:
+		return FString::Printf(TEXT("%s；切番茄，注意不要换顺序"), *ScoreGoal);
+	case 6:
 		return FString::Printf(TEXT("%s；煎熟牛肉再提交厚肉堡"), *ScoreGoal);
 	default:
 		return FString::Printf(TEXT("%s；完成豪华双肉堡冲三星"), *ScoreGoal);
@@ -625,12 +643,14 @@ FString UVRKitchenGameSessionComponent::GetTutorialHintText() const
 	case 1:
 		return Prefix + TEXT("经典汉堡：底部面包 + 熟肉饼 + 顶部面包。");
 	case 2:
-		return Prefix + TEXT("田园沙拉：切好生菜和番茄后直接叠盘出餐，不需要煎锅。");
+		return Prefix + TEXT("香煎牛排：把生牛肉放进煎锅，锅在灶台上加热到熟牛肉后再出餐。");
 	case 3:
-		return Prefix + TEXT("生菜汉堡：先切生菜，再放到熟肉饼上方。");
+		return Prefix + TEXT("田园沙拉：切好生菜和番茄后直接叠盘出餐，不需要煎锅。");
 	case 4:
-		return Prefix + TEXT("番茄汉堡：先切番茄，叠盘顺序仍然严格。");
+		return Prefix + TEXT("生菜汉堡：先切生菜，再放到熟肉饼上方。");
 	case 5:
+		return Prefix + TEXT("番茄汉堡：先切番茄，叠盘顺序仍然严格。");
+	case 6:
 		return Prefix + TEXT("厚肉生菜堡：使用熟牛肉，不要提交生肉或烧焦肉。");
 	default:
 		return Prefix + TEXT("豪华双肉堡：肉饼、生菜、熟牛肉、番茄都要按订单顺序。");
