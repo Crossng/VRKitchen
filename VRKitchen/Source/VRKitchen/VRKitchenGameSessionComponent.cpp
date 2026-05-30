@@ -608,14 +608,20 @@ namespace
 			*Step.RecipeCard.AssemblyText);
 	}
 
+	FString BuildKitchenStationGuideText()
+	{
+		return TEXT("厨房工位导览: 面包台拿底部面包和顶部面包；蔬菜区拿生菜和番茄；切菜板把蔬菜变成切好的生菜/番茄；调味区拿沙拉酱；煎锅/灶台把生肉饼或生牛肉煎熟；装盘区把食材按订单顺序放到盘子上；出餐区提交整盘订单；清理区丢弃错误或多余食材。");
+	}
+
 	FString BuildOrderBoardDetailsText(const FDemoMenuStep& Step)
 	{
 		return FString::Printf(
-			TEXT("%s\n推荐步骤: %s\n%s\n%s\n%s\n%s\n阶段目标: %s"),
+			TEXT("%s\n推荐步骤: %s\n%s\n%s\n%s\n%s\n%s\n阶段目标: %s"),
 			*BuildRecipeCardText(Step),
 			*Step.ActionStepText,
 			*Step.StationRouteText,
 			*Step.StationOutcomeText,
+			*BuildKitchenStationGuideText(),
 			*BuildPlateAssemblyGuideText(Step),
 			*Step.PreSubmitChecklistText,
 			*Step.NextGoalText);
@@ -1276,6 +1282,11 @@ FString UVRKitchenGameSessionComponent::GetCurrentStationOutcomeText() const
 	return GetDemoMenuStepForProgress(CorrectOrders).StationOutcomeText;
 }
 
+FString UVRKitchenGameSessionComponent::GetKitchenStationGuideText() const
+{
+	return BuildKitchenStationGuideText();
+}
+
 FString UVRKitchenGameSessionComponent::GetCurrentDishTypeText() const
 {
 	return GetDemoMenuStepForProgress(CorrectOrders).RecipeCard.DishTypeText;
@@ -1384,7 +1395,7 @@ FString UVRKitchenGameSessionComponent::GetFailureRecoveryText() const
 FString UVRKitchenGameSessionComponent::GetPlayerObjectiveText() const
 {
 	return FString::Printf(
-		TEXT("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s"),
+		TEXT("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s"),
 		*GetMenuProgressText(),
 		*GetStageCoachingText(),
 		*GetCurrentRecipeCardText(),
@@ -1392,6 +1403,7 @@ FString UVRKitchenGameSessionComponent::GetPlayerObjectiveText() const
 		*GetCurrentActionStepText(),
 		*GetCurrentStationRouteText(),
 		*GetCurrentStationOutcomeText(),
+		*GetKitchenStationGuideText(),
 		*GetCurrentPlateAssemblyGuideText(),
 		*GetCurrentPreSubmitChecklistText(),
 		*GetFailureRecoveryText());
@@ -1582,10 +1594,11 @@ FString UVRKitchenGameSessionComponent::BuildStatusText() const
 FString UVRKitchenGameSessionComponent::BuildTutorialText() const
 {
 	return FString::Printf(
-		TEXT("玩法提示\n%s\n%s\n%s\n%s\n%s\n步骤: 看订单 -> 按工位路线处理食材 -> 在盘子上按顺序叠好 -> 整盘出餐\n连续正确 3 单有奖励"),
+		TEXT("玩法提示\n%s\n%s\n%s\n%s\n%s\n%s\n步骤: 看订单 -> 按工位路线处理食材 -> 在盘子上按顺序叠好 -> 整盘出餐\n连续正确 3 单有奖励"),
 		*GetCurrentRequiredIngredientsText(),
 		*GetCurrentStationRouteText(),
 		*GetCurrentStationOutcomeText(),
+		*GetKitchenStationGuideText(),
 		*GetCurrentPlateAssemblyGuideText(),
 		*GetTutorialHintText());
 }

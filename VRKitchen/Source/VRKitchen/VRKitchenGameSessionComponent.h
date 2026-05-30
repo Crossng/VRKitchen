@@ -178,6 +178,9 @@ public:
 	FString GetCurrentStationOutcomeText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetKitchenStationGuideText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	FString GetCurrentDishTypeText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")

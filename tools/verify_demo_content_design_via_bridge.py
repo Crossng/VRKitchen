@@ -280,6 +280,15 @@ def assert_menu_route_health(session, context):
     require_text_contains(report, "沙拉与套餐盘装规则", f"{context} menu health report")
 
 
+def assert_kitchen_station_guide(session, context):
+    guide = session.get_kitchen_station_guide_text()
+    for fragment in ["厨房工位导览", "面包台", "蔬菜区", "切菜板", "调味区", "煎锅/灶台", "装盘区", "出餐区", "清理区"]:
+        require_text_contains(guide, fragment, f"{context} station guide")
+        require_text_contains(session.get_player_objective_text(), fragment, f"{context} objective station guide")
+        require_text_contains(session.get_current_order_board_text(), fragment, f"{context} order board station guide")
+        require_text_contains(session.get_tutorial_text(), fragment, f"{context} tutorial station guide")
+
+
 def assert_stage_coaching(session, orders_until_next, unlock_fragment, preview_fragment, path_fragment, context):
     require(session.get_correct_orders_until_next_stage() == orders_until_next, f"{context}: expected {orders_until_next} orders until next stage, got {session.get_correct_orders_until_next_stage()}")
     require_text_contains(session.get_current_stage_unlock_text(), unlock_fragment, f"{context} unlock text")
@@ -307,6 +316,7 @@ def assert_player_objective(session, ingredients_fragment, action_fragment, stat
     require_text_contains(session.get_current_order_quick_card_text(), recovery_fragment, f"{context} quick card recovery")
     require_text_contains(session.get_current_plate_assembly_guide_text(), "盘", f"{context} plate assembly guide")
     require_text_contains(session.get_current_order_quick_card_text(), "盘子", f"{context} quick card plating")
+    assert_kitchen_station_guide(session, context)
 
 
 def assert_recipe_card(session, dish_type_fragment, process_fragment, assembly_fragment, warning_fragment, context):

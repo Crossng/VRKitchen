@@ -54,6 +54,9 @@ if order_manager and delivery_area:
         require_text_contains(report, "沙拉与套餐盘装规则", "menu health report")
         require_text_contains(session.get_menu_route_text(), "田园沙拉", "menu route")
         require_text_contains(session.get_demo_menu_route_quality_report_text(), "盘装", "menu health report plating rule")
+        station_guide = session.get_kitchen_station_guide_text()
+        for fragment in ["厨房工位导览", "面包台", "蔬菜区", "切菜板", "调味区", "煎锅/灶台", "装盘区", "出餐区", "清理区"]:
+            require_text_contains(station_guide, fragment, "kitchen station guide")
         print(report)
 
 if failures:
