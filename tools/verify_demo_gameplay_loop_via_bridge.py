@@ -244,6 +244,10 @@ def assert_recipe_card(session, dish_type_fragment, process_fragment, assembly_f
     require_text_contains(session.get_player_objective_text(), dish_type_fragment, f"{context} objective recipe dish type")
     require_text_contains(session.get_tutorial_text(), dish_type_fragment, f"{context} tutorial recipe dish type")
     require_text_contains(session.get_tutorial_text(), warning_fragment, f"{context} tutorial recipe warning")
+    require_text_contains(session.get_current_order_board_text(), dish_type_fragment, f"{context} order board dish type")
+    require_text_contains(session.get_current_order_board_text(), process_fragment, f"{context} order board process")
+    require_text_contains(session.get_current_order_board_text(), assembly_fragment, f"{context} order board assembly")
+    require_text_contains(session.get_current_order_board_text(), warning_fragment, f"{context} order board warning")
 
 
 def assert_performance_summary(session, attempts, accuracy, accuracy_fragment, mistake_fragment, focus_fragment, context):

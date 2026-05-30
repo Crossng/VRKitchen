@@ -241,6 +241,28 @@ namespace
 		return GetDemoMenuStepForProgress(CorrectOrders).OrderSpec;
 	}
 
+	FString BuildRecipeCardText(const FDemoMenuStep& Step)
+	{
+		return FString::Printf(
+			TEXT("配方卡: %s\n所需食材: %s\n%s\n%s\n%s\n%s"),
+			*Step.OrderSpec.OrderName,
+			*Step.OrderSpec.DisplayDetails,
+			*Step.RecipeCard.DishTypeText,
+			*Step.RecipeCard.ProcessingText,
+			*Step.RecipeCard.AssemblyText,
+			*Step.RecipeCard.CommonMistakeText);
+	}
+
+	FString BuildOrderBoardDetailsText(const FDemoMenuStep& Step)
+	{
+		return FString::Printf(
+			TEXT("%s\n推荐步骤: %s\n%s\n阶段目标: %s"),
+			*BuildRecipeCardText(Step),
+			*Step.ActionStepText,
+			*Step.StationRouteText,
+			*Step.NextGoalText);
+	}
+
 	void SetOrderNameProperty(FProperty* Property, void* Container, const FString& Value)
 	{
 		if (FNameProperty* NameProperty = CastField<FNameProperty>(Property))
@@ -369,7 +391,7 @@ namespace
 		return 0;
 	}
 
-	void CallTabletRefresh(AActor* OrderManager, const FDemoOrderSpec& OrderSpec)
+	void CallTabletRefresh(AActor* OrderManager, const FDemoMenuStep& Step)
 	{
 		if (!OrderManager || !OrderManager->GetWorld())
 		{
@@ -390,6 +412,8 @@ namespace
 			return;
 		}
 
+		const FDemoOrderSpec& OrderSpec = Step.OrderSpec;
+		const FString BoardDetailsText = BuildOrderBoardDetailsText(Step);
 		uint8* Params = static_cast<uint8*>(FMemory_Alloca(RefreshFunction->ParmsSize));
 		FMemory::Memzero(Params, RefreshFunction->ParmsSize);
 		for (TFieldIterator<FProperty> It(RefreshFunction); It && It->HasAnyPropertyFlags(CPF_Parm); ++It)
@@ -418,11 +442,11 @@ namespace
 			{
 				if (FStrProperty* StringProperty = CastField<FStrProperty>(*It))
 				{
-					StringProperty->SetPropertyValue_InContainer(Params, OrderSpec.DisplayDetails);
+					StringProperty->SetPropertyValue_InContainer(Params, BoardDetailsText);
 				}
 				else if (FTextProperty* TextProperty = CastField<FTextProperty>(*It))
 				{
-					TextProperty->SetPropertyValue_InContainer(Params, FText::FromString(OrderSpec.DisplayDetails));
+					TextProperty->SetPropertyValue_InContainer(Params, FText::FromString(BoardDetailsText));
 				}
 			}
 			else if (It->GetFName() == FName(TEXT("CurrentScore")))
@@ -606,11 +630,12 @@ void UVRKitchenGameSessionComponent::ApplyDemoOrderForProgress()
 		return;
 	}
 
-	const FDemoOrderSpec OrderSpec = GetDemoOrderForProgress(CorrectOrders);
+	const FDemoMenuStep& Step = GetDemoMenuStepForProgress(CorrectOrders);
+	const FDemoOrderSpec& OrderSpec = Step.OrderSpec;
 	if (SetCurrentOrder(OrderManager, OrderSpec))
 	{
-		SetManagerTextProperty(OrderManager, TEXT("TempIngredientsText"), OrderSpec.DisplayDetails);
-		CallTabletRefresh(OrderManager, OrderSpec);
+		SetManagerTextProperty(OrderManager, TEXT("TempIngredientsText"), BuildOrderBoardDetailsText(Step));
+		CallTabletRefresh(OrderManager, Step);
 	}
 }
 
@@ -900,15 +925,12 @@ FString UVRKitchenGameSessionComponent::GetCurrentRecipeWarningText() const
 
 FString UVRKitchenGameSessionComponent::GetCurrentRecipeCardText() const
 {
-	const FDemoMenuStep& Step = GetDemoMenuStepForProgress(CorrectOrders);
-	return FString::Printf(
-		TEXT("配方卡: %s\n所需食材: %s\n%s\n%s\n%s\n%s"),
-		*Step.OrderSpec.OrderName,
-		*Step.OrderSpec.DisplayDetails,
-		*Step.RecipeCard.DishTypeText,
-		*Step.RecipeCard.ProcessingText,
-		*Step.RecipeCard.AssemblyText,
-		*Step.RecipeCard.CommonMistakeText);
+	return BuildRecipeCardText(GetDemoMenuStepForProgress(CorrectOrders));
+}
+
+FString UVRKitchenGameSessionComponent::GetCurrentOrderBoardText() const
+{
+	return BuildOrderBoardDetailsText(GetDemoMenuStepForProgress(CorrectOrders));
 }
 
 FString UVRKitchenGameSessionComponent::GetFailureRecoveryText() const
@@ -1095,7 +1117,7 @@ void UVRKitchenGameSessionComponent::EnsureTextComponents()
 		TutorialTextComponent->SetWorldSize(14.0f);
 		TutorialTextComponent->SetTextRenderColor(FColor::White);
 		TutorialTextComponent->SetRelativeLocation(FVector(0.0f, -120.0f, 210.0f));
-		TutorialTextComponent->SetText(FText::FromString(BuildTutorialText()));
+		TutorialTextComponent->SetText(FText::FromString(GetTutorialText()));
 		if (RootComponent)
 		{
 			TutorialTextComponent->SetupAttachment(RootComponent);
@@ -1114,7 +1136,7 @@ void UVRKitchenGameSessionComponent::UpdateStatusText()
 	}
 	if (TutorialTextComponent)
 	{
-		TutorialTextComponent->SetText(FText::FromString(BuildTutorialText()));
+		TutorialTextComponent->SetText(FText::FromString(GetTutorialText()));
 	}
 }
 

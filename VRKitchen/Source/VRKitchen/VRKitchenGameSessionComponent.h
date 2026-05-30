@@ -184,6 +184,9 @@ public:
 	FString GetCurrentRecipeCardText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetCurrentOrderBoardText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	FString GetFailureRecoveryText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
