@@ -19,6 +19,14 @@ namespace
 		FString DisplayDetails;
 	};
 
+	struct FDemoRecipeCardSpec
+	{
+		FString DishTypeText;
+		FString ProcessingText;
+		FString AssemblyText;
+		FString CommonMistakeText;
+	};
+
 	struct FDemoMenuStep
 	{
 		int32 FirstCorrectOrderCount = 0;
@@ -27,6 +35,7 @@ namespace
 		FString TutorialText;
 		FString ActionStepText;
 		FString StationRouteText;
+		FDemoRecipeCardSpec RecipeCard;
 		FDemoOrderSpec OrderSpec;
 	};
 
@@ -41,6 +50,12 @@ namespace
 				TEXT("先取底部面包，再煎熟肉饼，最后盖上顶部面包后出餐。"),
 				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 装盘区 -> 出餐区。"),
 				{
+					TEXT("菜品类型: 汉堡 / 热菜"),
+					TEXT("处理要求: 肉饼必须用煎锅和灶台煎熟，面包不需要处理"),
+					TEXT("叠盘顺序: 底部面包 -> 熟肉饼 -> 顶部面包"),
+					TEXT("常见错误: 生肉饼不能提交，顶部面包不能放在肉饼下面"),
+				},
+				{
 					TEXT("经典汉堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Top_Bun")},
 					TEXT("底部面包, 熟肉饼, 顶部面包"),
@@ -53,6 +68,12 @@ namespace
 				TEXT("香煎牛排：把生牛肉放进煎锅，锅在灶台上加热到熟牛肉后再出餐。"),
 				TEXT("把生牛肉放进煎锅，确认锅在灶台上，变成熟牛肉后立刻装盘。"),
 				TEXT("工位路线: 生牛肉区 -> 煎锅/灶台 -> 装盘区 -> 出餐区。"),
+				{
+					TEXT("菜品类型: 热菜 / 单品"),
+					TEXT("处理要求: 生牛肉必须在煎锅/灶台上煎成熟牛肉"),
+					TEXT("叠盘顺序: 熟牛肉单独装盘"),
+					TEXT("常见错误: 生牛肉不能提交，熟牛肉继续加热会烧焦"),
+				},
 				{
 					TEXT("香煎牛排"),
 					{TEXT("Cooked_Meat")},
@@ -67,6 +88,12 @@ namespace
 				TEXT("先切生菜，再切番茄，按生菜到番茄的顺序放盘。"),
 				TEXT("工位路线: 蔬菜区 -> 切菜板 -> 装盘区 -> 出餐区。冷菜，不用煎锅。"),
 				{
+					TEXT("菜品类型: 冷菜 / 沙拉"),
+					TEXT("处理要求: 生菜和番茄都要先在切菜板切好，不用煎锅"),
+					TEXT("叠盘顺序: 切好的生菜 -> 切好的番茄"),
+					TEXT("常见错误: 未切蔬菜不能提交，沙拉顺序不能颠倒"),
+				},
+				{
 					TEXT("田园沙拉"),
 					{TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
 					TEXT("切好的生菜, 切好的番茄"),
@@ -79,6 +106,12 @@ namespace
 				TEXT("生菜汉堡：先切生菜，再放到熟肉饼上方。"),
 				TEXT("先做底部面包和熟肉饼，再加入切好的生菜，最后盖顶部面包。"),
 				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区。"),
+				{
+					TEXT("菜品类型: 汉堡 / 热菜加蔬菜"),
+					TEXT("处理要求: 肉饼要煎熟，生菜要切好"),
+					TEXT("叠盘顺序: 底部面包 -> 熟肉饼 -> 切好的生菜 -> 顶部面包"),
+					TEXT("常见错误: 生菜未切或把生菜放到肉饼下面都会失败"),
+				},
 				{
 					TEXT("生菜汉堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
@@ -93,6 +126,12 @@ namespace
 				TEXT("先做底部面包和熟肉饼，再加入切好的番茄，最后盖顶部面包。"),
 				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区。"),
 				{
+					TEXT("菜品类型: 汉堡 / 热菜加蔬菜"),
+					TEXT("处理要求: 肉饼要煎熟，番茄要切好"),
+					TEXT("叠盘顺序: 底部面包 -> 熟肉饼 -> 切好的番茄 -> 顶部面包"),
+					TEXT("常见错误: 番茄未切或把顶部面包提前放下都会失败"),
+				},
+				{
 					TEXT("番茄汉堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
 					TEXT("底部面包, 熟肉饼, 切好的番茄, 顶部面包"),
@@ -105,6 +144,12 @@ namespace
 				TEXT("厚肉生菜堡：使用熟牛肉，不要提交生肉或烧焦肉。"),
 				TEXT("把牛肉煎熟，和切好的生菜夹进面包；不要让牛肉继续受热烧焦。"),
 				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区。熟牛肉要及时离火。"),
+				{
+					TEXT("菜品类型: 汉堡 / 厚肉热菜"),
+					TEXT("处理要求: 牛肉要煎成熟牛肉，生菜要切好"),
+					TEXT("叠盘顺序: 底部面包 -> 熟牛肉 -> 切好的生菜 -> 顶部面包"),
+					TEXT("常见错误: 生牛肉和烧焦牛肉不能提交，熟牛肉要及时离火"),
+				},
 				{
 					TEXT("厚肉生菜堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Meat"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
@@ -119,6 +164,12 @@ namespace
 				TEXT("按顺序放底部面包、熟肉饼、生菜、熟牛肉、番茄、顶部面包。"),
 				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区。双肉和蔬菜都要按层叠顺序。"),
 				{
+					TEXT("菜品类型: 汉堡 / 双肉挑战"),
+					TEXT("处理要求: 肉饼和牛肉都要煎熟，生菜和番茄都要切好"),
+					TEXT("叠盘顺序: 底部面包 -> 熟肉饼 -> 切好的生菜 -> 熟牛肉 -> 切好的番茄 -> 顶部面包"),
+					TEXT("常见错误: 双肉和蔬菜层级不能跳层或调换顺序"),
+				},
+				{
 					TEXT("豪华双肉堡"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Cooked_Meat"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
 					TEXT("底部面包, 熟肉饼, 切好的生菜, 熟牛肉, 切好的番茄, 顶部面包"),
@@ -132,6 +183,12 @@ namespace
 				TEXT("先煎熟牛肉放盘，再补切好的生菜和切好的番茄。"),
 				TEXT("工位路线: 生牛肉区 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区。先热菜，再冷菜配菜。"),
 				{
+					TEXT("菜品类型: 套餐 / 热菜加冷菜"),
+					TEXT("处理要求: 牛肉要煎熟，生菜和番茄要切好"),
+					TEXT("叠盘顺序: 熟牛肉 -> 切好的生菜 -> 切好的番茄"),
+					TEXT("常见错误: 套餐先热菜后冷菜，缺少配菜会失败"),
+				},
+				{
 					TEXT("牛排沙拉套餐"),
 					{TEXT("Cooked_Meat"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
 					TEXT("熟牛肉, 切好的生菜, 切好的番茄"),
@@ -144,6 +201,12 @@ namespace
 				TEXT("经典汉堡沙拉套餐：先完成经典汉堡，再补上沙拉配菜。"),
 				TEXT("先叠完整经典汉堡，再按生菜、番茄顺序补上沙拉配菜。"),
 				TEXT("工位路线: 面包台 -> 煎锅/灶台 -> 切菜板 -> 装盘区 -> 出餐区。先完成汉堡，再补冷菜配菜。"),
+				{
+					TEXT("菜品类型: 套餐 / 汉堡加沙拉"),
+					TEXT("处理要求: 肉饼要煎熟，生菜和番茄要切好"),
+					TEXT("叠盘顺序: 底部面包 -> 熟肉饼 -> 顶部面包 -> 切好的生菜 -> 切好的番茄"),
+					TEXT("常见错误: 先完成经典汉堡，再补沙拉配菜，不能把蔬菜夹进汉堡中间"),
+				},
 				{
 					TEXT("经典汉堡沙拉套餐"),
 					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Top_Bun"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
@@ -815,6 +878,39 @@ FString UVRKitchenGameSessionComponent::GetCurrentStationRouteText() const
 	return GetDemoMenuStepForProgress(CorrectOrders).StationRouteText;
 }
 
+FString UVRKitchenGameSessionComponent::GetCurrentDishTypeText() const
+{
+	return GetDemoMenuStepForProgress(CorrectOrders).RecipeCard.DishTypeText;
+}
+
+FString UVRKitchenGameSessionComponent::GetCurrentRecipeProcessText() const
+{
+	return GetDemoMenuStepForProgress(CorrectOrders).RecipeCard.ProcessingText;
+}
+
+FString UVRKitchenGameSessionComponent::GetCurrentRecipeAssemblyText() const
+{
+	return GetDemoMenuStepForProgress(CorrectOrders).RecipeCard.AssemblyText;
+}
+
+FString UVRKitchenGameSessionComponent::GetCurrentRecipeWarningText() const
+{
+	return GetDemoMenuStepForProgress(CorrectOrders).RecipeCard.CommonMistakeText;
+}
+
+FString UVRKitchenGameSessionComponent::GetCurrentRecipeCardText() const
+{
+	const FDemoMenuStep& Step = GetDemoMenuStepForProgress(CorrectOrders);
+	return FString::Printf(
+		TEXT("配方卡: %s\n所需食材: %s\n%s\n%s\n%s\n%s"),
+		*Step.OrderSpec.OrderName,
+		*Step.OrderSpec.DisplayDetails,
+		*Step.RecipeCard.DishTypeText,
+		*Step.RecipeCard.ProcessingText,
+		*Step.RecipeCard.AssemblyText,
+		*Step.RecipeCard.CommonMistakeText);
+}
+
 FString UVRKitchenGameSessionComponent::GetFailureRecoveryText() const
 {
 	if (LastFeedbackMessage.IsEmpty() || LastFeedbackMessage.Contains(TEXT("出餐成功")) || LastFeedbackMessage.Contains(TEXT("目标:")) || LastFeedbackMessage.Contains(TEXT("任务完成")))
@@ -868,9 +964,10 @@ FString UVRKitchenGameSessionComponent::GetFailureRecoveryText() const
 FString UVRKitchenGameSessionComponent::GetPlayerObjectiveText() const
 {
 	return FString::Printf(
-		TEXT("%s\n%s\n%s\n%s\n%s\n%s"),
+		TEXT("%s\n%s\n%s\n%s\n%s\n%s\n%s"),
 		*GetMenuProgressText(),
 		*GetStageCoachingText(),
+		*GetCurrentRecipeCardText(),
 		*GetCurrentRequiredIngredientsText(),
 		*GetCurrentActionStepText(),
 		*GetCurrentStationRouteText(),

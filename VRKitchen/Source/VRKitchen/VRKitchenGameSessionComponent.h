@@ -169,6 +169,21 @@ public:
 	FString GetCurrentStationRouteText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetCurrentDishTypeText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetCurrentRecipeProcessText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetCurrentRecipeAssemblyText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetCurrentRecipeWarningText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetCurrentRecipeCardText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	FString GetFailureRecoveryText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
