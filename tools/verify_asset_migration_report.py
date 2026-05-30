@@ -3,7 +3,8 @@
 
 The Unreal migration command can run in dry-run mode before any real Content
 move. This verifier makes that dry-run auditable: a dry-run report must contain
-only planned or skipped work, no errors, and the expected migration phases.
+only planned or skipped work, no errors, the expected migration phases, and the
+expected move records for each selected phase.
 """
 
 from __future__ import annotations
@@ -25,6 +26,25 @@ DEFAULT_EXPECTED_PHASES = (
 
 DRY_RUN_ALLOWED_STATUSES = {"plan", "skip"}
 
+PHASE_GROUP_ALIASES = {
+    "phase-2": (
+        "phase-2-dev-folders",
+        "phase-2-prototypes",
+    ),
+    "phase-3": (
+        "phase-3-external",
+        "phase-3-legacy",
+        "phase-3-root-legacy",
+        "phase-3-root-external",
+    ),
+    "phase-4": (
+        "phase-4-root-gameplay",
+        "phase-4-food-blueprints",
+        "phase-4-interaction-blueprints",
+        "phase-4-legacy-duplicates",
+    ),
+}
+
 EXPECTED_MOVES_BY_PHASE = {
     "phase-2-dev-folders": (
         ("move-directory", "/Game/Collections", "/Game/_Dev/Collections"),
@@ -32,6 +52,60 @@ EXPECTED_MOVES_BY_PHASE = {
     ),
     "phase-2-prototypes": (
         ("move-directory", "/Game/food_test", "/Game/_Dev/Prototypes/food_test"),
+    ),
+    "phase-3-external": (
+        ("move-directory", "/Game/Fast_Food_Restaurant", "/Game/_External/Marketplace/Fast_Food_Restaurant"),
+        ("move-directory", "/Game/SM_PanStove_01.fbm", "/Game/_External/TemplateSource/PanStove/SM_PanStove_01.fbm"),
+        ("move-directory", "/Game/SM_WallMonitor_01.fbm", "/Game/_External/TemplateSource/WallMonitor/SM_WallMonitor_01.fbm"),
+        ("move-directory", "/Game/SM_WallMonitor_01_fbm", "/Game/_External/TemplateSource/WallMonitor/SM_WallMonitor_01_fbm"),
+    ),
+    "phase-3-legacy": (
+        ("move-directory", "/Game/Characters", "/Game/_Legacy/Characters"),
+        ("move-directory", "/Game/FPWeapon", "/Game/_Legacy/FPWeapon"),
+        ("move-directory", "/Game/LevelPrototyping", "/Game/_Legacy/LevelPrototyping"),
+        ("move-directory", "/Game/Maps", "/Game/_Legacy/Maps/ImportedMaps"),
+        ("move-directory", "/Game/StarterContent", "/Game/_Legacy/StarterContent"),
+        ("move-directory", "/Game/VRSpectator", "/Game/_Legacy/VRSpectator"),
+    ),
+    "phase-3-root-legacy": (
+        ("move-asset", "/Game/Kitchen_Demo_Map", "/Game/_Legacy/Maps/Kitchen_Demo_Map"),
+        ("move-asset", "/Game/Kitchen_Demo_Map_BuiltData", "/Game/_Legacy/Maps/Kitchen_Demo_Map_BuiltData"),
+    ),
+    "phase-3-root-external": (
+        ("move-asset", "/Game/SM_PanStove_01", "/Game/_External/TemplateSource/PanStove/SM_PanStove_01"),
+        ("move-asset", "/Game/texture_pbr_20250901", "/Game/_External/TemplateSource/PanStove/Textures/texture_pbr_20250901"),
+        ("move-asset", "/Game/texture_pbr_20250901_metallic", "/Game/_External/TemplateSource/PanStove/Textures/texture_pbr_20250901_metallic"),
+        ("move-asset", "/Game/texture_pbr_20250901_normal", "/Game/_External/TemplateSource/PanStove/Textures/texture_pbr_20250901_normal"),
+        ("move-asset", "/Game/texture_pbr_20250901_roughness", "/Game/_External/TemplateSource/PanStove/Textures/texture_pbr_20250901_roughness"),
+    ),
+    "phase-4-root-gameplay": (
+        ("move-asset", "/Game/BP_Pan", "/Game/_Project/Gameplay/Cooking/BP_Pan"),
+        ("move-asset", "/Game/BP_Stove", "/Game/_Project/Gameplay/Cooking/BP_Stove"),
+        ("move-asset", "/Game/BP_PickFood", "/Game/_Project/Gameplay/Food/BP_PickFood"),
+        ("move-asset", "/Game/BP_Tomato", "/Game/_Project/Gameplay/Food/BP_Tomato"),
+        ("move-asset", "/Game/BP_Plate", "/Game/_Project/Gameplay/Delivery/BP_Plate"),
+    ),
+    "phase-4-food-blueprints": (
+        ("move-asset", "/Game/Blueprints/BP_BottomBun", "/Game/_Project/Gameplay/Food/BP_BottomBun"),
+        ("move-asset", "/Game/Blueprints/BP_ChoppedLettuce", "/Game/_Project/Gameplay/Food/BP_ChoppedLettuce"),
+        ("move-asset", "/Game/Blueprints/BP_ChoppedTomato", "/Game/_Project/Gameplay/Food/BP_ChoppedTomato"),
+        ("move-asset", "/Game/Blueprints/BP_FoodSpawner", "/Game/_Project/Gameplay/Food/BP_FoodSpawner"),
+        ("move-asset", "/Game/Blueprints/BP_Lettuce", "/Game/_Project/Gameplay/Food/BP_Lettuce"),
+        ("move-asset", "/Game/Blueprints/BP_Meat", "/Game/_Project/Gameplay/Food/BP_Meat"),
+        ("move-asset", "/Game/Blueprints/BP_Patty", "/Game/_Project/Gameplay/Food/BP_Patty"),
+        ("move-asset", "/Game/Blueprints/BP_TopBun", "/Game/_Project/Gameplay/Food/BP_TopBun"),
+        ("move-asset", "/Game/Blueprints/BP_row_meat", "/Game/_Project/Gameplay/Food/BP_RowMeat"),
+    ),
+    "phase-4-interaction-blueprints": (
+        ("move-asset", "/Game/Blueprints/BP_Bin", "/Game/_Project/Gameplay/Interaction/BP_Bin"),
+        ("move-asset", "/Game/Blueprints/BP_CuttingBoard", "/Game/_Project/Gameplay/Interaction/BP_CuttingBoard"),
+        ("move-asset", "/Game/Blueprints/BP_Knife", "/Game/_Project/Gameplay/Interaction/BP_Knife"),
+        ("move-asset", "/Game/Blueprints/BP_Sponge", "/Game/_Project/Gameplay/Interaction/BP_Sponge"),
+    ),
+    "phase-4-legacy-duplicates": (
+        ("move-asset", "/Game/Blueprints/BP_OrderTablet", "/Game/_Legacy/Blueprints/BP_OrderTablet"),
+        ("move-asset", "/Game/Blueprints/ST_Recipe", "/Game/_Legacy/Blueprints/ST_Recipe"),
+        ("move-asset", "/Game/Blueprints/WBP_Orderscreen", "/Game/_Legacy/Blueprints/WBP_Orderscreen"),
     ),
 }
 
@@ -48,6 +122,20 @@ def add_result(results: list[Check], level: str, message: str) -> None:
 
 def parse_csv(value: str) -> tuple[str, ...]:
     return tuple(item.strip() for item in value.split(",") if item.strip())
+
+
+def expand_phase_aliases(phases: tuple[str, ...]) -> tuple[str, ...]:
+    expanded: list[str] = []
+    saw_group_alias = False
+    for phase in phases:
+        if phase in PHASE_GROUP_ALIASES:
+            saw_group_alias = True
+            expanded.extend(PHASE_GROUP_ALIASES[phase])
+        else:
+            expanded.append(phase)
+    if saw_group_alias and "phase-1" not in expanded:
+        expanded.insert(0, "phase-1")
+    return tuple(dict.fromkeys(expanded))
 
 
 def load_report(path: Path, results: list[Check]) -> dict[str, Any] | None:
@@ -172,6 +260,12 @@ def verify_records(data: dict[str, Any], require_dry_run: bool, expected_phases:
         add_result(results, "INFO", "Expected move checks are disabled")
         return
 
+    checked_phases = [phase for phase in expected_phases if phase in EXPECTED_MOVES_BY_PHASE]
+    if checked_phases:
+        add_result(results, "INFO", "Checking expected move records for phases: " + ", ".join(checked_phases))
+    else:
+        add_result(results, "INFO", "No expected move records are registered for the selected phases")
+
     for phase in expected_phases:
         for action, source, target in EXPECTED_MOVES_BY_PHASE.get(phase, ()):
             record = matching_record(records, action, source, target)
@@ -210,7 +304,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--expected-phases",
         default=",".join(DEFAULT_EXPECTED_PHASES),
-        help="Comma-separated migration phases expected in the report. Use an empty string to skip phase checks.",
+        help=(
+            "Comma-separated migration phases expected in the report. "
+            "Group aliases phase-2, phase-3, and phase-4 expand to their concrete script phases. "
+            "Use an empty string to skip phase checks."
+        ),
     )
     parser.add_argument(
         "--allow-applied-report",
@@ -229,7 +327,7 @@ def main() -> int:
     args = parse_args()
     results: list[Check] = []
     report_path = args.report.expanduser().resolve()
-    expected_phases = parse_csv(args.expected_phases)
+    expected_phases = expand_phase_aliases(parse_csv(args.expected_phases))
     require_dry_run = not args.allow_applied_report
 
     data = load_report(report_path, results)

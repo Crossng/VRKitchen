@@ -56,6 +56,13 @@ $env:VRKITCHEN_ASSET_MIGRATION_REPORT='C:\Users\hp\Desktop\CrazyKitchen\VRKitche
 
 The migration script defaults to dry-run and does not run Fix Up Redirectors in unattended commandlets. After real asset moves, open Unreal Editor and run Fix Up Redirectors from the Content Browser before validation.
 
+Validate every migration dry-run report before moving real assets. The verifier can check a whole phase alias, such as `phase-3` or `phase-4`, or one concrete script phase:
+
+```powershell
+python tools/verify_asset_migration_report.py --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN_PHASE3.json --expected-phases phase-3
+python tools/verify_asset_migration_report.py --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN_PHASE4.json --expected-phases phase-4
+```
+
 ## What belongs in GitHub
 
 - `VRKitchen/Source/`

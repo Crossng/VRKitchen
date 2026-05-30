@@ -88,6 +88,16 @@ dry-run 报告必须先通过安全门禁，确认报告仍是 `dry_run=true`、
 python C:\Users\hp\Desktop\CrazyKitchen\tools\verify_asset_migration_report.py --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN.json
 ```
 
+后续预演 Phase 3 或 Phase 4 时，不要只检查 JSON 能否打开；必须用 `--expected-phases` 指定本批具体阶段，让脚本核对每一个预期移动动作都已经出现在 dry-run 报告里：
+
+```powershell
+python C:\Users\hp\Desktop\CrazyKitchen\tools\verify_asset_migration_report.py --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN_PHASE3.json --expected-phases phase-3
+
+python C:\Users\hp\Desktop\CrazyKitchen\tools\verify_asset_migration_report.py --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN_PHASE4.json --expected-phases phase-4
+```
+
+`phase-3` 会展开为 `phase-3-external`、`phase-3-legacy`、`phase-3-root-legacy` 和 `phase-3-root-external`；`phase-4` 会展开为 `phase-4-root-gameplay`、`phase-4-food-blueprints`、`phase-4-interaction-blueprints` 和 `phase-4-legacy-duplicates`。如果只预演其中一小批，也可以直接传具体脚本阶段名，例如 `--expected-phases phase-4-food-blueprints`。
+
 真实迁移时把 `VRKITCHEN_ASSET_MIGRATION_DRY_RUN` 改为 `0`。默认保持 `VRKITCHEN_ASSET_MIGRATION_FIXUP=0`，迁移后在 Unreal Editor 中手动执行 Fix Up Redirectors。
 
 ```powershell
