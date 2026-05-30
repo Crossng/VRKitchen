@@ -45,7 +45,7 @@
 - 当前 Demo 地图已补 `BP_FoodSpawner_RawMeat`，生牛肉现在通过 `BP_FoodSpawner` 可重复刷新，用于香煎牛排、厚肉堡和牛排沙拉套餐。
 - 当前 Demo 地图已补 `BP_FoodSpawner_SaladDressing`，沙拉酱现在通过 `BP_SaladDressing` 可重复刷新，用于田园沙拉和两个沙拉套餐。
 - `tools/ensure_demo_raw_patty_spawner_via_bridge.py` 可幂等修复 Demo 地图肉饼刷新点；`tools/ensure_demo_raw_meat_spawner_via_bridge.py` 可幂等修复 Demo 地图生牛肉刷新点；`tools/ensure_salad_dressing_assets_via_bridge.py` 可幂等生成/修复 `BP_SaladDressing` 和沙拉酱刷新点；如果地图回退或被误删，可重新运行对应脚本再运行 Demo 地图内容验证。
-- 资源整理规范已经写入 `VRKitchen_ASSET_ORGANIZATION.md`，第一阶段迁移路线写入 `VRKitchen_ASSET_MIGRATION_PLAN.md`；当前剩余审计为 `7 pass / 24 warn / 0 fail`。
+- 资源整理规范已经写入 `VRKitchen_ASSET_ORGANIZATION.md`，第一阶段迁移路线写入 `VRKitchen_ASSET_MIGRATION_PLAN.md`；当前剩余审计为 `7 pass / 22 warn / 0 fail`。
 - Phase 2 原型资源迁移已执行：`Content/_Dev/Prototypes/food_test` 下已有迁移后的资源本体；旧 `Content/food_test` 仍残留 redirector 和 `.fbx/.png` sidecar 文件，需要在可视化 Unreal Editor 中 Fix Up Redirectors 并人工确认后再清理。
 - 后续迁移使用 `tools/migrate_asset_organization_via_editor.py` 先 dry-run，再小批量执行；命令行默认不执行 Fix Up Redirectors，真实迁移后需要在 Unreal Editor 的 Content Browser 中手动修复重定向器。
 

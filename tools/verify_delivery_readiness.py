@@ -55,6 +55,7 @@ REQUIRED_CODE_REPO_ITEMS = {
     "tools/verify_asset_organization.py": "asset organization audit script",
     "tools/migrate_asset_organization_via_editor.py": "staged asset migration script",
     "tools/verify_asset_migration_report.py": "asset migration dry-run report verifier",
+    "tools/audit_asset_migration_state_via_editor.py": "asset migration state audit script",
     "VRKitchen_ASSET_ORGANIZATION.md": "asset organization guide",
     "VRKitchen/VRKitchen_ASSET_ORGANIZATION.md": "project asset organization guide",
     "VRKitchen_ASSET_MIGRATION_PLAN.md": "asset migration plan",

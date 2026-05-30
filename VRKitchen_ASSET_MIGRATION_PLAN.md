@@ -13,14 +13,17 @@
 - `VRTemplate`、`StarterContent`、`FPWeapon`、`LevelPrototyping`、`VRSpectator` 等应归为 `Content/_Legacy`，但必须先确认引用。
 - `Fast_Food_Restaurant` 与 FBX sidecar 目录应归为 `Content/_External`。
 - `food_test` 原型资源本体已迁移到 `Content/_Dev/Prototypes/food_test`；旧 `Content/food_test` 仍残留 redirector 和 `.fbx/.png` sidecar 文件，必须在可视化 Unreal Editor 中 Fix Up Redirectors 并人工确认后再清理。
-- `Collections`、`Developers` 仍应归为 `Content/_Dev`；下一批先做 dry-run，不直接移动真实资产。
-- 最新资源审计为 `7 pass / 24 warn / 0 fail`，说明结构在变干净，但还没有进入严格完成状态。
+- `Collections`、`Developers` 顶层空目录已通过 Unreal Editor API 清理，目标目录保留在 `Content/_Dev/Collections` 与 `Content/_Dev/Developers`。
+- Phase 3 大目录命令行迁移曾出现半成功状态：部分根目录贴图和 `SM_WallMonitor_01_fbm` 已迁到 `_External`，源路径留下 redirector；`Fast_Food_Restaurant`、`Maps` 与 `Kitchen_Demo_Map` 的大目录/旧地图迁移未完成。后续不要重复一键大目录迁移，应先在可视化 Unreal Editor 中 Fix Up Redirectors，再按小批次处理。
+- 最新资源审计为 `7 pass / 22 warn / 0 fail`，说明结构在变干净，但还没有进入严格完成状态。
 
 ## 已执行内容
 
 - 已通过 `tools/migrate_asset_organization_via_editor.py` 创建目标目录结构。
 - 已对 `phase-2-prototypes` 执行真实迁移，迁移报告为 `VRKitchen_ASSET_MIGRATION_APPLY_PHASE2_PROTOTYPES.json`；报告验证通过，但命令行返回值受 SourceControl 旧路径 `C:/Users/MullerAu` 噪声影响，需以后续验证和报告内容为准。
-- 已把 `phase-2-dev-folders` 确认为下一批低风险 dry-run 目标，真实迁移前不直接改动 `.uasset/.umap`。
+- 已对 `phase-2-dev-folders` 执行 dry-run 和真实整理，顶层 `Content/Collections` 与 `Content/Developers` 空目录已清理，`Content/_Dev/Collections` 与 `Content/_Dev/Developers` 保留为目标结构。
+- 已对 Phase 3 执行 dry-run 并生成 `VRKitchen_ASSET_MIGRATION_DRYRUN_PHASE3_CURRENT.json`，报告验证通过；随后真实执行生成 `VRKitchen_ASSET_MIGRATION_APPLY_PHASE3_CURRENT.json`，该报告包含失败项，必须视为半成功迁移记录而不是完成记录。
+- 已新增 `tools/audit_asset_migration_state_via_editor.py`，用于只读检查半成功迁移后的源/目标资产状态、redirector 状态和待人工处理项。
 - 已生成 `VRKitchen_ASSET_AUDIT.md` 和 `VRKitchen_ASSET_MIGRATION_APPLY_PHASE1_2.json` 作为完整工程本地审计记录；这些报告不需要进入 GitHub。
 - 命令行迁移脚本默认不执行 Fix Up Redirectors，因为 UE 5.5.4 的 AssetTools 在 unattended commandlet 中可能触发断言；每批真实资产迁移后，应在可视化 Unreal Editor 的 Content Browser 中手动执行 Fix Up Redirectors，再跑验证。
 
@@ -46,6 +49,7 @@
 - 迁移 `Fast_Food_Restaurant`、FBX sidecar、导入源文件到 `Content/_External`。
 - 旧 `Kitchen_Demo_Map` 进入 `Content/_Legacy/Maps` 或确认无用后删除。
 - `VRTemplate` 风险更高，只有在确认当前 Demo 不再依赖模板路径时才迁移。
+- 不要在 unattended commandlet 中再次整体执行 Phase 3 大目录真实迁移；先打开可视化 Unreal Editor，在 Content Browser 对 `/Game` 或相关源目录执行 Fix Up Redirectors，再运行 `audit_asset_migration_state_via_editor.py` 判断哪些条目仍是实物资产。
 
 ### Phase 4：核心玩法资产
 
@@ -99,6 +103,16 @@ python C:\Users\hp\Desktop\CrazyKitchen\tools\verify_asset_migration_report.py -
 `phase-3` 会展开为 `phase-3-external`、`phase-3-legacy`、`phase-3-root-legacy` 和 `phase-3-root-external`；`phase-4` 会展开为 `phase-4-root-gameplay`、`phase-4-food-blueprints`、`phase-4-interaction-blueprints` 和 `phase-4-legacy-duplicates`。如果只预演其中一小批，也可以直接传具体脚本阶段名，例如 `--expected-phases phase-4-food-blueprints`。
 
 真实迁移时把 `VRKITCHEN_ASSET_MIGRATION_DRY_RUN` 改为 `0`。默认保持 `VRKITCHEN_ASSET_MIGRATION_FIXUP=0`，迁移后在 Unreal Editor 中手动执行 Fix Up Redirectors。
+
+如果真实迁移报告包含 `errors`，不要立刻重复执行同一批迁移。先运行只读状态审计：
+
+```powershell
+$env:VRKITCHEN_ASSET_MIGRATION_REPORT='C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_APPLY_PHASE3_CURRENT.json'
+$env:VRKITCHEN_ASSET_MIGRATION_AUDIT='C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_AUDIT_PHASE3_CURRENT.json'
+& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\audit_asset_migration_state_via_editor.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
+```
+
+审计结果中 `migrated-with-source-redirector` 和 `directory-migrated-with-source-redirectors` 表示目标实物资产存在、源路径是 redirector；下一步应在可视化 Unreal Editor 中 Fix Up Redirectors，而不是用文件管理器删除。`directory-pending-source-assets` 表示源目录仍有真实资产，需要拆成更小批次迁移或人工确认引用后再处理。
 
 ```powershell
 & 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Build\BatchFiles\Build.bat' VRKitchenEditor Win64 Development -Project='C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -WaitMutex -NoHotReloadFromIDE

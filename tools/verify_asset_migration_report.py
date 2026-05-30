@@ -126,15 +126,11 @@ def parse_csv(value: str) -> tuple[str, ...]:
 
 def expand_phase_aliases(phases: tuple[str, ...]) -> tuple[str, ...]:
     expanded: list[str] = []
-    saw_group_alias = False
     for phase in phases:
         if phase in PHASE_GROUP_ALIASES:
-            saw_group_alias = True
             expanded.extend(PHASE_GROUP_ALIASES[phase])
         else:
             expanded.append(phase)
-    if saw_group_alias and "phase-1" not in expanded:
-        expanded.insert(0, "phase-1")
     return tuple(dict.fromkeys(expanded))
 
 
