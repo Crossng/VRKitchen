@@ -157,7 +157,7 @@ def reset_session(session):
     require(session_prop(session, "WrongOrders") == 0, "Wrong order count did not reset to 0")
     require(session_prop(session, "CurrentStreak") == 0, "Current streak did not reset to 0")
     require(session_prop(session, "BestStreak") == 0, "Best streak did not reset to 0")
-    require(session_prop(session, "TargetScore") >= 50, "Target score should keep the demo challenge goal visible")
+    require(session_prop(session, "TargetScore") >= 80, "Target score should keep the full demo menu visible")
     require(session.can_accept_orders(), "Session should accept orders after reset")
 
 
@@ -219,6 +219,7 @@ if order_manager and delivery_area:
 
     if session:
         simple_order = ["Bottom_Bun", "Cooked_Patty", "Top_Bun"]
+        salad_order = ["Chopped_Lettuce", "Chopped_Tomato"]
         lettuce_order = ["Bottom_Bun", "Cooked_Patty", "Chopped_Lettuce", "Top_Bun"]
         tomato_order = ["Bottom_Bun", "Cooked_Patty", "Chopped_Tomato", "Top_Bun"]
         meat_order = ["Bottom_Bun", "Cooked_Meat", "Chopped_Lettuce", "Top_Bun"]
@@ -295,35 +296,34 @@ if order_manager and delivery_area:
         reset_session(session)
         require(submit_tags(delivery_area, simple_order), "Target run first simple order should succeed")
         require(submit_tags(delivery_area, simple_order), "Target run second simple order should succeed")
-        require(submit_tags(delivery_area, lettuce_order), "Target run third lettuce order should succeed")
-        require(submit_tags(delivery_area, tomato_order), "Target run fourth tomato order should succeed")
-        require(submit_tags(delivery_area, meat_order), "Target run fifth thick meat order should succeed")
-        assert_stats(session, 55, 5, 0, "target score and streak bonus run")
+        require(submit_tags(delivery_area, salad_order), "Target run third salad order should succeed")
+        require(submit_tags(delivery_area, lettuce_order), "Target run fourth lettuce burger should succeed")
+        require(submit_tags(delivery_area, tomato_order), "Target run fifth tomato burger should succeed")
+        assert_stats(session, 55, 5, 0, "mid-run score and streak bonus run")
         require(session_prop(session, "CurrentStreak") == 5, "Current streak should track five correct orders")
         require(session_prop(session, "BestStreak") == 5, "Best streak should track five correct orders")
         require(session.get_star_rating() == 2, f"Expected two-star rating at 55 points, got {session.get_star_rating()}")
-        require(str(session.get_result_title()) == "挑战成功", f"Expected challenge success title, got {session.get_result_title()}")
+        require(str(session.get_result_title()) == "继续练习", f"Expected in-progress title before target, got {session.get_result_title()}")
         require(str(session.get_result_grade_text()) == "二星", f"Expected two-star grade text, got {session.get_result_grade_text()}")
-        require(bool(session.get_editor_property("bMissionCleared")), "Mission should be cleared after reaching target score")
-        require(not session.can_accept_orders(), "Session should stop accepting orders after mission clear")
-        print("PASS target case: score target, streak bonus, and result grade work")
+        require(not bool(session.get_editor_property("bMissionCleared")), "Mission should not clear before the full menu run")
+        require(session.can_accept_orders(), "Session should keep accepting orders before the full menu target")
+        print("PASS mid-run case: score, streak bonus, and partial rating work before target")
 
-        session.set_editor_property("TargetScore", 70)
         reset_session(session)
         require(submit_tags(delivery_area, simple_order), "Extended run first simple order should succeed")
         require(submit_tags(delivery_area, simple_order), "Extended run second simple order should succeed")
-        require(submit_tags(delivery_area, lettuce_order), "Extended run third lettuce order should succeed")
-        require(submit_tags(delivery_area, tomato_order), "Extended run fourth tomato order should succeed")
-        require(submit_tags(delivery_area, meat_order), "Extended run fifth thick meat order should succeed")
-        require(submit_tags(delivery_area, deluxe_order), "Extended run sixth double meat order should succeed")
-        assert_stats(session, 70, 6, 0, "extended double meat run")
-        require(session_prop(session, "CurrentStreak") == 6, "Current streak should track six correct orders")
-        require(session_prop(session, "BestStreak") == 6, "Best streak should track six correct orders")
-        require(session.get_star_rating() == 3, f"Expected three-star rating at 70 points, got {session.get_star_rating()}")
+        require(submit_tags(delivery_area, salad_order), "Extended run third salad order should succeed")
+        require(submit_tags(delivery_area, lettuce_order), "Extended run fourth lettuce burger should succeed")
+        require(submit_tags(delivery_area, tomato_order), "Extended run fifth tomato burger should succeed")
+        require(submit_tags(delivery_area, meat_order), "Extended run sixth thick meat order should succeed")
+        require(submit_tags(delivery_area, deluxe_order), "Extended run seventh double meat order should succeed")
+        assert_stats(session, 80, 7, 0, "extended salad and double meat run")
+        require(session_prop(session, "CurrentStreak") == 7, "Current streak should track seven correct orders")
+        require(session_prop(session, "BestStreak") == 7, "Best streak should track seven correct orders")
+        require(session.get_star_rating() == 3, f"Expected three-star rating at 80 points, got {session.get_star_rating()}")
         require(str(session.get_result_grade_text()) == "三星", f"Expected three-star grade text, got {session.get_result_grade_text()}")
-        require(bool(session.get_editor_property("bMissionCleared")), "Extended run should clear mission at 70 points")
-        session.set_editor_property("TargetScore", 50)
-        print("PASS extended recipe case: thick meat and double meat orders work")
+        require(bool(session.get_editor_property("bMissionCleared")), "Extended run should clear mission at 80 points")
+        print("PASS extended recipe case: salad, thick meat, and double meat orders work")
 
         reset_session(session)
         require(submit_tags(delivery_area, simple_order), "First simple order should succeed")
@@ -331,30 +331,33 @@ if order_manager and delivery_area:
         assert_session_guidance(
             session,
             2,
-            "生菜切配",
+            "沙拉切配",
             0,
             "节奏稳定",
-            "切生菜",
-            "生菜汉堡",
-            "lettuce stage guidance",
+            "田园沙拉",
+            "田园沙拉",
+            "salad stage guidance",
         )
-        require(not submit_tags(delivery_area, simple_order), "Third simple order should fail after difficulty increases")
+        require(not submit_tags(delivery_area, simple_order), "Third simple order should fail after salad stage starts")
         require_text_contains(session.get_tutorial_hint_text(), "刚才出错", "failure recovery tutorial")
-        require(submit_tags(delivery_area, lettuce_order), "Third progressive lettuce order should succeed")
+        require(not submit_tags(delivery_area, ["Raw_Lettuce", "Chopped_Tomato"]), "Raw lettuce should fail for salad order")
+        require(not submit_tags(delivery_area, ["Chopped_Tomato", "Chopped_Lettuce"]), "Reversed salad order should fail")
+        require(not submit_tags(delivery_area, ["Chopped_Lettuce", "Chopped_Tomato", "Top_Bun"]), "Salad with extra bun should fail")
+        require(submit_tags(delivery_area, salad_order), "Third progressive salad order should succeed")
         assert_session_guidance(
             session,
             3,
-            "番茄切配",
+            "生菜汉堡进阶",
             0,
             "节奏稳定",
-            "切番茄",
-            "番茄汉堡",
-            "tomato stage guidance",
+            "切好的生菜",
+            "生菜汉堡",
+            "lettuce burger stage guidance",
         )
         require(session_prop(session, "CorrectOrders") == 3, "Three completed orders were not recorded")
-        require(session_prop(session, "WrongOrders") == 1, "Difficulty probe failure should be counted once")
-        require(session_prop(session, "SessionScore") == 28, f"Expected score 28 after progression probe, got {session_prop(session, 'SessionScore')}")
-        print("PASS progression case: third order requires chopped ingredient")
+        require(session_prop(session, "WrongOrders") == 4, "Salad probe failures should be counted")
+        require(session_prop(session, "SessionScore") == 22, f"Expected score 22 after salad progression probes, got {session_prop(session, 'SessionScore')}")
+        print("PASS progression case: third order requires chopped salad ingredients")
 
 destroy_spawned()
 
