@@ -39,7 +39,8 @@
 - 时间进入 45 秒内会提示“注意时间”，进入 20 秒内会提示“最后冲刺”；教程文本会随订单阶段和错误恢复动态变化。
 - Demo 地图入口已经整理为 `/Game/_Project/Maps/VRKitchen_Demo`。
 - `tools/verify_demo_map_content_via_bridge.py` 已加入交付门禁，用于只读验证 Demo 地图里订单管理器、订单板、出餐区、煎锅/灶台、切菜板/刀、盘子、食材刷新点、沙拉食材和基础空间关系都已摆放到位。
-- 当前 Demo 地图中肉饼通过一个已摆放的 `BP_Patty` 提供，可覆盖演示流程；如果后续要支持玩家连续多轮自由练习汉堡，需要补一个可重复刷新的肉饼食材点。
+- 当前 Demo 地图已补 `BP_FoodSpawner_RawPatty`，肉饼现在通过 `BP_FoodSpawner` 可重复刷新，不再依赖一次性摆放的 `BP_Patty` 覆盖汉堡练习。
+- `tools/ensure_demo_raw_patty_spawner_via_bridge.py` 可幂等修复 Demo 地图肉饼刷新点；如果地图回退或被误删，可重新运行该脚本再运行 Demo 地图内容验证。
 - 资源整理规范已经写入 `VRKitchen_ASSET_ORGANIZATION.md`，第一阶段迁移路线写入 `VRKitchen_ASSET_MIGRATION_PLAN.md`；当前剩余审计为 `7 pass / 24 warn / 0 fail`。
 - Phase 2 原型资源迁移已执行：`Content/_Dev/Prototypes/food_test` 下已有迁移后的资源本体；旧 `Content/food_test` 仍残留 redirector 和 `.fbx/.png` sidecar 文件，需要在可视化 Unreal Editor 中 Fix Up Redirectors 并人工确认后再清理。
 - 后续迁移使用 `tools/migrate_asset_organization_via_editor.py` 先 dry-run，再小批量执行；命令行默认不执行 Fix Up Redirectors，真实迁移后需要在 Unreal Editor 的 Content Browser 中手动修复重定向器。
@@ -50,7 +51,7 @@
 - `CompileAllBlueprints` 蓝图编译通过，要求保持 `0 errors / 0 warnings / 0 failed blueprints`。
 - `DataValidation` 资源数据验证通过，要求保持 `Success - 0 errors / 0 warnings`。
 - `BuildCookRun` Win64 Development 打包通过。
-- Demo 地图内容脚本 `tools/verify_demo_map_content_via_bridge.py` 已通过，确认核心演示 Actor、盘子、五个食材刷新点、沙拉所需生菜/番茄、已摆放肉饼、煎锅到灶台距离、刀到切菜板距离和关键区域间距满足演示要求。
+- Demo 地图内容脚本 `tools/verify_demo_map_content_via_bridge.py` 已通过，确认核心演示 Actor、盘子、至少六个食材刷新点、沙拉所需生菜/番茄、可重复肉饼刷新点、煎锅到灶台距离、刀到切菜板距离和关键区域间距满足演示要求。
 - 自动化玩法脚本 `tools/verify_demo_gameplay_loop_via_bridge.py` 已覆盖核心 Demo 规则：
 - 正确订单成功加分。
 - 空盘提交失败并提示“请先放上食材”。
@@ -100,6 +101,12 @@ Demo 地图内容可单独验证：
 
 ```powershell
 & 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\verify_demo_map_content_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
+```
+
+如果 Demo 地图肉饼刷新点缺失，可先运行幂等修复脚本：
+
+```powershell
+& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\ensure_demo_raw_patty_spawner_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
 ```
 
 资源整理审计可以运行：

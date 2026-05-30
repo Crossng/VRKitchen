@@ -23,7 +23,7 @@ REQUIRED_MIN_COUNTS = {
         "class_prefixes": ("/Game/BP_Plate.",),
     },
     "food_spawner": {
-        "min_count": 5,
+        "min_count": 6,
         "class_prefixes": ("/Game/Blueprints/BP_FoodSpawner.",),
     },
     "trash_visual": {
@@ -36,13 +36,10 @@ REQUIRED_MIN_COUNTS = {
 REQUIRED_FOOD_CLASSES = {
     "bottom_bun": "/Game/Blueprints/BP_BottomBun.BP_BottomBun_C",
     "top_bun": "/Game/Blueprints/BP_TopBun.BP_TopBun_C",
+    "raw_patty": "/Game/Blueprints/BP_Patty.BP_Patty_C",
     "raw_meat": "/Game/Blueprints/BP_Meat.BP_Meat_C",
     "raw_lettuce": "/Game/Blueprints/BP_Lettuce.BP_Lettuce_C",
     "raw_tomato": "/Game/BP_Tomato.BP_Tomato_C",
-}
-
-REQUIRED_PLACED_FOOD_CLASSES = {
-    "raw_patty": "/Game/Blueprints/BP_Patty.",
 }
 
 MIN_REASONABLE_DISTANCE = 35.0
@@ -161,16 +158,6 @@ def main():
         require(
             expected_class in spawned_class_values,
             f"Food spawners do not cover {food_name}: expected {expected_class}, got {sorted(spawned_class_values)}",
-            failures,
-        )
-
-    report["placed_foods"] = {}
-    for food_name, expected_prefix in REQUIRED_PLACED_FOOD_CLASSES.items():
-        matches = find_by_class_prefix(actors, (expected_prefix,))
-        report["placed_foods"][food_name] = [actor_to_summary(actor) for actor in matches]
-        require(
-            matches,
-            f"Demo map needs at least one placed {food_name} actor or a matching food spawner",
             failures,
         )
 
