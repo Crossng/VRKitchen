@@ -138,6 +138,25 @@ PHASE_LABELS = {
     "phase-6": "Enable --strict and fail the build on organization drift.",
 }
 
+PHASE_ORDER = tuple(PHASE_LABELS)
+RISK_ORDER = {"low": 0, "medium": 1, "high": 2}
+CATEGORY_ORDER = {"dev": 0, "external": 1, "legacy": 2, "project": 3, "review": 4, "rename-review": 5}
+
+MIGRATION_SCRIPT_PHASES = {
+    "phase-2": ("phase-2-dev-folders", "phase-2-prototypes"),
+    "phase-3": ("phase-3-external", "phase-3-legacy", "phase-3-root-legacy", "phase-3-root-external"),
+    "phase-4": ("phase-4-root-gameplay", "phase-4-food-blueprints", "phase-4-interaction-blueprints", "phase-4-legacy-duplicates"),
+}
+
+VALIDATION_GATE_COMMANDS = (
+    "VRKitchenEditor Win64 Development C++ build",
+    "CompileAllBlueprints",
+    "DataValidation",
+    "tools/verify_demo_gameplay_loop_via_bridge.py",
+    "Win64 Development BuildCookRun package smoke",
+    "tools/verify_delivery_readiness.py",
+)
+
 
 @dataclass
 class Check:
@@ -168,6 +187,96 @@ def first_items(items: list[str], limit: int = 20) -> str:
     visible = items[:limit]
     suffix = "" if len(items) <= limit else f" ... (+{len(items) - limit} more)"
     return ", ".join(visible) + suffix
+
+
+def phase_sort_key(phase: str) -> tuple[int, str]:
+    try:
+        return (PHASE_ORDER.index(phase), phase)
+    except ValueError:
+        return (len(PHASE_ORDER), phase)
+
+
+def finding_sort_key(finding: Finding) -> tuple[tuple[int, str], int, int, str, str]:
+    return (
+        phase_sort_key(finding.phase),
+        RISK_ORDER.get(finding.risk, 99),
+        CATEGORY_ORDER.get(finding.category, 99),
+        finding.kind,
+        finding.path,
+    )
+
+
+def sorted_findings(findings: list[Finding]) -> list[Finding]:
+    return sorted(findings, key=finding_sort_key)
+
+
+def markdown_cell(value: str) -> str:
+    return value.replace("|", "/").replace("\n", " ")
+
+
+def append_counter_table(lines: list[str], title: str, counts: Counter[str], preferred_order: tuple[str, ...] = ()) -> None:
+    lines.extend(["", f"## {title}", "", "| Value | Count |", "| --- | ---: |"])
+    ordered_keys = [key for key in preferred_order if key in counts]
+    ordered_keys.extend(sorted(key for key in counts if key not in ordered_keys))
+    if not ordered_keys:
+        lines.append("| none | 0 |")
+        return
+    for key in ordered_keys:
+        lines.append(f"| `{key}` | {counts[key]} |")
+
+
+def append_findings_table(lines: list[str], findings: list[Finding], empty_message: str) -> None:
+    if not findings:
+        lines.append(empty_message)
+        return
+    lines.extend([
+        "| Kind | Path | Category | Suggested Destination | Phase | Risk | Note |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+    ])
+    for finding in sorted_findings(findings):
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    markdown_cell(finding.kind),
+                    f"`{markdown_cell(finding.path)}`",
+                    markdown_cell(finding.category),
+                    f"`{markdown_cell(finding.destination)}`",
+                    markdown_cell(finding.phase),
+                    markdown_cell(finding.risk),
+                    markdown_cell(finding.note),
+                ]
+            )
+            + " |"
+        )
+
+
+def powershell_quote(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
+
+
+def build_dry_run_command(full_project_root: Path, script_phases: tuple[str, ...], report_name: str) -> list[str]:
+    project_file = full_project_root / "VRKitchen.uproject"
+    script_path = full_project_root.parent / "tools" / "migrate_asset_organization_via_editor.py"
+    report_path = full_project_root.parent / report_name
+    return [
+        f"$env:VRKITCHEN_ASSET_MIGRATION_PHASES={powershell_quote('phase-1,' + ','.join(script_phases))}",
+        "$env:VRKITCHEN_ASSET_MIGRATION_DRY_RUN='1'",
+        f"$env:VRKITCHEN_ASSET_MIGRATION_REPORT={powershell_quote(str(report_path))}",
+        f"& 'D:\\Program Files (x86)\\Epic Games\\UE_5.5\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe' {powershell_quote(str(project_file))} -run=pythonscript -script={powershell_quote(str(script_path))} -unattended -nop4 -nosplash -NullRHI",
+    ]
+
+
+def recommend_next_findings(findings: list[Finding]) -> list[Finding]:
+    for phase in PHASE_ORDER:
+        candidates = [finding for finding in findings if finding.phase == phase and finding.risk == "low"]
+        if candidates:
+            return sorted_findings(candidates)
+    for phase in PHASE_ORDER:
+        candidates = [finding for finding in findings if finding.phase == phase]
+        if candidates:
+            return sorted_findings(candidates)
+    return []
 
 
 def classification_for_top_level(name: str) -> tuple[str, str, str, str, str]:
@@ -279,16 +388,63 @@ def audit_content(full_project_root: Path, strict: bool) -> tuple[list[Check], l
 
 
 def build_markdown_report(full_project_root: Path, findings: list[Finding]) -> str:
+    category_counts = Counter(finding.category for finding in findings)
+    phase_counts = Counter(finding.phase for finding in findings)
+    risk_counts = Counter(finding.risk for finding in findings)
+    recommended_findings = recommend_next_findings(findings)
+    recommended_phase = recommended_findings[0].phase if recommended_findings else ""
+    script_phases = MIGRATION_SCRIPT_PHASES.get(recommended_phase, ())
+
     lines = [
         "# VRKitchen Asset Organization Audit",
         "",
         f"- Full project root: `{full_project_root}`",
         f"- Findings: {len(findings)}",
         "- This report is read-only. Move assets only inside Unreal Editor and then run Fix Up Redirectors.",
+        "- GitHub remains code/config/docs/tools only; full Content assets stay in the netdisk project package.",
+        "",
+        "## Current Summary",
+        "",
+        f"- Phase findings: {', '.join(f'{key}={value}' for key, value in sorted(phase_counts.items(), key=lambda item: phase_sort_key(item[0])) ) or 'none'}",
+        f"- Risk findings: {', '.join(f'{key}={value}' for key, value in sorted(risk_counts.items(), key=lambda item: RISK_ORDER.get(item[0], 99)) ) or 'none'}",
+        f"- Category findings: {', '.join(f'{key}={value}' for key, value in sorted(category_counts.items(), key=lambda item: CATEGORY_ORDER.get(item[0], 99)) ) or 'none'}",
+        "",
+    ]
+
+    append_counter_table(lines, "Findings By Phase", phase_counts, PHASE_ORDER)
+    append_counter_table(lines, "Findings By Risk", risk_counts, ("low", "medium", "high"))
+    append_counter_table(lines, "Findings By Category", category_counts, ("dev", "external", "legacy", "project", "review", "rename-review"))
+
+    lines.extend(["", "## Recommended Next Batch", ""])
+    if recommended_findings:
+        lines.append(f"- Recommended audit phase: `{recommended_phase}`")
+        lines.append("- Start with the rows below because they are the earliest low-risk findings currently visible.")
+        lines.append("- Keep this as a dry-run unless you are ready to open Unreal Editor, fix redirectors, and run the full validation gate.")
+        lines.append("")
+        append_findings_table(lines, recommended_findings, "No recommended findings.")
+        if script_phases:
+            lines.extend(["", "Dry-run command:", "", "```powershell"])
+            lines.extend(build_dry_run_command(full_project_root, script_phases, f"VRKitchen_ASSET_MIGRATION_DRYRUN_{recommended_phase}.json"))
+            lines.extend(["```", ""])
+        else:
+            lines.append("")
+            lines.append("No migration script phase is mapped for this audit phase yet; create a dedicated small-batch migration before moving assets.")
+    else:
+        lines.append("No findings remain. This is the point where `--strict` can become a final gate.")
+
+    lines.extend([
+        "",
+        "## Validation Gate After Any Real Move",
+        "",
+    ])
+    for command in VALIDATION_GATE_COMMANDS:
+        lines.append(f"- {command}")
+
+    lines.extend([
         "",
         "## Migration Phases",
         "",
-    ]
+    ])
     for phase, description in PHASE_LABELS.items():
         lines.append(f"- `{phase}`: {description}")
 
@@ -296,26 +452,9 @@ def build_markdown_report(full_project_root: Path, findings: list[Finding]) -> s
         "",
         "## Findings",
         "",
-        "| Kind | Path | Category | Suggested Destination | Phase | Risk | Note |",
-        "| --- | --- | --- | --- | --- | --- | --- |",
     ])
 
-    for finding in findings:
-        lines.append(
-            "| "
-            + " | ".join(
-                [
-                    finding.kind,
-                    f"`{finding.path}`",
-                    finding.category,
-                    f"`{finding.destination}`",
-                    finding.phase,
-                    finding.risk,
-                    finding.note.replace("|", "/"),
-                ]
-            )
-            + " |"
-        )
+    append_findings_table(lines, findings, "No findings.")
 
     lines.extend([
         "",

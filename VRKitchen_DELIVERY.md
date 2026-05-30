@@ -28,7 +28,7 @@
 - 运行时会显示中文新手提示、剩余时间、分数、完成数、错误数、当前阶段、紧张度和下一目标。
 - 时间进入 45 秒内会提示“注意时间”，进入 20 秒内会提示“最后冲刺”；教程文本会随订单阶段和错误恢复动态变化。
 - Demo 地图入口已经整理为 `/Game/_Project/Maps/VRKitchen_Demo`。
-- 资源整理规范已经写入 `VRKitchen_ASSET_ORGANIZATION.md`，第一阶段迁移路线写入 `VRKitchen_ASSET_MIGRATION_PLAN.md`；目标结构和 `Collections/Developers` 低风险清理已完成，当前剩余审计为 `7 pass / 22 warn / 0 fail`。
+- 资源整理规范已经写入 `VRKitchen_ASSET_ORGANIZATION.md`，第一阶段迁移路线写入 `VRKitchen_ASSET_MIGRATION_PLAN.md`；当前剩余审计为 `7 pass / 24 warn / 0 fail`，下一批建议只 dry-run `Collections`、`Developers` 和 `food_test` 归入 `_Dev`。
 - 后续迁移使用 `tools/migrate_asset_organization_via_editor.py` 先 dry-run，再小批量执行；命令行默认不执行 Fix Up Redirectors，真实迁移后需要在 Unreal Editor 的 Content Browser 中手动修复重定向器。
 
 ## 已验证项目
@@ -66,7 +66,7 @@
 每次完成一轮新目标、准备推送 GitHub 或上传网盘前，建议先运行：
 
 ```powershell
-python tools\verify_delivery_readiness.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen --code-repo-root C:\Users\hp\Desktop\VRKitchen_CodeOnly
+python C:\Users\hp\Desktop\CrazyKitchen\tools\verify_delivery_readiness.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen --code-repo-root C:\Users\hp\Desktop\VRKitchen_CodeOnly
 ```
 
 脚本只做文件和配置层面的交付边界检查：完整工程是否包含 Demo 地图、源码、配置、插件和说明；代码版仓库是否没有误跟踪 `Content`、`.uasset`、`.umap`、二进制输出和大文件。它不能替代 C++ 构建、蓝图编译、DataValidation、玩法自动化、Win64 打包和真实头显测试。
@@ -74,21 +74,21 @@ python tools\verify_delivery_readiness.py --full-project-root C:\Users\hp\Deskto
 资源整理审计可以运行：
 
 ```powershell
-python tools\verify_asset_organization.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen
+python C:\Users\hp\Desktop\CrazyKitchen\tools\verify_asset_organization.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen
 ```
 
 该脚本默认只给出警告，不移动资源；等完成 Unreal Editor 内迁移和引用修复后，可加 `--strict` 作为最终项目结构门禁。
 
-如果需要输出可读迁移清单，可运行：
+如果需要输出可读迁移清单，可运行；报告会包含 phase/risk/category 汇总、推荐下一批和 dry-run 命令：
 
 ```powershell
-python tools\verify_asset_organization.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_AUDIT.md
+python C:\Users\hp\Desktop\CrazyKitchen\tools\verify_asset_organization.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_AUDIT.md
 ```
 
 如果需要先预演下一批迁移，可运行：
 
 ```powershell
-$env:VRKITCHEN_ASSET_MIGRATION_PHASES='phase-1,phase-2-prototypes'
+$env:VRKITCHEN_ASSET_MIGRATION_PHASES='phase-1,phase-2-dev-folders,phase-2-prototypes'
 $env:VRKITCHEN_ASSET_MIGRATION_DRY_RUN='1'
 $env:VRKITCHEN_ASSET_MIGRATION_REPORT='C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN.json'
 & 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\migrate_asset_organization_via_editor.py' -unattended -nop4 -nosplash -NullRHI

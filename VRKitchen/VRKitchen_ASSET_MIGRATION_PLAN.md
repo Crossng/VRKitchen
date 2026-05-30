@@ -12,13 +12,13 @@
 - `Content` 根目录仍有可迁移资产，例如 `BP_Pan.uasset`、`BP_PickFood.uasset`、`BP_Plate.uasset`、`BP_Stove.uasset`、旧地图和导入贴图。
 - `VRTemplate`、`StarterContent`、`FPWeapon`、`LevelPrototyping`、`VRSpectator` 等应归为 `Content/_Legacy`，但必须先确认引用。
 - `Fast_Food_Restaurant` 与 FBX sidecar 目录应归为 `Content/_External`。
-- `Collections`、`Developers` 的空旧目录已经清理；`food_test` 仍应归为 `Content/_Dev`。
-- 最新资源审计为 `7 pass / 22 warn / 0 fail`，说明结构在变干净，但还没有进入严格完成状态。
+- `Collections`、`Developers` 与 `food_test` 仍应归为 `Content/_Dev`；下一批先做 dry-run，不直接移动真实资产。
+- 最新资源审计为 `7 pass / 24 warn / 0 fail`，说明结构在变干净，但还没有进入严格完成状态。
 
 ## 已执行内容
 
 - 已通过 `tools/migrate_asset_organization_via_editor.py` 创建目标目录结构。
-- 已执行 `phase-2-dev-folders`，清理根目录下的 `Collections` 和 `Developers` 空旧目录。
+- 已把 `phase-2-dev-folders` 与 `phase-2-prototypes` 确认为下一批低风险 dry-run 目标，真实迁移前不直接改动 `.uasset/.umap`。
 - 已生成 `VRKitchen_ASSET_AUDIT.md` 和 `VRKitchen_ASSET_MIGRATION_APPLY_PHASE1_2.json` 作为完整工程本地审计记录；这些报告不需要进入 GitHub。
 - 命令行迁移脚本默认不执行 Fix Up Redirectors，因为 UE 5.5.4 的 AssetTools 在 unattended commandlet 中可能触发断言；每批真实资产迁移后，应在可视化 Unreal Editor 的 Content Browser 中手动执行 Fix Up Redirectors，再跑验证。
 
@@ -27,7 +27,7 @@
 ### Phase 1：审计与空结构
 
 - 创建缺失的目标目录结构。
-- 使用 `tools/verify_asset_organization.py --report ...` 输出当前资源分类报告。
+- 使用 `tools/verify_asset_organization.py --report ...` 输出当前资源分类报告；报告会按 phase/risk/category 汇总，并给出推荐下一批迁移。
 - 不移动任何 `.uasset/.umap`。
 - 可用 `tools/migrate_asset_organization_via_editor.py` 的 dry-run/执行模式重复生成或确认该结构。
 
@@ -35,7 +35,7 @@
 
 - 迁移 `Developers`、`food_test`、临时测试地图和原型资源到 `Content/_Dev`。
 - 迁移前确认它们不在当前 Demo 地图和 Cook 配置中。
-- `Developers` 和 `Collections` 已完成低风险清理；`food_test` 仍未迁移，下一步要先 dry-run。
+- `Collections`、`Developers` 和 `food_test` 下一步要先 dry-run；确认引用安全后，才在 Unreal Editor 内执行真实迁移。
 
 ### Phase 3：模板、第三方与旧地图
 
@@ -73,7 +73,7 @@ python tools\verify_asset_organization.py --full-project-root C:\Users\hp\Deskto
 迁移脚本 dry-run 示例：
 
 ```powershell
-$env:VRKITCHEN_ASSET_MIGRATION_PHASES='phase-1,phase-2-prototypes'
+$env:VRKITCHEN_ASSET_MIGRATION_PHASES='phase-1,phase-2-dev-folders,phase-2-prototypes'
 $env:VRKITCHEN_ASSET_MIGRATION_DRY_RUN='1'
 $env:VRKITCHEN_ASSET_MIGRATION_REPORT='C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN.json'
 & 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\migrate_asset_organization_via_editor.py' -unattended -nop4 -nosplash -NullRHI

@@ -39,7 +39,7 @@ python tools/verify_asset_organization.py --full-project-root C:\Users\hp\Deskto
 
 The default audit is advisory. Use `--strict` only after project assets have been migrated and redirectors have been fixed.
 
-To create a Markdown migration report from the full project:
+To create a Markdown migration report from the full project, including phase/risk/category summaries, the recommended next batch, and a matching dry-run command:
 
 ```powershell
 python tools/verify_asset_organization.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_AUDIT.md
@@ -48,7 +48,7 @@ python tools/verify_asset_organization.py --full-project-root C:\Users\hp\Deskto
 To dry-run a staged Unreal Editor migration:
 
 ```powershell
-$env:VRKITCHEN_ASSET_MIGRATION_PHASES='phase-1,phase-2-prototypes'
+$env:VRKITCHEN_ASSET_MIGRATION_PHASES='phase-1,phase-2-dev-folders,phase-2-prototypes'
 $env:VRKITCHEN_ASSET_MIGRATION_DRY_RUN='1'
 $env:VRKITCHEN_ASSET_MIGRATION_REPORT='C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN.json'
 & 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\migrate_asset_organization_via_editor.py' -unattended -nop4 -nosplash -NullRHI
