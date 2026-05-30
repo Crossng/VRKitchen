@@ -4,6 +4,8 @@
 #include "Components/TextRenderComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/PlayerController.h"
+#include "InputCoreTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "UObject/UnrealType.h"
@@ -287,6 +289,20 @@ void UVRKitchenGameSessionComponent::TickComponent(float DeltaTime, ELevelTick T
 		}
 	}
 
+	if (bSessionEnded)
+	{
+		if (UWorld* World = GetWorld())
+		{
+			if (APlayerController* PlayerController = World->GetFirstPlayerController())
+			{
+				if (PlayerController->WasInputKeyJustPressed(EKeys::R))
+				{
+					ResetSession();
+				}
+			}
+		}
+	}
+
 	UpdateStatusText();
 }
 
@@ -429,7 +445,7 @@ FString UVRKitchenGameSessionComponent::BuildStatusText() const
 	if (bSessionEnded)
 	{
 		return FString::Printf(
-			TEXT("时间到\n总分: %d\n完成: %d\n错误: %d"),
+			TEXT("时间到\n总分: %d\n完成: %d\n错误: %d\n按 R 重新开始"),
 			SessionScore,
 			CorrectOrders,
 			WrongOrders);

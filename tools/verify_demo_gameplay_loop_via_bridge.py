@@ -229,6 +229,11 @@ if order_manager and delivery_area:
         require(not session.can_accept_orders(), "Session should not accept orders after end")
         print("PASS timeout case: no scoring after session end")
 
+        session.reset_session()
+        require(session.can_accept_orders(), "Session should accept orders after reset")
+        assert_stats(session, 0, 0, 0, "reset after timeout")
+        print("PASS reset case: session can restart after time end")
+
         reset_session(session)
         require(submit_tags(delivery_area, simple_order), "First simple order should succeed")
         require(submit_tags(delivery_area, simple_order), "Second simple order should succeed")
