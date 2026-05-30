@@ -83,6 +83,11 @@ namespace
 		return NAME_None;
 	}
 
+	bool IsKnownFoodActor(const AActor* Actor)
+	{
+		return !FindPrimaryFoodTag(Actor).IsNone();
+	}
+
 	struct FSubmittedFood
 	{
 		TWeakObjectPtr<AActor> Actor;
@@ -190,6 +195,83 @@ namespace
 			return A.SortZ < B.SortZ;
 		});
 
+		return Foods;
+	}
+
+	void AddOverlappingCleanupActors(AActor* CleanupArea, TSet<AActor*>& SeenActors, TArray<FSubmittedFood>& OutFoods)
+	{
+		if (!CleanupArea)
+		{
+			return;
+		}
+
+		TArray<UPrimitiveComponent*> PrimitiveComponents;
+		CleanupArea->GetComponents<UPrimitiveComponent>(PrimitiveComponents);
+		for (UPrimitiveComponent* PrimitiveComponent : PrimitiveComponents)
+		{
+			if (!PrimitiveComponent)
+			{
+				continue;
+			}
+
+			TArray<AActor*> OverlappingActors;
+			PrimitiveComponent->GetOverlappingActors(OverlappingActors);
+			for (AActor* OverlappingActor : OverlappingActors)
+			{
+				if (OverlappingActor != CleanupArea && IsKnownFoodActor(OverlappingActor))
+				{
+					AddSubmittedActor(OverlappingActor, nullptr, SeenActors, OutFoods, false);
+				}
+			}
+		}
+	}
+
+	TArray<FSubmittedFood> GatherCleanupAreaFoods(AActor* CleanupArea)
+	{
+		TArray<FSubmittedFood> Foods;
+		if (!CleanupArea)
+		{
+			return Foods;
+		}
+
+		TSet<AActor*> SeenActors;
+		TArray<AActor*> AttachedActors;
+		CleanupArea->GetAttachedActors(AttachedActors, true, true);
+		for (AActor* AttachedActor : AttachedActors)
+		{
+			if (IsKnownFoodActor(AttachedActor))
+			{
+				AddSubmittedActor(AttachedActor, nullptr, SeenActors, Foods, false);
+			}
+		}
+
+		if (UWorld* World = CleanupArea->GetWorld())
+		{
+			for (TActorIterator<AActor> It(World); It; ++It)
+			{
+				AActor* Candidate = *It;
+				if (!Candidate || Candidate == CleanupArea || !IsKnownFoodActor(Candidate))
+				{
+					continue;
+				}
+
+				bool bAttachedToCleanupArea = Candidate->GetAttachParentActor() == CleanupArea;
+				if (!bAttachedToCleanupArea)
+				{
+					if (USceneComponent* CandidateRoot = Candidate->GetRootComponent())
+					{
+						bAttachedToCleanupArea = CandidateRoot->GetAttachParent() == CleanupArea->GetRootComponent();
+					}
+				}
+
+				if (bAttachedToCleanupArea)
+				{
+					AddSubmittedActor(Candidate, nullptr, SeenActors, Foods, false);
+				}
+			}
+		}
+
+		AddOverlappingCleanupActors(CleanupArea, SeenActors, Foods);
 		return Foods;
 	}
 
@@ -606,15 +688,23 @@ namespace
 		}
 	}
 
-	void ClearSubmittedFoods(AActor* DeliveryArea, const TArray<FSubmittedFood>& SubmittedFoods)
+	int32 DestroySubmittedFoodActors(const TArray<FSubmittedFood>& SubmittedFoods)
 	{
+		int32 RemovedCount = 0;
 		for (const FSubmittedFood& SubmittedFood : SubmittedFoods)
 		{
 			if (AActor* FoodActor = SubmittedFood.Actor.Get())
 			{
 				FoodActor->Destroy();
+				++RemovedCount;
 			}
 		}
+		return RemovedCount;
+	}
+
+	void ClearSubmittedFoods(AActor* DeliveryArea, const TArray<FSubmittedFood>& SubmittedFoods)
+	{
+		DestroySubmittedFoodActors(SubmittedFoods);
 
 		ResetCurrentZ(DeliveryArea);
 		CallMakeClean(DeliveryArea);
@@ -740,4 +830,35 @@ void UVRKitchenOrderValidationLibrary::SubmitCurrentPlateValidated(AActor* Deliv
 
 	ClearSubmittedFoods(DeliveryArea, SubmittedFoods);
 	SpawnFloatingFeedback(DeliveryArea, FeedbackMessage, OutOk ? FColor::Green : FColor::Red);
+}
+
+void UVRKitchenOrderValidationLibrary::ClearCurrentPlate(AActor* DeliveryArea, int32& OutRemovedCount)
+{
+	OutRemovedCount = 0;
+	if (!DeliveryArea)
+	{
+		return;
+	}
+
+	const TArray<FSubmittedFood> SubmittedFoods = GatherSubmittedFoods(DeliveryArea);
+	OutRemovedCount = SubmittedFoods.Num();
+	ClearSubmittedFoods(DeliveryArea, SubmittedFoods);
+
+	const FString FeedbackMessage = OutRemovedCount > 0 ? TEXT("已清理盘面") : TEXT("没有可清理食材");
+	SpawnFloatingFeedback(DeliveryArea, FeedbackMessage, OutRemovedCount > 0 ? FColor::Cyan : FColor::Yellow);
+}
+
+void UVRKitchenOrderValidationLibrary::ClearFoodActorsInCleanupArea(AActor* CleanupArea, int32& OutRemovedCount)
+{
+	OutRemovedCount = 0;
+	if (!CleanupArea)
+	{
+		return;
+	}
+
+	const TArray<FSubmittedFood> CleanupFoods = GatherCleanupAreaFoods(CleanupArea);
+	OutRemovedCount = DestroySubmittedFoodActors(CleanupFoods);
+
+	const FString FeedbackMessage = OutRemovedCount > 0 ? TEXT("已丢弃食材") : TEXT("没有可丢弃食材");
+	SpawnFloatingFeedback(CleanupArea, FeedbackMessage, OutRemovedCount > 0 ? FColor::Cyan : FColor::Yellow);
 }

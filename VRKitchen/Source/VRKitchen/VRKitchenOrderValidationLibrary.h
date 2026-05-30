@@ -12,4 +12,10 @@ class VRKITCHEN_API UVRKitchenOrderValidationLibrary : public UBlueprintFunction
 public:
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Orders", meta = (DefaultToSelf = "DeliveryArea"))
 	static void SubmitCurrentPlateValidated(AActor* DeliveryArea, bool& OutOk);
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Cleanup", meta = (DefaultToSelf = "DeliveryArea"))
+	static void ClearCurrentPlate(AActor* DeliveryArea, int32& OutRemovedCount);
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Cleanup", meta = (DefaultToSelf = "CleanupArea"))
+	static void ClearFoodActorsInCleanupArea(AActor* CleanupArea, int32& OutRemovedCount);
 };

@@ -6,7 +6,7 @@
 
 ## 启动方式
 
-1. 使用 Unreal Engine 5.5.4 打开 `VRKitchen/VRKitchen.uproject`。
+1. 使用 Unreal Engine 5.5.4 打开 `VRKitchen.uproject`。
 2. 默认启动地图为 `/Game/_Project/Maps/VRKitchen_Demo`。
 3. SteamVR 用户请确保 SteamVR 已安装，并在 OpenXR 设置中使用 SteamVR Runtime。
 4. 没有头显时可以进行编辑器验证、蓝图编译、数据验证和 Win64 打包验证，但不能确认真实 VR 手柄手感。
@@ -17,6 +17,7 @@
 - 盘子提交时会按食材顺序严格校验。
 - 正确订单显示“出餐成功”并加分。
 - 错误订单会显示中文原因，包括具体缺少/多出的食材、沙拉或套餐顺序错误、未知食材、未切蔬菜、未煎熟肉类和烧焦肉类。
+- 已新增非破坏性的清理/回收接口：`ClearCurrentPlate(AActor* DeliveryArea, int32& OutRemovedCount)` 可清空当前盘面并显示“已清理盘面”，`ClearFoodActorsInCleanupArea(AActor* CleanupArea, int32& OutRemovedCount)` 可清理回收区/垃圾桶中已放入的食材并显示“已丢弃食材”；旧提交接口 `SubmitCurrentPlateValidated(AActor* DeliveryArea, bool& OutOk)` 保持不变。
 - 生肉饼和生肉可以在煎锅 + 灶台上烹饪，完成后显示“已煎熟”。
 - 熟肉继续停留在热锅上会烧焦，烧焦食材不能通过订单。
 - Demo 回合默认 3 分钟，目标 115 分，正确订单 +10 分，错误订单默认 -2 分且不扣到负数。
@@ -77,6 +78,7 @@
 - 自动化会检查订单板详情文本包含配方卡关键信息，确保沙拉和套餐的冷菜/热菜路线、处理要求、叠盘顺序和常见错误能被 UI 直接展示。
 - 自动化会检查出餐前检查清单会随菜单阶段变化，并确认经典汉堡、香煎牛排、田园沙拉、牛排沙拉套餐和经典汉堡沙拉套餐的检查清单同时进入玩家目标文本和订单板详情文本。
 - 自动化会检查阶段学习路径文本会随进度变化：开局预告香煎牛排，牛排阶段预告田园沙拉，套餐阶段预告最终菜单，最终阶段显示已到最终菜单。
+- 清理回收脚本 `tools/verify_cleanup_recovery_via_bridge.py` 已通过，覆盖清空当前盘面、清理回收区已附着食材、不改变分数/正确数/错误数/连击数，以及不会销毁回收区本体。
 
 ## 自动化验证说明
 
@@ -150,23 +152,30 @@ python C:\Users\hp\Desktop\CrazyKitchen\tools\verify_asset_migration_report.py -
 & 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\fix_salad_cutting_assets_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
 ```
 
+清理/回收能力可单独验证：
+
+```powershell
+& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\verify_cleanup_recovery_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
+```
+
 ## 未验证项目
 
 - 真实 SteamVR 头显运行体验。
 - VR 手柄抓取、叠放、切菜、出餐区交互手感。
+- 垃圾桶/回收区的真实 VR 手柄交互手感与具体蓝图触发方式。
 - Quest/Android 独立运行。
 
 ## 交付方式
 
-- 完整工程通过网盘交付，必须包含 `VRKitchen/Content`、`VRKitchen/Config`、`VRKitchen/Source`、`VRKitchen/Plugins` 和 `VRKitchen/VRKitchen.uproject`。
+- 完整工程通过网盘交付，必须包含 `Content`、`Config`、`Source`、`Plugins` 和 `VRKitchen.uproject`。
 - GitHub 仓库只放代码、配置、说明和小工具，不上传 `Content` 大资源、`.uasset`、`.umap`、`Binaries`、`Intermediate`、`Saved`、`DerivedDataCache`。
 - 当前 GitHub 仓库地址为 `https://github.com/Crossng/VRKitchen.git`。
 
 ## 建议上传网盘时排除
 
-- `VRKitchen/Intermediate`
-- `VRKitchen/Saved`
-- `VRKitchen/DerivedDataCache`
-- `VRKitchen/Binaries`
+- `Intermediate`
+- `Saved`
+- `DerivedDataCache`
+- `Binaries`
 
 这些目录可以重新生成；如果担心接收方没有编译环境，可以额外保留 `Binaries`，但包体会更大。
