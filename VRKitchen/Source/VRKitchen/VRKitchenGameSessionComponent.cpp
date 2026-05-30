@@ -1058,6 +1058,11 @@ FString UVRKitchenGameSessionComponent::GetTutorialHintText() const
 	return Prefix + GetDemoMenuStepForProgress(CorrectOrders).TutorialText + TEXT("\n") + GetNextStagePreviewText() + TEXT("\n") + GetCurrentActionStepText();
 }
 
+FString UVRKitchenGameSessionComponent::GetTutorialText() const
+{
+	return FString::Printf(TEXT("%s\n%s"), *BuildTutorialText(), *GetCurrentRecipeCardText());
+}
+
 void UVRKitchenGameSessionComponent::EnsureTextComponents()
 {
 	AActor* Owner = GetOwner();

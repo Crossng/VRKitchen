@@ -207,6 +207,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	FString GetTutorialHintText() const;
 
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetTutorialText() const;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
