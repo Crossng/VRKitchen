@@ -298,6 +298,10 @@ def assert_player_objective(session, ingredients_fragment, action_fragment, stat
     require_text_contains(session.get_player_objective_text(), action_fragment, f"{context} objective action")
     require_text_contains(session.get_player_objective_text(), station_fragment, f"{context} objective station route")
     require_text_contains(session.get_player_objective_text(), recovery_fragment, f"{context} objective recovery")
+    require_text_contains(session.get_current_order_quick_card_text(), "订单速查", f"{context} quick card title")
+    require_text_contains(session.get_current_order_quick_card_text(), ingredients_fragment, f"{context} quick card ingredients")
+    require_text_contains(session.get_current_order_quick_card_text(), action_fragment, f"{context} quick card action")
+    require_text_contains(session.get_current_order_quick_card_text(), recovery_fragment, f"{context} quick card recovery")
 
 
 def assert_recipe_card(session, dish_type_fragment, process_fragment, assembly_fragment, warning_fragment, context):
@@ -366,6 +370,7 @@ def assert_menu_step_texts(session, step_index, spec, context):
         require_text_contains(session.get_current_station_outcome_text(), spec["outcomes"][1], f"{context} station outcome 2")
     for fragment in spec["checklist"]:
         require_text_contains(session.get_current_pre_submit_checklist_text(), fragment, f"{context} checklist")
+        require_text_contains(session.get_current_order_quick_card_text(), fragment, f"{context} quick card checklist")
     require_text_contains(session.get_current_dish_type_text(), spec["dish_type"], f"{context} dish type")
     require_text_contains(session.get_current_recipe_process_text(), spec["process"], f"{context} process")
     require_text_contains(session.get_current_recipe_assembly_text(), spec["assembly"], f"{context} assembly")
@@ -376,6 +381,8 @@ def assert_menu_step_texts(session, step_index, spec, context):
     require_text_contains(session.get_current_order_board_text(), spec["details"], f"{context} order board details")
     require_text_contains(session.get_current_order_board_text(), spec["action"], f"{context} order board action")
     require_text_contains(session.get_current_order_board_text(), spec["next_goal"], f"{context} order board next goal")
+    require_text_contains(session.get_current_order_quick_card_text(), f"{step_index + 1}/{EXPECTED_MENU_TOTAL}", f"{context} quick card progress")
+    require_text_contains(session.get_current_order_quick_card_text(), spec["name"], f"{context} quick card name")
     require_text_contains(session.get_player_objective_text(), spec["details"], f"{context} objective ingredients")
     require_text_contains(session.get_player_objective_text(), spec["action"], f"{context} objective action")
     require_text_contains(session.get_player_objective_text(), spec["route"], f"{context} objective route")

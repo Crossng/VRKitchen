@@ -1283,6 +1283,20 @@ FString UVRKitchenGameSessionComponent::GetCurrentOrderBoardText() const
 	return BuildOrderBoardDetailsText(GetDemoMenuStepForProgress(CorrectOrders));
 }
 
+FString UVRKitchenGameSessionComponent::GetCurrentOrderQuickCardText() const
+{
+	const FDemoMenuStep& Step = GetDemoMenuStepForProgress(CorrectOrders);
+	return FString::Printf(
+		TEXT("订单速查\n当前: %d/%d %s\n食材: %s\n下一步: %s\n检查: %s\n失败修复: %s"),
+		GetCurrentMenuRouteStep(),
+		GetMenuRouteTotal(),
+		*Step.OrderSpec.OrderName,
+		*Step.OrderSpec.DisplayDetails,
+		*Step.ActionStepText,
+		*Step.PreSubmitChecklistText,
+		*GetFailureRecoveryText());
+}
+
 FString UVRKitchenGameSessionComponent::GetCurrentPreSubmitChecklistText() const
 {
 	return GetDemoMenuStepForProgress(CorrectOrders).PreSubmitChecklistText;

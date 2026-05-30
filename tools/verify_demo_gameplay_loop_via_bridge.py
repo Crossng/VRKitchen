@@ -238,6 +238,10 @@ def assert_player_objective(session, ingredients_fragment, action_fragment, stat
     require_text_contains(session.get_player_objective_text(), action_fragment, f"{context} objective action")
     require_text_contains(session.get_player_objective_text(), station_fragment, f"{context} objective station route")
     require_text_contains(session.get_player_objective_text(), recovery_fragment, f"{context} objective recovery")
+    require_text_contains(session.get_current_order_quick_card_text(), "订单速查", f"{context} quick card title")
+    require_text_contains(session.get_current_order_quick_card_text(), ingredients_fragment, f"{context} quick card ingredients")
+    require_text_contains(session.get_current_order_quick_card_text(), action_fragment, f"{context} quick card action")
+    require_text_contains(session.get_current_order_quick_card_text(), recovery_fragment, f"{context} quick card recovery")
 
 
 def assert_recipe_card(session, dish_type_fragment, process_fragment, assembly_fragment, warning_fragment, context):
@@ -267,6 +271,7 @@ def assert_pre_submit_checklist(session, *fragments, context):
         require_text_contains(checklist, fragment, f"{context} checklist")
         require_text_contains(session.get_player_objective_text(), fragment, f"{context} objective checklist")
         require_text_contains(session.get_current_order_board_text(), fragment, f"{context} order board checklist")
+        require_text_contains(session.get_current_order_quick_card_text(), fragment, f"{context} quick card checklist")
 
 
 def assert_station_outcome(session, *fragments, context):
