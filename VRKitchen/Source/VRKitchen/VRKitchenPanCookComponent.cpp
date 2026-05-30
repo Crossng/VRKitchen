@@ -14,8 +14,10 @@ namespace
 {
 	const FName TagRawMeat(TEXT("Raw_Meat"));
 	const FName TagCookedMeat(TEXT("Cooked_Meat"));
+	const FName TagBurntMeat(TEXT("Burnt_Meat"));
 	const FName TagRawPatty(TEXT("Raw_Patty"));
 	const FName TagCookedPatty(TEXT("Cooked_Patty"));
+	const FName TagBurntPatty(TEXT("Burnt_Patty"));
 	const FName TagOnStove(TEXT("OnStove"));
 
 	template <typename TComponent>
@@ -177,6 +179,26 @@ namespace
 		SpawnFloatingFeedback(FoodActor, TEXT("已煎熟"), FColor::Orange);
 		return true;
 	}
+
+	bool OvercookFoodActor(AActor* FoodActor, const FName CookedTag, const FName BurntTag, const double DeltaTime, const double OvercookTimeSeconds, TMap<TWeakObjectPtr<AActor>, double>& OvercookTimes)
+	{
+		if (!FoodActor || !FoodActor->Tags.Contains(CookedTag) || FoodActor->Tags.Contains(BurntTag))
+		{
+			return false;
+		}
+
+		double& HeatTime = OvercookTimes.FindOrAdd(FoodActor);
+		HeatTime += DeltaTime;
+		if (HeatTime < OvercookTimeSeconds)
+		{
+			return true;
+		}
+
+		FoodActor->Tags.Remove(CookedTag);
+		FoodActor->Tags.AddUnique(BurntTag);
+		SpawnFloatingFeedback(FoodActor, TEXT("烧焦了"), FColor::Red);
+		return true;
+	}
 }
 
 UVRKitchenPanCookComponent::UVRKitchenPanCookComponent()
@@ -274,6 +296,16 @@ void UVRKitchenPanCookComponent::TickComponent(float DeltaTime, ELevelTick TickT
 			continue;
 		}
 
-		CookFoodActor(FoodActor, TagRawPatty, TagCookedPatty, DeltaTime, CookTimeSeconds);
+		if (CookFoodActor(FoodActor, TagRawPatty, TagCookedPatty, DeltaTime, CookTimeSeconds))
+		{
+			continue;
+		}
+
+		if (OvercookFoodActor(FoodActor, TagCookedMeat, TagBurntMeat, DeltaTime, OvercookTimeSeconds, OvercookTimes))
+		{
+			continue;
+		}
+
+		OvercookFoodActor(FoodActor, TagCookedPatty, TagBurntPatty, DeltaTime, OvercookTimeSeconds, OvercookTimes);
 	}
 }

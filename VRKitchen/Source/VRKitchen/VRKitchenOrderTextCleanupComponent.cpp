@@ -1,5 +1,7 @@
 #include "VRKitchenOrderTextCleanupComponent.h"
 
+#include "VRKitchenGameSessionComponent.h"
+
 #include "GameFramework/Actor.h"
 #include "UObject/UnrealType.h"
 
@@ -29,6 +31,20 @@ void UVRKitchenOrderTextCleanupComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	CleanupTempIngredientsText();
+
+	if (AActor* Owner = GetOwner())
+	{
+		if (!Owner->FindComponentByClass<UVRKitchenGameSessionComponent>())
+		{
+			UVRKitchenGameSessionComponent* SessionComponent = NewObject<UVRKitchenGameSessionComponent>(Owner, TEXT("VRKitchenGameSession"));
+			if (SessionComponent)
+			{
+				Owner->AddInstanceComponent(SessionComponent);
+				SessionComponent->RegisterComponent();
+				SessionComponent->StartSession();
+			}
+		}
+	}
 }
 
 void UVRKitchenOrderTextCleanupComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

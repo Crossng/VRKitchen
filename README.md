@@ -4,13 +4,20 @@ This repository intentionally contains only code, configuration, and small tooli
 
 The full Unreal project assets are delivered separately through cloud storage/netdisk. Do not commit large binary project data here.
 
+## Current demo scope
+
+- Target: UE 5.5.4, Windows PCVR, SteamVR through OpenXR.
+- Demo map: `/Game/_Project/Maps/VRKitchen_Demo`.
+- Gameplay loop: Chinese order feedback, validated plate submission, pan/stove cooking, overcooked burnt food rejection, 3-minute session timer, score, correct/wrong counters, and progressive burger orders.
+- Not verified here: real SteamVR headset feel, controller hand feel, Quest/Android standalone runtime.
+
 ## How to use
 
 1. Download the full VRKitchen project package from netdisk/cloud storage.
 2. Overlay this repository's `VRKitchen/` folder onto the full project folder.
 3. Open `VRKitchen/VRKitchen.uproject` with Unreal Engine 5.5.4.
 4. Rebuild the `VRKitchen` C++ module if prompted.
-5. Run `CompileAllBlueprints` and `DataValidation` before sharing a release.
+5. Run `CompileAllBlueprints`, `DataValidation`, and `tools/verify_demo_gameplay_loop_via_bridge.py` before sharing a release.
 
 ## What belongs in GitHub
 

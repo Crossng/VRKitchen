@@ -1,5 +1,7 @@
 #include "VRKitchenOrderValidationLibrary.h"
 
+#include "VRKitchenGameSessionComponent.h"
+
 #include "Components/PrimitiveComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/TextRenderComponent.h"
@@ -22,6 +24,8 @@ namespace
 	const FName TagRawMeat(TEXT("Raw_Meat"));
 	const FName TagRawLettuce(TEXT("Raw_Lettuce"));
 	const FName TagRawTomato(TEXT("Raw_Tomato"));
+	const FName TagBurntPatty(TEXT("Burnt_Patty"));
+	const FName TagBurntMeat(TEXT("Burnt_Meat"));
 
 	const TArray<FName>& KnownFoodTags()
 	{
@@ -36,6 +40,8 @@ namespace
 			TagRawMeat,
 			TagRawLettuce,
 			TagRawTomato,
+			TagBurntPatty,
+			TagBurntMeat,
 		};
 		return Tags;
 	}
@@ -251,6 +257,30 @@ namespace
 		return OrderManagerClass ? UGameplayStatics::GetActorOfClass(World, OrderManagerClass) : nullptr;
 	}
 
+	UVRKitchenGameSessionComponent* FindOrCreateGameSession(AActor* OrderManager)
+	{
+		if (!OrderManager)
+		{
+			return nullptr;
+		}
+
+		if (UVRKitchenGameSessionComponent* ExistingComponent = OrderManager->FindComponentByClass<UVRKitchenGameSessionComponent>())
+		{
+			return ExistingComponent;
+		}
+
+		UVRKitchenGameSessionComponent* SessionComponent = NewObject<UVRKitchenGameSessionComponent>(OrderManager, TEXT("VRKitchenGameSession"));
+		if (!SessionComponent)
+		{
+			return nullptr;
+		}
+
+		OrderManager->AddInstanceComponent(SessionComponent);
+		SessionComponent->RegisterComponent();
+		SessionComponent->StartSession();
+		return SessionComponent;
+	}
+
 	bool SubmittedTagsMatchRequiredTags(const TArray<FSubmittedFood>& SubmittedFoods, const TArray<FName>& RequiredTags)
 	{
 		if (SubmittedFoods.Num() != RequiredTags.Num())
@@ -275,6 +305,11 @@ namespace
 			|| FoodTag == TagRawMeat
 			|| FoodTag == TagRawLettuce
 			|| FoodTag == TagRawTomato;
+	}
+
+	bool IsBurntFoodTag(const FName FoodTag)
+	{
+		return FoodTag == TagBurntPatty || FoodTag == TagBurntMeat;
 	}
 
 	FString BuildSubmitFeedbackMessage(const bool bHasOrder, const TArray<FSubmittedFood>& SubmittedFoods, const TArray<FName>& RequiredTags, const bool bMatchesOrder)
@@ -304,6 +339,11 @@ namespace
 			if (IsRawOrUnprocessedFoodTag(SubmittedFood.FoodTag))
 			{
 				return TEXT("不能提交未处理食材");
+			}
+
+			if (IsBurntFoodTag(SubmittedFood.FoodTag))
+			{
+				return TEXT("食材烧焦了");
 			}
 		}
 
@@ -454,6 +494,13 @@ void UVRKitchenOrderValidationLibrary::SubmitCurrentPlateValidated(AActor* Deliv
 	}
 
 	AActor* OrderManager = FindOrderManager(DeliveryArea->GetWorld());
+	UVRKitchenGameSessionComponent* GameSession = FindOrCreateGameSession(OrderManager);
+	if (GameSession && !GameSession->CanAcceptOrders())
+	{
+		SpawnFloatingFeedback(DeliveryArea, TEXT("时间已结束"), FColor::Yellow);
+		return;
+	}
+
 	TArray<FName> RequiredTags;
 	const bool bHasOrder = GetCurrentOrderRequiredTags(OrderManager, RequiredTags);
 	const TArray<FSubmittedFood> SubmittedFoods = GatherSubmittedFoods(DeliveryArea);
@@ -466,6 +513,15 @@ void UVRKitchenOrderValidationLibrary::SubmitCurrentPlateValidated(AActor* Deliv
 	}
 
 	const FString FeedbackMessage = BuildSubmitFeedbackMessage(bHasOrder, SubmittedFoods, RequiredTags, bMatchesOrder);
+	if (GameSession)
+	{
+		GameSession->RecordOrderSubmission(OutOk, FeedbackMessage);
+		if (OutOk)
+		{
+			GameSession->ApplyDemoOrderForProgress();
+		}
+	}
+
 	ClearSubmittedFoods(DeliveryArea, SubmittedFoods);
 	SpawnFloatingFeedback(DeliveryArea, FeedbackMessage, OutOk ? FColor::Green : FColor::Red);
 }
