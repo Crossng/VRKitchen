@@ -35,6 +35,12 @@ To verify that the nine-dish demo menu, including garden salad with `Salad_Dress
 & 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\verify_demo_content_design_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
 ```
 
+To run the lightweight menu-health audit that checks unlock order, unique dish names, Chinese player-facing text, and salad/combo recipe rules:
+
+```powershell
+& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\verify_demo_menu_quality_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
+```
+
 If the full project map is missing the salad dressing Blueprint or food spawner, run the idempotent repair script in the full project before map/content validation. It saves `.uasset/.umap`, so the resulting assets stay in the netdisk package, not GitHub:
 
 ```powershell

@@ -209,6 +209,14 @@ def assert_menu_progress(session, step, total, item_fragment, route_fragment, co
     require_text_contains(session.get_menu_route_text(), route_fragment, f"{context} menu route")
 
 
+def assert_menu_route_health(session, context):
+    report = session.get_demo_menu_route_quality_report_text()
+    require(session.is_demo_menu_route_healthy(), f"{context}: demo menu route should be healthy\n{report}")
+    require_text_contains(report, "菜单自检: 通过", f"{context} menu health report")
+    require_text_contains(report, "菜单数量: 9", f"{context} menu health report")
+    require_text_contains(report, "沙拉与套餐规则", f"{context} menu health report")
+
+
 def assert_stage_coaching(session, orders_until_next, unlock_fragment, preview_fragment, path_fragment, context):
     require(session.get_correct_orders_until_next_stage() == orders_until_next, f"{context}: expected {orders_until_next} orders until next stage, got {session.get_correct_orders_until_next_stage()}")
     require_text_contains(session.get_current_stage_unlock_text(), unlock_fragment, f"{context} unlock text")
@@ -314,6 +322,7 @@ if order_manager and delivery_area:
     require(session is not None, "Session component was not created on order manager")
 
     if session:
+        assert_menu_route_health(session, "initial menu route health")
         simple_order = ["Bottom_Bun", "Cooked_Patty", "Top_Bun"]
         steak_order = ["Cooked_Meat"]
         salad_order = ["Chopped_Lettuce", "Chopped_Tomato", "Salad_Dressing"]

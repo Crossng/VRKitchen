@@ -142,6 +142,12 @@ public:
 	FString GetMenuRouteText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	bool IsDemoMenuRouteHealthy() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
+	FString GetDemoMenuRouteQualityReportText() const;
+
+	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")
 	FString GetMenuProgressText() const;
 
 	UFUNCTION(BlueprintCallable, Category = "VRKitchen|Session")

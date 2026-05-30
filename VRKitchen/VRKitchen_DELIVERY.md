@@ -41,6 +41,7 @@
 - Demo 地图入口已经整理为 `/Game/_Project/Maps/VRKitchen_Demo`。
 - `tools/verify_demo_map_content_via_bridge.py` 已加入交付门禁，用于只读验证 Demo 地图里订单管理器、订单板、出餐区、煎锅/灶台、切菜板/刀、盘子、食材刷新点、沙拉食材、沙拉酱和基础空间关系都已摆放到位。
 - `tools/verify_demo_content_design_via_bridge.py` 已加入交付门禁，用真实提交推进完整 9 菜菜单，验证经典汉堡、香煎牛排、田园沙拉、进阶汉堡、套餐和最终汉堡沙拉套餐的订单标签、阶段文案、玩家目标、配方卡、工位路线、工位结果、检查清单和三星结算链路。
+- `tools/verify_demo_menu_quality_via_bridge.py` 已加入交付门禁，用于只读检查 9 菜菜单健康度，确认解锁顺序、菜名唯一性、正式食材标签、中文玩家文案、切菜/煎锅/调味区提示、沙拉与套餐规则都没有在后续改动中退化。
 - 当前 Demo 地图已补 `BP_FoodSpawner_RawPatty`，肉饼现在通过 `BP_FoodSpawner` 可重复刷新，不再依赖一次性摆放的 `BP_Patty` 覆盖汉堡练习。
 - 当前 Demo 地图已补 `BP_FoodSpawner_RawMeat`，生牛肉现在通过 `BP_FoodSpawner` 可重复刷新，用于香煎牛排、厚肉堡和牛排沙拉套餐。
 - 当前 Demo 地图已补 `BP_FoodSpawner_SaladDressing`，沙拉酱现在通过 `BP_SaladDressing` 可重复刷新，用于田园沙拉和两个沙拉套餐。
@@ -57,6 +58,7 @@
 - `BuildCookRun` Win64 Development 打包通过。
 - Demo 地图内容脚本 `tools/verify_demo_map_content_via_bridge.py` 已通过，确认核心演示 Actor、盘子、至少六个食材刷新点、沙拉所需生菜/番茄/沙拉酱、可重复肉饼刷新点、可重复生牛肉刷新点、煎锅到灶台距离、刀到切菜板距离和关键区域间距满足演示要求。
 - Demo 内容设计脚本 `tools/verify_demo_content_design_via_bridge.py` 已通过，确认 9 菜菜单可以按真实提交推进到带沙拉酱的田园沙拉、牛排沙拉套餐和经典汉堡沙拉套餐，并且每个阶段的订单详情、配方卡、工位提示、检查清单、学习路径和最终三星结算都可调用。
+- Demo 菜单健康脚本 `tools/verify_demo_menu_quality_via_bridge.py` 已通过，确认菜单路线自检正常，菜名唯一、中文文案完整、沙拉/套餐规则未退化。
 - 自动化玩法脚本 `tools/verify_demo_gameplay_loop_via_bridge.py` 已覆盖核心 Demo 规则：
 - 正确订单成功加分。
 - 空盘提交失败并提示“请先放上食材”。

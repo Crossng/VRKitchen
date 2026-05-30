@@ -41,6 +41,55 @@ namespace
 		FDemoOrderSpec OrderSpec;
 	};
 
+	const FName TagBottomBun(TEXT("Bottom_Bun"));
+	const FName TagTopBun(TEXT("Top_Bun"));
+	const FName TagCookedPatty(TEXT("Cooked_Patty"));
+	const FName TagCookedMeat(TEXT("Cooked_Meat"));
+	const FName TagChoppedLettuce(TEXT("Chopped_Lettuce"));
+	const FName TagChoppedTomato(TEXT("Chopped_Tomato"));
+	const FName TagSaladDressing(TEXT("Salad_Dressing"));
+	const FName TagRawPatty(TEXT("Raw_Patty"));
+	const FName TagRawMeat(TEXT("Raw_Meat"));
+	const FName TagRawLettuce(TEXT("Raw_Lettuce"));
+	const FName TagRawTomato(TEXT("Raw_Tomato"));
+	const FName TagBurntPatty(TEXT("Burnt_Patty"));
+	const FName TagBurntMeat(TEXT("Burnt_Meat"));
+
+	bool RequiredTagsExactlyMatch(const TArray<FName>& RequiredTags, const TArray<FName>& ExpectedTags)
+	{
+		if (RequiredTags.Num() != ExpectedTags.Num())
+		{
+			return false;
+		}
+
+		for (int32 Index = 0; Index < RequiredTags.Num(); ++Index)
+		{
+			if (RequiredTags[Index] != ExpectedTags[Index])
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool IsGardenSaladOrder(const TArray<FName>& RequiredTags)
+	{
+		static const TArray<FName> GardenSaladTags = {TagChoppedLettuce, TagChoppedTomato, TagSaladDressing};
+		return RequiredTagsExactlyMatch(RequiredTags, GardenSaladTags);
+	}
+
+	bool IsSteakSaladComboOrder(const TArray<FName>& RequiredTags)
+	{
+		static const TArray<FName> SteakSaladComboTags = {TagCookedMeat, TagChoppedLettuce, TagChoppedTomato, TagSaladDressing};
+		return RequiredTagsExactlyMatch(RequiredTags, SteakSaladComboTags);
+	}
+
+	bool IsBurgerSaladComboOrder(const TArray<FName>& RequiredTags)
+	{
+		static const TArray<FName> BurgerSaladComboTags = {TagBottomBun, TagCookedPatty, TagTopBun, TagChoppedLettuce, TagChoppedTomato, TagSaladDressing};
+		return RequiredTagsExactlyMatch(RequiredTags, BurgerSaladComboTags);
+	}
+
 	const TArray<FDemoMenuStep>& GetDemoMenuRoute()
 	{
 		static const TArray<FDemoMenuStep> Route = {
@@ -235,6 +284,270 @@ namespace
 			},
 		};
 		return Route;
+	}
+
+	const TArray<FName>& KnownMenuFoodTags()
+	{
+		static const TArray<FName> Tags = {
+			TagBottomBun,
+			TagTopBun,
+			TagCookedPatty,
+			TagCookedMeat,
+			TagChoppedLettuce,
+			TagChoppedTomato,
+			TagSaladDressing,
+		};
+		return Tags;
+	}
+
+	FString GetMenuFoodTagDisplayName(const FName FoodTag)
+	{
+		if (FoodTag == TagBottomBun)
+		{
+			return TEXT("底部面包");
+		}
+		if (FoodTag == TagTopBun)
+		{
+			return TEXT("顶部面包");
+		}
+		if (FoodTag == TagCookedPatty)
+		{
+			return TEXT("熟肉饼");
+		}
+		if (FoodTag == TagCookedMeat)
+		{
+			return TEXT("熟牛肉");
+		}
+		if (FoodTag == TagChoppedLettuce)
+		{
+			return TEXT("切好的生菜");
+		}
+		if (FoodTag == TagChoppedTomato)
+		{
+			return TEXT("切好的番茄");
+		}
+		if (FoodTag == TagSaladDressing)
+		{
+			return TEXT("沙拉酱");
+		}
+		return FoodTag.IsNone() ? TEXT("未知食材") : FoodTag.ToString();
+	}
+
+	bool IsKnownMenuFoodTag(const FName FoodTag)
+	{
+		return KnownMenuFoodTags().Contains(FoodTag);
+	}
+
+	bool IsRawOrBurntTag(const FName FoodTag)
+	{
+		return FoodTag == TagRawPatty
+			|| FoodTag == TagRawMeat
+			|| FoodTag == TagRawLettuce
+			|| FoodTag == TagRawTomato
+			|| FoodTag == TagBurntPatty
+			|| FoodTag == TagBurntMeat;
+	}
+
+	FString StepLabel(const int32 Index, const FDemoMenuStep& Step)
+	{
+		return FString::Printf(TEXT("%d/%d「%s」"), Index + 1, GetDemoMenuRoute().Num(), *Step.OrderSpec.OrderName);
+	}
+
+	void AddMenuIssue(TArray<FString>& Issues, const int32 Index, const FDemoMenuStep& Step, const FString& Message)
+	{
+		Issues.Add(FString::Printf(TEXT("%s：%s"), *StepLabel(Index, Step), *Message));
+	}
+
+	void ValidateVisibleMenuText(TArray<FString>& Issues, const int32 Index, const FDemoMenuStep& Step, const FString& FieldName, const FString& Value)
+	{
+		if (Value.TrimStartAndEnd().IsEmpty())
+		{
+			AddMenuIssue(Issues, Index, Step, FString::Printf(TEXT("%s 不能为空"), *FieldName));
+			return;
+		}
+
+		for (const FName FoodTag : KnownMenuFoodTags())
+		{
+			const FString InternalTagText = FoodTag.ToString();
+			if (Value.Contains(InternalTagText))
+			{
+				AddMenuIssue(
+					Issues,
+					Index,
+					Step,
+					FString::Printf(TEXT("%s 漏出了内部标签 %s，应使用中文玩家文案"), *FieldName, *InternalTagText));
+			}
+		}
+	}
+
+	void ValidateDemoMenuRoute(TArray<FString>& OutIssues)
+	{
+		OutIssues.Reset();
+		const TArray<FDemoMenuStep>& Route = GetDemoMenuRoute();
+		if (Route.Num() == 0)
+		{
+			OutIssues.Add(TEXT("菜单路线为空"));
+			return;
+		}
+
+		if (Route[0].FirstCorrectOrderCount != 0)
+		{
+			OutIssues.Add(TEXT("第一道菜单必须从 0 单正确订单开始"));
+		}
+
+		TSet<FString> SeenOrderNames;
+		for (int32 Index = 0; Index < Route.Num(); ++Index)
+		{
+			const FDemoMenuStep& Step = Route[Index];
+			if (Index > 0 && Step.FirstCorrectOrderCount <= Route[Index - 1].FirstCorrectOrderCount)
+			{
+				AddMenuIssue(OutIssues, Index, Step, TEXT("解锁正确订单数必须严格递增"));
+			}
+
+			if (SeenOrderNames.Contains(Step.OrderSpec.OrderName))
+			{
+				AddMenuIssue(OutIssues, Index, Step, TEXT("菜名重复，订单板和学习路线会混淆"));
+			}
+			SeenOrderNames.Add(Step.OrderSpec.OrderName);
+
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("阶段名称"), Step.StageText);
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("下一目标"), Step.NextGoalText);
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("教程文本"), Step.TutorialText);
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("推荐步骤"), Step.ActionStepText);
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("工位路线"), Step.StationRouteText);
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("工位结果"), Step.StationOutcomeText);
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("出餐前检查"), Step.PreSubmitChecklistText);
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("菜品类型"), Step.RecipeCard.DishTypeText);
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("处理要求"), Step.RecipeCard.ProcessingText);
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("叠盘顺序"), Step.RecipeCard.AssemblyText);
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("常见错误"), Step.RecipeCard.CommonMistakeText);
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("菜名"), Step.OrderSpec.OrderName);
+			ValidateVisibleMenuText(OutIssues, Index, Step, TEXT("食材详情"), Step.OrderSpec.DisplayDetails);
+
+			if (Step.OrderSpec.RequiredTags.Num() == 0)
+			{
+				AddMenuIssue(OutIssues, Index, Step, TEXT("订单至少需要 1 个食材标签"));
+			}
+
+			TSet<FName> SeenRequiredTags;
+			for (const FName FoodTag : Step.OrderSpec.RequiredTags)
+			{
+				if (!IsKnownMenuFoodTag(FoodTag))
+				{
+					AddMenuIssue(OutIssues, Index, Step, FString::Printf(TEXT("订单使用了未登记食材标签 %s"), *FoodTag.ToString()));
+				}
+				if (IsRawOrBurntTag(FoodTag))
+				{
+					AddMenuIssue(OutIssues, Index, Step, FString::Printf(TEXT("菜单不应要求生食材或烧焦食材 %s"), *FoodTag.ToString()));
+				}
+				if (SeenRequiredTags.Contains(FoodTag))
+				{
+					AddMenuIssue(OutIssues, Index, Step, FString::Printf(TEXT("同一道菜重复要求食材 %s"), *GetMenuFoodTagDisplayName(FoodTag)));
+				}
+				SeenRequiredTags.Add(FoodTag);
+
+				const FString DisplayName = GetMenuFoodTagDisplayName(FoodTag);
+				if (!Step.OrderSpec.DisplayDetails.Contains(DisplayName))
+				{
+					AddMenuIssue(OutIssues, Index, Step, FString::Printf(TEXT("食材详情缺少中文食材名 %s"), *DisplayName));
+				}
+			}
+
+			const TArray<FName>& Tags = Step.OrderSpec.RequiredTags;
+			const bool bNeedsCooking = Tags.Contains(TagCookedPatty) || Tags.Contains(TagCookedMeat);
+			const bool bNeedsChopping = Tags.Contains(TagChoppedLettuce) || Tags.Contains(TagChoppedTomato);
+			const bool bHasDressing = Tags.Contains(TagSaladDressing);
+			const bool bIsGardenSalad = IsGardenSaladOrder(Tags);
+
+			if (bNeedsCooking && (!Step.StationRouteText.Contains(TEXT("煎锅")) || !Step.StationRouteText.Contains(TEXT("灶台"))))
+			{
+				AddMenuIssue(OutIssues, Index, Step, TEXT("含熟肉订单必须在工位路线里提示煎锅和灶台"));
+			}
+
+			if (bNeedsChopping)
+			{
+				const FString ChoppingText = Step.StationRouteText + Step.StationOutcomeText + Step.RecipeCard.ProcessingText + Step.PreSubmitChecklistText;
+				if (!ChoppingText.Contains(TEXT("切菜板")) || !ChoppingText.Contains(TEXT("切好")))
+				{
+					AddMenuIssue(OutIssues, Index, Step, TEXT("含切菜订单必须提示切菜板和切好状态"));
+				}
+			}
+
+			if (bHasDressing)
+			{
+				if (!Tags.Contains(TagChoppedLettuce) || !Tags.Contains(TagChoppedTomato))
+				{
+					AddMenuIssue(OutIssues, Index, Step, TEXT("含沙拉酱订单必须同时要求切好的生菜和切好的番茄"));
+				}
+				if (Tags.Last() != TagSaladDressing)
+				{
+					AddMenuIssue(OutIssues, Index, Step, TEXT("沙拉酱必须作为沙拉/套餐最后一个叠盘标签"));
+				}
+				if (!Step.StationRouteText.Contains(TEXT("调味区")))
+				{
+					AddMenuIssue(OutIssues, Index, Step, TEXT("含沙拉酱订单必须在工位路线里提示调味区"));
+				}
+				if (!Step.PreSubmitChecklistText.Contains(TEXT("沙拉酱")))
+				{
+					AddMenuIssue(OutIssues, Index, Step, TEXT("含沙拉酱订单必须在出餐前检查里提示沙拉酱"));
+				}
+			}
+
+			if (bIsGardenSalad)
+			{
+				if (!Step.StationRouteText.Contains(TEXT("冷菜")) || !Step.StationRouteText.Contains(TEXT("不用煎锅")))
+				{
+					AddMenuIssue(OutIssues, Index, Step, TEXT("田园沙拉必须明确提示冷菜且不用煎锅"));
+				}
+				if (!Step.RecipeCard.DishTypeText.Contains(TEXT("沙拉")))
+				{
+					AddMenuIssue(OutIssues, Index, Step, TEXT("田园沙拉菜品类型必须标明沙拉"));
+				}
+			}
+
+			if (IsSteakSaladComboOrder(Tags) || IsBurgerSaladComboOrder(Tags))
+			{
+				if (!Step.RecipeCard.DishTypeText.Contains(TEXT("套餐")))
+				{
+					AddMenuIssue(OutIssues, Index, Step, TEXT("沙拉组合订单必须在菜品类型里标明套餐"));
+				}
+				if (!Step.RecipeCard.CommonMistakeText.Contains(TEXT("沙拉酱")))
+				{
+					AddMenuIssue(OutIssues, Index, Step, TEXT("沙拉套餐常见错误必须提醒沙拉酱"));
+				}
+			}
+		}
+	}
+
+	bool IsDemoMenuRouteHealthyInternal()
+	{
+		TArray<FString> Issues;
+		ValidateDemoMenuRoute(Issues);
+		return Issues.Num() == 0;
+	}
+
+	FString BuildDemoMenuRouteQualityReportText()
+	{
+		TArray<FString> Issues;
+		ValidateDemoMenuRoute(Issues);
+		const TArray<FDemoMenuStep>& Route = GetDemoMenuRoute();
+		if (Issues.Num() == 0)
+		{
+			return FString::Printf(
+				TEXT("菜单自检: 通过\n菜单数量: %d\n检查项: 解锁顺序、菜名唯一、正式食材标签、中文玩家文案、切菜/煎锅/调味区提示、沙拉与套餐规则"),
+				Route.Num());
+		}
+
+		TArray<FString> Lines;
+		for (const FString& Issue : Issues)
+		{
+			Lines.Add(FString::Printf(TEXT("- %s"), *Issue));
+		}
+		return FString::Printf(
+			TEXT("菜单自检: 失败\n菜单数量: %d\n问题数: %d\n%s"),
+			Route.Num(),
+			Issues.Num(),
+			*FString::Join(Lines, TEXT("\n")));
 	}
 
 	int32 GetMenuStepIndexForProgress(const int32 CorrectOrders)
@@ -817,6 +1130,16 @@ FString UVRKitchenGameSessionComponent::GetMenuRouteText() const
 		MenuItems.Add(FString::Printf(TEXT("%d.%s"), Index + 1, *Route[Index].OrderSpec.OrderName));
 	}
 	return FString::Printf(TEXT("菜单路线：%s"), *FString::Join(MenuItems, TEXT(" -> ")));
+}
+
+bool UVRKitchenGameSessionComponent::IsDemoMenuRouteHealthy() const
+{
+	return IsDemoMenuRouteHealthyInternal();
+}
+
+FString UVRKitchenGameSessionComponent::GetDemoMenuRouteQualityReportText() const
+{
+	return BuildDemoMenuRouteQualityReportText();
 }
 
 FString UVRKitchenGameSessionComponent::GetMenuProgressText() const
