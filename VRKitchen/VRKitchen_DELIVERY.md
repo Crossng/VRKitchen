@@ -6,7 +6,7 @@
 
 ## 启动方式
 
-1. 使用 Unreal Engine 5.5.4 打开 `VRKitchen.uproject`。
+1. 使用 Unreal Engine 5.5.4 打开 `VRKitchen/VRKitchen.uproject`。
 2. 默认启动地图为 `/Game/_Project/Maps/VRKitchen_Demo`。
 3. SteamVR 用户请确保 SteamVR 已安装，并在 OpenXR 设置中使用 SteamVR Runtime。
 4. 没有头显时可以进行编辑器验证、蓝图编译、数据验证和 Win64 打包验证，但不能确认真实 VR 手柄手感。
@@ -33,11 +33,13 @@
 - Demo 会话组件会暴露本局复盘文本，包括总提交数、准确率、错误复盘、最佳连击和下一局练习重点，结算后可直接显示给玩家。
 - 香煎牛排已经作为正式菜单接入，要求提交“熟牛肉”，用于教学煎锅和灶台烹饪。
 - 田园沙拉已经作为正式菜单接入，要求按顺序提交“切好的生菜, 切好的番茄”，不需要煎锅。
+- 沙拉真实食材链路已补齐：`/Game/Blueprints/BP_Lettuce`、`/Game/BP_Tomato`、`/Game/Blueprints/BP_ChoppedLettuce`、`/Game/Blueprints/BP_ChoppedTomato` 的切菜默认值和订单标签已通过只读脚本验证；本轮修复了 `/Game/BP_Tomato` 缺少 `Raw_Tomato` 标签的问题。
 - 套餐订单已经作为后期挑战接入：牛排沙拉套餐要求“熟牛肉, 切好的生菜, 切好的番茄”，经典汉堡沙拉套餐要求“底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄”。
 - 运行时会显示中文新手提示、剩余时间、分数、完成数、错误数、当前阶段、紧张度和下一目标。
 - 时间进入 45 秒内会提示“注意时间”，进入 20 秒内会提示“最后冲刺”；教程文本会随订单阶段和错误恢复动态变化。
 - Demo 地图入口已经整理为 `/Game/_Project/Maps/VRKitchen_Demo`。
-- 资源整理规范已经写入 `VRKitchen_ASSET_ORGANIZATION.md`，第一阶段迁移路线写入 `VRKitchen_ASSET_MIGRATION_PLAN.md`；当前剩余审计为 `7 pass / 24 warn / 0 fail`，下一批建议只 dry-run `Collections`、`Developers` 和 `food_test` 归入 `_Dev`。
+- 资源整理规范已经写入 `VRKitchen_ASSET_ORGANIZATION.md`，第一阶段迁移路线写入 `VRKitchen_ASSET_MIGRATION_PLAN.md`；当前剩余审计为 `7 pass / 24 warn / 0 fail`。
+- Phase 2 原型资源迁移已执行：`Content/_Dev/Prototypes/food_test` 下已有迁移后的资源本体；旧 `Content/food_test` 仍残留 redirector 和 `.fbx/.png` sidecar 文件，需要在可视化 Unreal Editor 中 Fix Up Redirectors 并人工确认后再清理。
 - 后续迁移使用 `tools/migrate_asset_organization_via_editor.py` 先 dry-run，再小批量执行；命令行默认不执行 Fix Up Redirectors，真实迁移后需要在 Unreal Editor 的 Content Browser 中手动修复重定向器。
 
 ## 已验证项目
@@ -59,6 +61,7 @@
 - 连续完成至少 3 单后订单难度递进到香煎牛排，后续还能进入田园沙拉、生菜汉堡、番茄汉堡、厚肉、双肉和套餐订单。
 - 香煎牛排覆盖正确提交、生牛肉失败、烧焦牛肉失败和错误菜品失败。
 - 田园沙拉覆盖正确提交、未切生菜失败、未切番茄失败、沙拉顺序错误失败和多余面包失败，并检查反馈文本。
+- `tools/verify_salad_cutting_assets_via_bridge.py` 只读验证沙拉切菜资产默认值：生菜/番茄必须各切 1 次并生成对应切好食材，生菜、番茄、切好生菜、切好番茄必须携带订单校验所需标签。
 - 牛排沙拉套餐和经典汉堡沙拉套餐覆盖正确提交、缺少配菜失败、套餐顺序错误失败和多余食材失败，并检查反馈文本。
 - 煎锅离开灶台不烹饪，回到灶台后可以继续煎熟，熟肉继续受热会烧焦。
 - 会话组件暴露阶段文本、紧张度、下一目标和教程提示，自动化会检查这些信息可调用且会随进度变化。
@@ -118,6 +121,18 @@ dry-run 结束后必须先验证 JSON 报告，确认没有真实移动资源、
 python C:\Users\hp\Desktop\CrazyKitchen\tools\verify_asset_migration_report.py --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN.json
 ```
 
+沙拉切菜资产链路可单独验证：
+
+```powershell
+& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\verify_salad_cutting_assets_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
+```
+
+如验证指出沙拉切菜默认值或标签缺失，可运行修复脚本后重新验证；该脚本会保存相关 `.uasset`，因此修复后的完整工程资源仍走网盘，不进入 GitHub：
+
+```powershell
+& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\fix_salad_cutting_assets_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
+```
+
 ## 未验证项目
 
 - 真实 SteamVR 头显运行体验。
@@ -126,15 +141,15 @@ python C:\Users\hp\Desktop\CrazyKitchen\tools\verify_asset_migration_report.py -
 
 ## 交付方式
 
-- 完整工程通过网盘交付，必须包含 `Content`、`Config`、`Source`、`Plugins` 和 `VRKitchen.uproject`。
+- 完整工程通过网盘交付，必须包含 `VRKitchen/Content`、`VRKitchen/Config`、`VRKitchen/Source`、`VRKitchen/Plugins` 和 `VRKitchen/VRKitchen.uproject`。
 - GitHub 仓库只放代码、配置、说明和小工具，不上传 `Content` 大资源、`.uasset`、`.umap`、`Binaries`、`Intermediate`、`Saved`、`DerivedDataCache`。
 - 当前 GitHub 仓库地址为 `https://github.com/Crossng/VRKitchen.git`。
 
 ## 建议上传网盘时排除
 
-- `Intermediate`
-- `Saved`
-- `DerivedDataCache`
-- `Binaries`
+- `VRKitchen/Intermediate`
+- `VRKitchen/Saved`
+- `VRKitchen/DerivedDataCache`
+- `VRKitchen/Binaries`
 
 这些目录可以重新生成；如果担心接收方没有编译环境，可以额外保留 `Binaries`，但包体会更大。

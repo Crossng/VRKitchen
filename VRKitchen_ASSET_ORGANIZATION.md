@@ -71,6 +71,7 @@ Content/
 
 - 交付 Demo 地图固定为 `/Game/_Project/Maps/VRKitchen_Demo`。
 - 项目新增资源默认进入 `Content/_Project`。
+- 沙拉相关当前活跃路径暂保持为现状以避免引用断裂：生菜在 `/Game/Blueprints/BP_Lettuce`，番茄在 `/Game/BP_Tomato`，切好食材在 `/Game/Blueprints/BP_ChoppedLettuce` 与 `/Game/Blueprints/BP_ChoppedTomato`；后续迁移到 `Content/_Project/Gameplay/Food` 前必须先 dry-run 并跑沙拉切菜验证。
 - 第三方包或原始素材进入 `Content/_External`，不要直接散在根目录。
 - VRTemplate、StarterContent 等历史模板资源迁移前先归类到 `Content/_Legacy`，确认引用后再删除。
 - 临时验证资源、测试地图、实验蓝图进入 `Content/_Dev`，交付前决定是否删除或转正。
@@ -87,7 +88,8 @@ Content/
 
 ## 当前推荐下一批
 
-- 先只 dry-run `phase-2-dev-folders` 和 `phase-2-prototypes`，观察 `Collections`、`Developers`、`food_test` 是否会移动到 `_Dev`。
+- 先只 dry-run `phase-2-dev-folders`，观察 `Collections`、`Developers` 是否会移动到 `_Dev`。
+- `food_test` 原型资源本体已迁移到 `_Dev/Prototypes/food_test`；旧目录残留 redirector 和导入 sidecar 文件，下一步应在可视化 Unreal Editor 中 Fix Up Redirectors 后再清理，不要重复执行目录迁移。
 - 不在命令行 unattended 模式中自动 Fix Up Redirectors；真实迁移后打开 Unreal Editor 手动修复。
 - `VRTemplate`、`Blueprints`、根目录活跃蓝图、订单区和食材蓝图属于高风险或中风险，不应和开发临时资源一起迁移。
 

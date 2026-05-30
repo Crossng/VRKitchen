@@ -43,6 +43,8 @@ REQUIRED_CODE_REPO_ITEMS = {
     "VRKitchen/Source/VRKitchen/VRKitchenOrderValidationLibrary.cpp": "order validation source",
     "VRKitchen/Source/VRKitchen/VRKitchenPanCookComponent.cpp": "pan cooking source",
     "tools/verify_demo_gameplay_loop_via_bridge.py": "gameplay automation script",
+    "tools/verify_salad_cutting_assets_via_bridge.py": "salad cutting asset validation script",
+    "tools/fix_salad_cutting_assets_via_bridge.py": "salad cutting asset repair script",
     "tools/verify_delivery_readiness.py": "delivery readiness script",
     "tools/verify_asset_organization.py": "asset organization audit script",
     "tools/migrate_asset_organization_via_editor.py": "staged asset migration script",
