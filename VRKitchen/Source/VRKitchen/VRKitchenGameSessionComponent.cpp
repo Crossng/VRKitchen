@@ -30,26 +30,37 @@ namespace
 			};
 		}
 
-		if (CorrectOrders < 4)
+		if (CorrectOrders == 2)
 		{
-			const bool bUseLettuce = CorrectOrders % 2 == 0;
-			return bUseLettuce
-				? FDemoOrderSpec{
-					TEXT("生菜汉堡"),
-					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
-					TEXT("底部面包, 熟肉饼, 切好的生菜, 顶部面包"),
-				}
-				: FDemoOrderSpec{
-					TEXT("番茄汉堡"),
-					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
-					TEXT("底部面包, 熟肉饼, 切好的番茄, 顶部面包"),
-				};
+			return {
+				TEXT("生菜汉堡"),
+				{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
+				TEXT("底部面包, 熟肉饼, 切好的生菜, 顶部面包"),
+			};
+		}
+
+		if (CorrectOrders == 3)
+		{
+			return {
+				TEXT("番茄汉堡"),
+				{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
+				TEXT("底部面包, 熟肉饼, 切好的番茄, 顶部面包"),
+			};
+		}
+
+		if (CorrectOrders == 4)
+		{
+			return {
+				TEXT("厚肉生菜堡"),
+				{TEXT("Bottom_Bun"), TEXT("Cooked_Meat"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
+				TEXT("底部面包, 熟牛肉, 切好的生菜, 顶部面包"),
+			};
 		}
 
 		return {
-			TEXT("豪华汉堡"),
-			{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
-			TEXT("底部面包, 熟肉饼, 切好的生菜, 切好的番茄, 顶部面包"),
+			TEXT("豪华双肉堡"),
+			{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Cooked_Meat"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
+			TEXT("底部面包, 熟肉饼, 切好的生菜, 熟牛肉, 切好的番茄, 顶部面包"),
 		};
 	}
 
