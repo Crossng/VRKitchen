@@ -49,6 +49,16 @@
 - 结算阶段支持按 `R` 重新开始一局。
 - 如果后续修改蓝图或地图，请至少重新运行 C++ 构建、蓝图编译、数据验证、玩法脚本和 Win64 打包。
 
+## 交付前自检
+
+每次完成一轮新目标、准备推送 GitHub 或上传网盘前，建议先运行：
+
+```powershell
+python ..\tools\verify_delivery_readiness.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen --code-repo-root C:\Users\hp\Desktop\VRKitchen_CodeOnly
+```
+
+脚本只做文件和配置层面的交付边界检查：完整工程是否包含 Demo 地图、源码、配置、插件和说明；代码版仓库是否没有误跟踪 `Content`、`.uasset`、`.umap`、二进制输出和大文件。它不能替代 C++ 构建、蓝图编译、DataValidation、玩法自动化、Win64 打包和真实头显测试。
+
 ## 未验证项目
 
 - 真实 SteamVR 头显运行体验。

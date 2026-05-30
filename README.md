@@ -19,6 +19,16 @@ The full Unreal project assets are delivered separately through cloud storage/ne
 4. Rebuild the `VRKitchen` C++ module if prompted.
 5. Run `CompileAllBlueprints`, `DataValidation`, and `tools/verify_demo_gameplay_loop_via_bridge.py` before sharing a release.
 
+## Delivery self-check
+
+Before pushing code or uploading the full project to netdisk, run the delivery boundary check:
+
+```powershell
+python tools/verify_delivery_readiness.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen --code-repo-root C:\Users\hp\Desktop\VRKitchen_CodeOnly
+```
+
+The script checks that the full project still contains the demo map, source, config, plugin, and delivery docs, and that the code-only GitHub repository does not track `Content`, `.uasset`, `.umap`, binaries, package outputs, or oversized files.
+
 ## What belongs in GitHub
 
 - `VRKitchen/Source/`
