@@ -19,85 +19,143 @@ namespace
 		FString DisplayDetails;
 	};
 
+	struct FDemoMenuStep
+	{
+		int32 FirstCorrectOrderCount = 0;
+		FString StageText;
+		FString NextGoalText;
+		FString TutorialText;
+		FDemoOrderSpec OrderSpec;
+	};
+
+	const TArray<FDemoMenuStep>& GetDemoMenuRoute()
+	{
+		static const TArray<FDemoMenuStep> Route = {
+			{
+				0,
+				TEXT("基础汉堡训练"),
+				TEXT("先稳定完成 2 单经典汉堡"),
+				TEXT("经典汉堡：底部面包 + 熟肉饼 + 顶部面包。"),
+				{
+					TEXT("经典汉堡"),
+					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Top_Bun")},
+					TEXT("底部面包, 熟肉饼, 顶部面包"),
+				},
+			},
+			{
+				2,
+				TEXT("牛排煎制"),
+				TEXT("用煎锅和灶台做香煎牛排"),
+				TEXT("香煎牛排：把生牛肉放进煎锅，锅在灶台上加热到熟牛肉后再出餐。"),
+				{
+					TEXT("香煎牛排"),
+					{TEXT("Cooked_Meat")},
+					TEXT("熟牛肉"),
+				},
+			},
+			{
+				3,
+				TEXT("沙拉切配"),
+				TEXT("切生菜和番茄做田园沙拉"),
+				TEXT("田园沙拉：切好生菜和番茄后直接叠盘出餐，不需要煎锅。"),
+				{
+					TEXT("田园沙拉"),
+					{TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
+					TEXT("切好的生菜, 切好的番茄"),
+				},
+			},
+			{
+				4,
+				TEXT("生菜汉堡进阶"),
+				TEXT("把切好的生菜加入汉堡"),
+				TEXT("生菜汉堡：先切生菜，再放到熟肉饼上方。"),
+				{
+					TEXT("生菜汉堡"),
+					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
+					TEXT("底部面包, 熟肉饼, 切好的生菜, 顶部面包"),
+				},
+			},
+			{
+				5,
+				TEXT("番茄切配"),
+				TEXT("切番茄，注意不要换顺序"),
+				TEXT("番茄汉堡：先切番茄，叠盘顺序仍然严格。"),
+				{
+					TEXT("番茄汉堡"),
+					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
+					TEXT("底部面包, 熟肉饼, 切好的番茄, 顶部面包"),
+				},
+			},
+			{
+				6,
+				TEXT("厚肉煎制"),
+				TEXT("煎熟牛肉再提交厚肉堡"),
+				TEXT("厚肉生菜堡：使用熟牛肉，不要提交生肉或烧焦肉。"),
+				{
+					TEXT("厚肉生菜堡"),
+					{TEXT("Bottom_Bun"), TEXT("Cooked_Meat"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
+					TEXT("底部面包, 熟牛肉, 切好的生菜, 顶部面包"),
+				},
+			},
+			{
+				7,
+				TEXT("豪华双肉挑战"),
+				TEXT("完成豪华双肉堡，准备套餐挑战"),
+				TEXT("豪华双肉堡：肉饼、生菜、熟牛肉、番茄都要按订单顺序。"),
+				{
+					TEXT("豪华双肉堡"),
+					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Cooked_Meat"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
+					TEXT("底部面包, 熟肉饼, 切好的生菜, 熟牛肉, 切好的番茄, 顶部面包"),
+				},
+			},
+			{
+				8,
+				TEXT("牛排沙拉套餐"),
+				TEXT("把牛排和沙拉按套餐顺序出餐"),
+				TEXT("牛排沙拉套餐：先放熟牛肉，再放切好的生菜和番茄。"),
+				{
+					TEXT("牛排沙拉套餐"),
+					{TEXT("Cooked_Meat"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
+					TEXT("熟牛肉, 切好的生菜, 切好的番茄"),
+				},
+			},
+			{
+				9,
+				TEXT("汉堡沙拉套餐"),
+				TEXT("完成经典汉堡沙拉套餐冲三星"),
+				TEXT("经典汉堡沙拉套餐：先完成经典汉堡，再补上沙拉配菜。"),
+				{
+					TEXT("经典汉堡沙拉套餐"),
+					{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Top_Bun"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
+					TEXT("底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄"),
+				},
+			},
+		};
+		return Route;
+	}
+
+	int32 GetMenuStepIndexForProgress(const int32 CorrectOrders)
+	{
+		const TArray<FDemoMenuStep>& Route = GetDemoMenuRoute();
+		for (int32 Index = Route.Num() - 1; Index >= 0; --Index)
+		{
+			if (CorrectOrders >= Route[Index].FirstCorrectOrderCount)
+			{
+				return Index;
+			}
+		}
+		return 0;
+	}
+
+	const FDemoMenuStep& GetDemoMenuStepForProgress(const int32 CorrectOrders)
+	{
+		const TArray<FDemoMenuStep>& Route = GetDemoMenuRoute();
+		return Route[FMath::Clamp(GetMenuStepIndexForProgress(CorrectOrders), 0, Route.Num() - 1)];
+	}
+
 	FDemoOrderSpec GetDemoOrderForProgress(const int32 CorrectOrders)
 	{
-		if (CorrectOrders < 2)
-		{
-			return {
-				TEXT("经典汉堡"),
-				{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Top_Bun")},
-				TEXT("底部面包, 熟肉饼, 顶部面包"),
-			};
-		}
-
-		if (CorrectOrders == 2)
-		{
-			return {
-				TEXT("香煎牛排"),
-				{TEXT("Cooked_Meat")},
-				TEXT("熟牛肉"),
-			};
-		}
-
-		if (CorrectOrders == 3)
-		{
-			return {
-				TEXT("田园沙拉"),
-				{TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
-				TEXT("切好的生菜, 切好的番茄"),
-			};
-		}
-
-		if (CorrectOrders == 4)
-		{
-			return {
-				TEXT("生菜汉堡"),
-				{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
-				TEXT("底部面包, 熟肉饼, 切好的生菜, 顶部面包"),
-			};
-		}
-
-		if (CorrectOrders == 5)
-		{
-			return {
-				TEXT("番茄汉堡"),
-				{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
-				TEXT("底部面包, 熟肉饼, 切好的番茄, 顶部面包"),
-			};
-		}
-
-		if (CorrectOrders == 6)
-		{
-			return {
-				TEXT("厚肉生菜堡"),
-				{TEXT("Bottom_Bun"), TEXT("Cooked_Meat"), TEXT("Chopped_Lettuce"), TEXT("Top_Bun")},
-				TEXT("底部面包, 熟牛肉, 切好的生菜, 顶部面包"),
-			};
-		}
-
-		if (CorrectOrders == 7)
-		{
-			return {
-				TEXT("豪华双肉堡"),
-				{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Chopped_Lettuce"), TEXT("Cooked_Meat"), TEXT("Chopped_Tomato"), TEXT("Top_Bun")},
-				TEXT("底部面包, 熟肉饼, 切好的生菜, 熟牛肉, 切好的番茄, 顶部面包"),
-			};
-		}
-
-		if (CorrectOrders == 8)
-		{
-			return {
-				TEXT("牛排沙拉套餐"),
-				{TEXT("Cooked_Meat"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
-				TEXT("熟牛肉, 切好的生菜, 切好的番茄"),
-			};
-		}
-
-		return {
-			TEXT("经典汉堡沙拉套餐"),
-			{TEXT("Bottom_Bun"), TEXT("Cooked_Patty"), TEXT("Top_Bun"), TEXT("Chopped_Lettuce"), TEXT("Chopped_Tomato")},
-			TEXT("底部面包, 熟肉饼, 顶部面包, 切好的生菜, 切好的番茄"),
-		};
+		return GetDemoMenuStepForProgress(CorrectOrders).OrderSpec;
 	}
 
 	void SetOrderNameProperty(FProperty* Property, void* Container, const FString& Value)
@@ -513,74 +571,50 @@ FString UVRKitchenGameSessionComponent::GetResultGradeText() const
 	}
 }
 
+int32 UVRKitchenGameSessionComponent::GetMenuRouteTotal() const
+{
+	return GetDemoMenuRoute().Num();
+}
+
+int32 UVRKitchenGameSessionComponent::GetCurrentMenuRouteStep() const
+{
+	return GetMenuStepIndexForProgress(CorrectOrders) + 1;
+}
+
+FString UVRKitchenGameSessionComponent::GetCurrentMenuItemText() const
+{
+	const FDemoMenuStep& Step = GetDemoMenuStepForProgress(CorrectOrders);
+	return FString::Printf(TEXT("%s：%s"), *Step.OrderSpec.OrderName, *Step.OrderSpec.DisplayDetails);
+}
+
+FString UVRKitchenGameSessionComponent::GetMenuRouteText() const
+{
+	TArray<FString> MenuItems;
+	const TArray<FDemoMenuStep>& Route = GetDemoMenuRoute();
+	for (int32 Index = 0; Index < Route.Num(); ++Index)
+	{
+		MenuItems.Add(FString::Printf(TEXT("%d.%s"), Index + 1, *Route[Index].OrderSpec.OrderName));
+	}
+	return FString::Printf(TEXT("菜单路线：%s"), *FString::Join(MenuItems, TEXT(" -> ")));
+}
+
+FString UVRKitchenGameSessionComponent::GetMenuProgressText() const
+{
+	return FString::Printf(
+		TEXT("菜单进度: %d/%d  当前: %s"),
+		GetCurrentMenuRouteStep(),
+		GetMenuRouteTotal(),
+		*GetCurrentMenuItemText());
+}
+
 int32 UVRKitchenGameSessionComponent::GetOrderStageIndex() const
 {
-	if (CorrectOrders < 2)
-	{
-		return 1;
-	}
-
-	if (CorrectOrders == 2)
-	{
-		return 2;
-	}
-
-	if (CorrectOrders == 3)
-	{
-		return 3;
-	}
-
-	if (CorrectOrders == 4)
-	{
-		return 4;
-	}
-
-	if (CorrectOrders == 5)
-	{
-		return 5;
-	}
-
-	if (CorrectOrders == 6)
-	{
-		return 6;
-	}
-
-	if (CorrectOrders == 7)
-	{
-		return 7;
-	}
-
-	if (CorrectOrders == 8)
-	{
-		return 8;
-	}
-
-	return 9;
+	return GetCurrentMenuRouteStep();
 }
 
 FString UVRKitchenGameSessionComponent::GetOrderStageText() const
 {
-	switch (GetOrderStageIndex())
-	{
-	case 1:
-		return TEXT("基础汉堡训练");
-	case 2:
-		return TEXT("牛排煎制");
-	case 3:
-		return TEXT("沙拉切配");
-	case 4:
-		return TEXT("生菜汉堡进阶");
-	case 5:
-		return TEXT("番茄切配");
-	case 6:
-		return TEXT("厚肉煎制");
-	case 7:
-		return TEXT("豪华双肉挑战");
-	case 8:
-		return TEXT("牛排沙拉套餐");
-	default:
-		return TEXT("汉堡沙拉套餐");
-	}
+	return GetDemoMenuStepForProgress(CorrectOrders).StageText;
 }
 
 int32 UVRKitchenGameSessionComponent::GetUrgencyLevel() const
@@ -628,27 +662,7 @@ FString UVRKitchenGameSessionComponent::GetNextGoalText() const
 		? FString::Printf(TEXT("还差 %d 分达成目标"), MissingScore)
 		: TEXT("自由练习");
 
-	switch (GetOrderStageIndex())
-	{
-	case 1:
-		return FString::Printf(TEXT("%s；先稳定完成 2 单经典汉堡"), *ScoreGoal);
-	case 2:
-		return FString::Printf(TEXT("%s；用煎锅和灶台做香煎牛排"), *ScoreGoal);
-	case 3:
-		return FString::Printf(TEXT("%s；切生菜和番茄做田园沙拉"), *ScoreGoal);
-	case 4:
-		return FString::Printf(TEXT("%s；把切好的生菜加入汉堡"), *ScoreGoal);
-	case 5:
-		return FString::Printf(TEXT("%s；切番茄，注意不要换顺序"), *ScoreGoal);
-	case 6:
-		return FString::Printf(TEXT("%s；煎熟牛肉再提交厚肉堡"), *ScoreGoal);
-	case 7:
-		return FString::Printf(TEXT("%s；完成豪华双肉堡，准备套餐挑战"), *ScoreGoal);
-	case 8:
-		return FString::Printf(TEXT("%s；把牛排和沙拉按套餐顺序出餐"), *ScoreGoal);
-	default:
-		return FString::Printf(TEXT("%s；完成经典汉堡沙拉套餐冲三星"), *ScoreGoal);
-	}
+	return FString::Printf(TEXT("%s；%s"), *ScoreGoal, *GetDemoMenuStepForProgress(CorrectOrders).NextGoalText);
 }
 
 FString UVRKitchenGameSessionComponent::GetTutorialHintText() const
@@ -674,27 +688,7 @@ FString UVRKitchenGameSessionComponent::GetTutorialHintText() const
 		Prefix = TEXT("刚才出错：先看红色失败原因。\n");
 	}
 
-	switch (GetOrderStageIndex())
-	{
-	case 1:
-		return Prefix + TEXT("经典汉堡：底部面包 + 熟肉饼 + 顶部面包。");
-	case 2:
-		return Prefix + TEXT("香煎牛排：把生牛肉放进煎锅，锅在灶台上加热到熟牛肉后再出餐。");
-	case 3:
-		return Prefix + TEXT("田园沙拉：切好生菜和番茄后直接叠盘出餐，不需要煎锅。");
-	case 4:
-		return Prefix + TEXT("生菜汉堡：先切生菜，再放到熟肉饼上方。");
-	case 5:
-		return Prefix + TEXT("番茄汉堡：先切番茄，叠盘顺序仍然严格。");
-	case 6:
-		return Prefix + TEXT("厚肉生菜堡：使用熟牛肉，不要提交生肉或烧焦肉。");
-	case 7:
-		return Prefix + TEXT("豪华双肉堡：肉饼、生菜、熟牛肉、番茄都要按订单顺序。");
-	case 8:
-		return Prefix + TEXT("牛排沙拉套餐：先放熟牛肉，再放切好的生菜和番茄。");
-	default:
-		return Prefix + TEXT("经典汉堡沙拉套餐：先完成经典汉堡，再补上沙拉配菜。");
-	}
+	return Prefix + GetDemoMenuStepForProgress(CorrectOrders).TutorialText;
 }
 
 void UVRKitchenGameSessionComponent::EnsureTextComponents()
@@ -774,11 +768,12 @@ FString UVRKitchenGameSessionComponent::BuildStatusText() const
 	}
 
 	return FString::Printf(
-		TEXT("剩余时间: %02d:%02d  %s\n阶段: %s\n分数: %d / 目标: %d\n完成: %d  错误: %d  连击: %d\n下一目标: %s\n%s"),
+		TEXT("剩余时间: %02d:%02d  %s\n阶段: %s\n%s\n分数: %d / 目标: %d\n完成: %d  错误: %d  连击: %d\n下一目标: %s\n%s"),
 		Minutes,
 		Seconds,
 		*GetUrgencyText(),
 		*GetOrderStageText(),
+		*GetMenuProgressText(),
 		SessionScore,
 		TargetScore,
 		CorrectOrders,

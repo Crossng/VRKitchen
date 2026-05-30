@@ -200,6 +200,15 @@ def run_failure_case(session, delivery_area, name, tags):
     print(f"PASS failure case: {name}")
 
 
+def assert_menu_progress(session, step, total, item_fragment, route_fragment, context):
+    require(session.get_menu_route_total() == total, f"{context}: expected menu route total {total}, got {session.get_menu_route_total()}")
+    require(session.get_current_menu_route_step() == step, f"{context}: expected menu step {step}, got {session.get_current_menu_route_step()}")
+    require_text_contains(session.get_current_menu_item_text(), item_fragment, f"{context} current menu item")
+    require_text_contains(session.get_menu_progress_text(), f"{step}/{total}", f"{context} menu progress")
+    require_text_contains(session.get_menu_progress_text(), item_fragment, f"{context} menu progress item")
+    require_text_contains(session.get_menu_route_text(), route_fragment, f"{context} menu route")
+
+
 order_manager = find_actor_by_label("BP_OrderManager_Playable")
 delivery_area = find_actor_by_label("BP_DeliveryArea")
 order_tablet = find_actor_by_label("BP_OrderTablet")
@@ -240,6 +249,9 @@ if order_manager and delivery_area:
         burger_salad_combo_order = ["Bottom_Bun", "Cooked_Patty", "Top_Bun", "Chopped_Lettuce", "Chopped_Tomato"]
 
         reset_session(session)
+        assert_menu_progress(session, 1, 9, "经典汉堡", "经典汉堡 -> 2.香煎牛排", "initial menu progress")
+        require_text_contains(session.get_menu_route_text(), "田园沙拉", "menu route includes salad")
+        require_text_contains(session.get_menu_route_text(), "经典汉堡沙拉套餐", "menu route includes final combo")
         assert_session_guidance(
             session,
             1,
@@ -346,6 +358,7 @@ if order_manager and delivery_area:
         reset_session(session)
         require(submit_tags(delivery_area, simple_order), "First simple order should succeed")
         require(submit_tags(delivery_area, simple_order), "Second simple order should succeed")
+        assert_menu_progress(session, 2, 9, "香煎牛排", "牛排沙拉套餐", "steak menu progress")
         assert_session_guidance(
             session,
             2,
@@ -361,6 +374,7 @@ if order_manager and delivery_area:
         submit_tags_expect_feedback(session, delivery_area, ["Raw_Meat"], "牛肉还没煎熟", "raw meat steak order")
         submit_tags_expect_feedback(session, delivery_area, ["Burnt_Meat"], "牛肉烧焦了", "burnt meat steak order")
         require(submit_tags(delivery_area, steak_order), "Third progressive steak order should succeed")
+        assert_menu_progress(session, 3, 9, "田园沙拉", "汉堡沙拉套餐", "salad menu progress")
         assert_session_guidance(
             session,
             3,
@@ -400,6 +414,7 @@ if order_manager and delivery_area:
         require(submit_tags(delivery_area, tomato_order), "Combo probe sixth tomato burger should succeed")
         require(submit_tags(delivery_area, meat_order), "Combo probe seventh thick meat order should succeed")
         require(submit_tags(delivery_area, deluxe_order), "Combo probe eighth double meat order should succeed")
+        assert_menu_progress(session, 8, 9, "牛排沙拉套餐", "经典汉堡沙拉套餐", "steak salad combo menu progress")
         assert_session_guidance(
             session,
             8,
@@ -414,6 +429,7 @@ if order_manager and delivery_area:
         submit_tags_expect_feedback(session, delivery_area, ["Chopped_Lettuce", "Cooked_Meat", "Chopped_Tomato"], "套餐顺序错误：先放熟牛肉", "steak salad combo wrong order")
         submit_tags_expect_feedback(session, delivery_area, ["Cooked_Meat", "Chopped_Lettuce", "Chopped_Tomato", "Top_Bun"], "套餐多了食材：顶部面包", "steak salad combo with extra bun")
         require(submit_tags(delivery_area, steak_salad_combo_order), "Steak salad combo should succeed after probes")
+        assert_menu_progress(session, 9, 9, "经典汉堡沙拉套餐", "牛排沙拉套餐", "burger salad combo menu progress")
         assert_session_guidance(
             session,
             9,
