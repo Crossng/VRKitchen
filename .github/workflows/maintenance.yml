@@ -1,0 +1,35 @@
+name: 维护检查
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python-tooling:
+    name: Python 工具（Python ${{ matrix.python-version }}）
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
+
+    steps:
+      - name: 签出仓库
+        uses: actions/checkout@v4
+
+      - name: 配置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 编译 Python 工具
+        run: python -m compileall -q tools
+
+      - name: 运行仓库检查
+        run: python -m unittest discover -s tools/tests -p 'test_*.py'
+
+      - name: 验证纯代码交付边界
+        run: python tools/verify_delivery_readiness.py --skip-full-project --code-repo-root . --require-clean-git

@@ -1,6 +1,7 @@
 #include "UnrealBridgeModule.h"
 #include "UnrealBridgeDiscovery.h"
 #include "UnrealBridgeServer.h"
+#include "HAL/FileManager.h"
 #include "Interfaces/IMainFrameModule.h"
 #include "Interfaces/IPluginManager.h"
 #include "Interfaces/IPv4/IPv4Address.h"
@@ -213,14 +214,26 @@ void FUnrealBridgeModule::StartupModule()
 	if (Server->HasToken())
 	{
 		// Write the token to a predictable place so the client can consume it
-		// without copy-pasting from the log. 0 on the mode because UE's
-		// FFileHelper doesn't expose ACL control — the Saved/ folder is
-		// already user-scoped.
+		// without copy-pasting from the log. UE's FFileHelper doesn't expose
+		// ACL control, so the Saved/ folder is expected to remain user-scoped.
 		const FString TokenPath = FPaths::Combine(FPaths::ProjectSavedDir(),
 			TEXT("UnrealBridge"), TEXT("token.txt"));
-		FFileHelper::SaveStringToFile(Token, *TokenPath,
+		const FString TokenDirectory = FPaths::GetPath(TokenPath);
+		const bool bDirectoryReady = IFileManager::Get().MakeDirectory(*TokenDirectory, true);
+		const bool bTokenWritten = bDirectoryReady && FFileHelper::SaveStringToFile(
+			Token,
+			*TokenPath,
 			FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
-		UE_LOG(LogUnrealBridgeModule, Log, TEXT("token written to %s"), *TokenPath);
+		if (bTokenWritten)
+		{
+			UE_LOG(LogUnrealBridgeModule, Log, TEXT("token written to %s"), *TokenPath);
+		}
+		else
+		{
+			UE_LOG(LogUnrealBridgeModule, Warning,
+				TEXT("could not write bridge token to %s — clients must use the configured token directly"),
+				*TokenPath);
+		}
 	}
 
 	// ---- start the discovery responder --------------------------------

@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import socket
 import struct
 import sys
@@ -31,14 +32,20 @@ def send_request(host, port, payload, timeout):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Minimal UnrealBridge TCP client")
+    parser = argparse.ArgumentParser(description="UnrealBridge TCP 客户端")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, required=True)
     parser.add_argument("--timeout", type=float, default=30.0)
+    parser.add_argument(
+        "--token",
+        default=None,
+        help="鉴权 token；设置 UNREAL_BRIDGE_TOKEN 后可省略。",
+    )
     parser.add_argument("--ping", action="store_true")
     parser.add_argument("--script")
     parser.add_argument("--script-file")
     args = parser.parse_args()
+    token = args.token if args.token is not None else os.environ.get("UNREAL_BRIDGE_TOKEN", "")
 
     if args.ping:
         payload = {"id": str(uuid.uuid4()), "command": "ping"}
@@ -50,6 +57,9 @@ def main():
             with open(args.script_file, "r", encoding="utf-8") as f:
                 script = f.read()
         payload = {"id": str(uuid.uuid4()), "script": script, "timeout": args.timeout}
+
+    if token:
+        payload["token"] = token
 
     response = send_request(args.host, args.port, payload, args.timeout)
     json.dump(response, sys.stdout, ensure_ascii=False, indent=2)

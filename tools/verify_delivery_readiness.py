@@ -53,6 +53,8 @@ REQUIRED_CODE_REPO_ITEMS = {
     "tools/ensure_demo_raw_meat_spawner_via_bridge.py": "raw meat spawner repair script",
     "tools/ensure_salad_dressing_assets_via_bridge.py": "salad dressing asset/spawner repair script",
     "tools/verify_delivery_readiness.py": "delivery readiness script",
+    ".github/workflows/maintenance.yml": "maintenance CI workflow",
+    "tools/tests/test_delivery_readiness.py": "delivery readiness regression tests",
     "tools/verify_asset_organization.py": "asset organization audit script",
     "tools/migrate_asset_organization_via_editor.py": "staged asset migration script",
     "tools/verify_asset_migration_report.py": "asset migration dry-run report verifier",
@@ -399,6 +401,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Fail if the code-only repository has uncommitted changes.",
     )
+    parser.add_argument(
+        "--skip-full-project",
+        action="store_true",
+        help="Only validate the code-only repository; useful for CI and code checkouts without Content/.",
+    )
     return parser.parse_args()
 
 
@@ -408,13 +415,17 @@ def main() -> int:
     code_repo_root = args.code_repo_root.expanduser().resolve()
 
     results: list[Check] = []
-    check_full_project(full_project_root, results)
+    if not args.skip_full_project:
+        check_full_project(full_project_root, results)
     check_code_repo(code_repo_root, args.require_clean_git, results)
-    check_delivery_docs(full_project_root, ("VRKitchen_DELIVERY.md",), results)
+    if not args.skip_full_project:
+        check_delivery_docs(full_project_root, ("VRKitchen_DELIVERY.md",), results)
     check_delivery_docs(code_repo_root, ("VRKitchen_DELIVERY.md", "VRKitchen/VRKitchen_DELIVERY.md"), results)
-    check_asset_docs(full_project_root, ("VRKitchen_ASSET_ORGANIZATION.md",), results)
+    if not args.skip_full_project:
+        check_asset_docs(full_project_root, ("VRKitchen_ASSET_ORGANIZATION.md",), results)
     check_asset_docs(code_repo_root, ("VRKitchen_ASSET_ORGANIZATION.md", "VRKitchen/VRKitchen_ASSET_ORGANIZATION.md"), results)
-    check_migration_docs(full_project_root, ("VRKitchen_ASSET_MIGRATION_PLAN.md",), results)
+    if not args.skip_full_project:
+        check_migration_docs(full_project_root, ("VRKitchen_ASSET_MIGRATION_PLAN.md",), results)
     check_migration_docs(code_repo_root, ("VRKitchen_ASSET_MIGRATION_PLAN.md", "VRKitchen/VRKitchen_ASSET_MIGRATION_PLAN.md"), results)
 
     return print_results(results)

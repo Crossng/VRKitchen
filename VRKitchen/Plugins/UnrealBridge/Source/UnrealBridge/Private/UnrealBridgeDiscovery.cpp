@@ -12,6 +12,7 @@
 #include "Sockets.h"
 #include "HAL/PlatformProcess.h"
 #include "Misc/App.h"
+#include "Containers/StringConv.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogUnrealBridgeDiscovery, Log, All);
 
@@ -210,7 +211,11 @@ void FBridgeDiscoveryService::HandleDatagram(const uint8* Bytes, int32 Length, c
 
 	// UE's TCHAR JSON parser wants TCHAR-encoded text; UDP payloads are UTF-8
 	// on the wire so we convert here.
-	const FString Payload = FString(Length, UTF8_TO_TCHAR(reinterpret_cast<const char*>(Bytes)));
+	// The datagram is not guaranteed to be NUL-terminated.  Do not pass it to
+	// UTF8_TO_TCHAR, which expects a terminated string and can read past the
+	// receive buffer when a packet fills it exactly.
+	FUTF8ToTCHAR Converter(reinterpret_cast<const ANSICHAR*>(Bytes), Length);
+	const FString Payload(Converter.Length(), Converter.Get());
 
 	TSharedPtr<FJsonObject> Root;
 	TSharedRef<TJsonReader<TCHAR>> Reader = TJsonReaderFactory<TCHAR>::Create(Payload);
