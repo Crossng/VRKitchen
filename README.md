@@ -1,150 +1,123 @@
-# VRKitchen 纯代码仓库
+# VRKitchen
 
-本仓库只保存 VRKitchen Unreal Engine 5.5.4 项目的代码、配置和小型工具。
+> 基于 Unreal Engine 5.5.4 的 PCVR 厨房交互演示项目。
 
-完整 Unreal 工程资源通过云盘/网盘单独交付。请不要在这里提交大型二进制项目资源。
+[![项目状态：已结项](https://img.shields.io/badge/status-completed-2ea44f?style=flat-square)](https://github.com/Crossng/VRKitchen)
+[![Unreal Engine 5.5.4](https://img.shields.io/badge/Unreal%20Engine-5.5.4-313131?style=flat-square&logo=unrealengine)](https://www.unrealengine.com/)
+[![平台：Windows PCVR](https://img.shields.io/badge/platform-Windows%20PCVR-0078D4?style=flat-square)](https://github.com/Crossng/VRKitchen)
+[![维护检查](https://github.com/Crossng/VRKitchen/actions/workflows/maintenance.yml/badge.svg)](https://github.com/Crossng/VRKitchen/actions/workflows/maintenance.yml)
+
+VRKitchen 是一个面向 PCVR 的厨房交互演示项目。玩家需要接收订单、处理食材、完成烹饪和装盘，并在规定时间内提交正确菜品。项目已完成既定演示目标，当前仓库作为结项版本的源代码与交付归档使用。
+
+## 项目状态
+
+本项目已经结项，不再进行常规功能开发。仓库保留以下内容：
+
+- Unreal Engine C++ 源代码
+- 项目配置和插件配置
+- 交付检查、内容验证和资源审计工具
+- 项目运行、资源整理和交付说明
+
+完整 Unreal 工程资源体积较大，继续通过百度网盘提供，不直接提交到 GitHub。
 
 ## 完整工程下载
 
-完整工程源文件（`VRCrazyKitchen.zip` 等 2 个文件）通过百度网盘分享：
+完整工程源文件（`VRCrazyKitchen.zip` 等 2 个文件）：
 
-- [打开百度网盘分享](https://pan.baidu.com/s/1FlrQ5vl0GHLvo42fHb5gmA?pwd=rdnf)
+- [百度网盘下载](https://pan.baidu.com/s/1FlrQ5vl0GHLvo42fHb5gmA?pwd=rdnf)
 - 提取码：`rdnf`
 
-下载并解压完整工程后，再按照下面的“使用方式”打开 Unreal 项目。GitHub 仓库只维护代码、配置和工具，完整资源仍保留在网盘中。
+下载并解压后，请按照[快速开始](#快速开始)打开项目。GitHub 中的代码可以覆盖/合并到完整工程中，以使用仓库中的最新源代码版本。
 
-## 当前 Demo 范围
+## 项目内容
 
-- 目标环境：UE 5.5.4、Windows PCVR、通过 OpenXR 使用 SteamVR。
-- Demo 地图：`/Game/_Project/Maps/VRKitchen_Demo`。
-- 玩法闭环：中文订单反馈、盘面提交校验、煎锅/灶台烹饪、烧焦食材拒绝、3 分钟回合、115 分目标、连击奖励、任务完成结算、星级、正确/错误计数、递进式牛排、带沙拉酱的田园沙拉、汉堡和套餐订单，以及阶段提示、紧张度提示和下一目标引导。
-- 当前未在本仓库中验证：真实 SteamVR 头显体验、手柄操作手感、Quest/Android 独立运行时。
+- 中文订单板与订单反馈
+- 食材拿取、切配、烹饪、装盘和出餐流程
+- 汉堡、牛排、田园沙拉以及多种组合订单
+- 生肉、生肉饼、切好蔬菜和沙拉酱的完整处理链路
+- 严格的食材状态、数量和装盘顺序校验
+- 生食材、未切食材、烧焦食材和错误顺序的失败反馈
+- 3 分钟回合、目标分数、错误扣分、连击奖励和星级结算
+- 当前目标、工位路线、配方卡、出餐检查清单和新手提示
+- 盘面清理与食材回收流程
 
-## 使用方式
+## 技术规格
 
-1. 从云盘/网盘下载完整 VRKitchen 工程包。
-2. 将本仓库中的 `VRKitchen/` 文件夹覆盖/叠加到完整工程目录中。
+| 项目 | 内容 |
+| --- | --- |
+| 引擎 | Unreal Engine 5.5.4 |
+| 运行平台 | Windows PCVR |
+| VR 运行时 | SteamVR / OpenXR |
+| Demo 地图 | `/Game/_Project/Maps/VRKitchen_Demo` |
+| 主要代码 | C++、Blueprint |
+| 辅助工具 | Python |
+
+## 快速开始
+
+1. 从上面的百度网盘链接下载完整工程并解压。
+2. 如需使用 GitHub 中的源代码，将仓库内的 `VRKitchen/` 文件夹合并到完整工程根目录。保留完整工程的 `Content/` 资源，不要把资源目录提交回 GitHub。
 3. 使用 Unreal Engine 5.5.4 打开 `VRKitchen/VRKitchen.uproject`。
-4. 如果 Unreal 提示需要编译，请重新编译 `VRKitchen` C++ 模块。
-5. 发布前运行 `CompileAllBlueprints`、`DataValidation`、`tools/verify_demo_gameplay_loop_via_bridge.py` 和 `tools/verify_demo_content_design_via_bridge.py`。
+4. 使用 SteamVR 时，将 SteamVR 设置为 OpenXR Runtime，并连接 PCVR 头显。
+5. 运行地图 `/Game/_Project/Maps/VRKitchen_Demo`。
 
-## 维护检查
+没有头显时，也可以在编辑器中进行代码编译、蓝图编译、数据验证和 Win64 打包验证，但无法替代真实 VR 操作体验测试。
 
-仓库提供了一条不需要单独下载 `Content/` 目录的轻量级 CI 检查路径。在仓库根目录执行以下命令即可运行相同的本地检查：
+## 仓库结构
+
+```text
+VRKitchen/
+├── Config/                         项目配置
+├── Plugins/UnrealBridge/            Unreal Editor 辅助插件
+├── Source/VRKitchen/               VRKitchen C++ 源代码
+└── VRKitchen.uproject               Unreal 项目文件
+
+tools/
+├── verify_demo_gameplay_loop_via_bridge.py      玩法流程验证
+├── verify_demo_content_design_via_bridge.py     Demo 内容验证
+├── verify_demo_map_content_via_bridge.py        Demo 地图验证
+├── verify_demo_menu_quality_via_bridge.py      菜单质量验证
+├── verify_delivery_readiness.py                 交付边界检查
+└── verify_asset_organization.py                 资源整理审计
+```
+
+## 结项验证记录
+
+结项版本曾完成以下验证：
+
+- `VRKitchenEditor Win64 Development` C++ 构建
+- `CompileAllBlueprints` 蓝图编译
+- `DataValidation` 资源数据验证
+- Win64 Development 打包
+- Demo 地图核心 Actor 和空间关系检查
+- 九道菜菜单、沙拉、套餐和三星结算流程检查
+- 烹饪、烧焦、切菜、装盘顺序和错误反馈检查
+
+仓库本身还提供轻量级的代码检查：
 
 ```bash
 python3 -m compileall -q tools
 python3 -m unittest discover -s tools/tests -p 'test_*.py'
-python3 tools/verify_delivery_readiness.py --skip-full-project --code-repo-root . --require-clean-git
+python3 tools/verify_delivery_readiness.py --skip-full-project --code-repo-root .
 ```
 
-完整交付检查仍然需要完整 Unreal 工程，是上传新的网盘工程包前的最终门禁：
+上述检查不需要下载 `Content/`，主要用于确认代码仓库边界和辅助工具没有损坏。完整工程验证请参考 [`VRKitchen_DELIVERY.md`](VRKitchen_DELIVERY.md)。
 
-```bash
-python3 tools/verify_delivery_readiness.py \
-  --full-project-root /path/to/VRKitchen \
-  --code-repo-root . \
-  --require-clean-git
-```
+## 资源提交边界
 
-Python 检查只验证仓库边界和工具语法，不能替代 Unreal Editor 验证、蓝图编译、Data Validation、头显测试或 Win64 打包。
-
-如果 UnrealBridge 绑定到了非本机回环地址，请通过环境变量传入 token，避免 token 出现在 shell 历史记录中：
-
-```bash
-UNREAL_BRIDGE_TOKEN='your-token' \
-  python3 tools/unreal_bridge_client.py --host 192.168.1.20 --port 54321 --ping
-```
-
-## 交付自检
-
-在推送代码或将完整工程上传到网盘前，运行交付边界检查：
-
-```powershell
-python tools/verify_delivery_readiness.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen --code-repo-root C:\Users\hp\Desktop\VRKitchen_CodeOnly
-```
-
-该脚本会检查完整工程是否仍包含 Demo 地图、源代码、配置、插件和交付文档，并确认代码仓库没有跟踪 `Content`、`.uasset`、`.umap`、二进制文件、打包输出或超大文件。
-
-要验证九道菜 Demo 菜单（包括带 `Salad_Dressing` 的田园沙拉和沙拉套餐）是否仍然接入玩家配方卡、订单板、工位提示、检查清单和最终三星结算流程：
-
-```powershell
-& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\verify_demo_content_design_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
-```
-
-要运行轻量级菜单健康检查，确认解锁顺序、菜名唯一性、中文玩家文案以及沙拉/套餐配方规则：
-
-```powershell
-& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\verify_demo_menu_quality_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
-```
-
-如果完整工程地图缺少沙拉酱 Blueprint 或食材刷新点，请在完整工程中运行幂等修复脚本，再进行地图/内容验证。脚本会保存 `.uasset/.umap`，因此生成的资源只会留在网盘工程包中，不会进入 GitHub：
-
-```powershell
-& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\ensure_salad_dressing_assets_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
-```
-
-如果完整工程地图缺少牛排和牛排沙拉套餐使用的生牛肉刷新点，请运行：
-
-```powershell
-& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\ensure_demo_raw_meat_spawner_via_bridge.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
-```
-
-## 资源整理审计
-
-资源命名和目录规则记录在 `VRKitchen_ASSET_ORGANIZATION.md`，分阶段迁移方案记录在 `VRKitchen_ASSET_MIGRATION_PLAN.md`。当前安全流程是先审计，之后只在 Unreal Editor 内移动资源：
-
-```powershell
-python tools/verify_asset_organization.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen
-```
-
-默认审计是提示模式；只有在资源迁移完成并修复重定向器后，才使用 `--strict`。
-
-要从完整工程生成 Markdown 迁移报告，其中包含阶段/风险/类别汇总、建议的下一批资源和对应的 dry-run 命令：
-
-```powershell
-python tools/verify_asset_organization.py --full-project-root C:\Users\hp\Desktop\CrazyKitchen\VRKitchen --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_AUDIT.md
-```
-
-要对分阶段 Unreal Editor 迁移执行 dry-run：
-
-```powershell
-$env:VRKITCHEN_ASSET_MIGRATION_PHASES='phase-1,phase-2-dev-folders,phase-2-prototypes'
-$env:VRKITCHEN_ASSET_MIGRATION_DRY_RUN='1'
-$env:VRKITCHEN_ASSET_MIGRATION_REPORT='C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN.json'
-& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\migrate_asset_organization_via_editor.py' -unattended -nop4 -nosplash -NullRHI
-```
-
-迁移脚本默认使用 dry-run，并且不会在无人值守 commandlet 中执行 Fix Up Redirectors。真实移动资源后，请在 Unreal Editor 的 Content Browser 中手动执行 Fix Up Redirectors。
-
-在实际移动资源前，先验证每一份迁移 dry-run 报告。验证器支持 `phase-3`、`phase-4` 等阶段别名，也支持指定具体脚本阶段：
-
-```powershell
-python tools/verify_asset_migration_report.py --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN_PHASE3.json --expected-phases phase-3
-python tools/verify_asset_migration_report.py --report C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_DRYRUN_PHASE4.json --expected-phases phase-4
-```
-
-如果真实迁移只完成了一部分，请先审计当前重定向器/目标状态，再尝试下一次移动。该审计是只读的，可用于判断下一步应该在 Content Browser 中执行 Fix Up Redirectors、缩小迁移批次，还是进行人工复核：
-
-```powershell
-$env:VRKITCHEN_ASSET_MIGRATION_REPORT='C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_APPLY_PHASE3_CURRENT.json'
-$env:VRKITCHEN_ASSET_MIGRATION_AUDIT='C:\Users\hp\Desktop\CrazyKitchen\VRKitchen_ASSET_MIGRATION_AUDIT_PHASE3_CURRENT.json'
-& 'D:\Program Files (x86)\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\Users\hp\Desktop\CrazyKitchen\VRKitchen\VRKitchen.uproject' -run=pythonscript -script='C:\Users\hp\Desktop\CrazyKitchen\tools\audit_asset_migration_state_via_editor.py' -unattended -nop4 -NoSourceControl -nosplash -NullRHI
-```
-
-## GitHub 中应包含的内容
-
-- `VRKitchen/Source/`
-- `VRKitchen/Config/`
-- `VRKitchen/VRKitchen.uproject`
-- `tools/` 下的小型辅助脚本
-- 必要时加入 UnrealBridge 源码/Python 工具
-
-## 不应提交到 GitHub 的内容
+GitHub 仓库只保存代码、配置、插件源码、说明文档和小型工具。以下内容保留在完整工程或网盘中，不应提交到 GitHub：
 
 - `Content/`
 - `Binaries/`
 - `Intermediate/`
 - `Saved/`
 - `DerivedDataCache/`
-- 大型 `.uasset`、`.umap`、`.fbx`、`.zip`、`.pdb`、`.exe` 文件和打包产物
+- `.uasset`、`.umap`、`.fbx`、`.zip`、`.pdb`、`.exe` 等大型资源和构建产物
+
+资源目录规范和迁移说明：
+
+- [`VRKitchen_ASSET_ORGANIZATION.md`](VRKitchen_ASSET_ORGANIZATION.md)
+- [`VRKitchen_ASSET_MIGRATION_PLAN.md`](VRKitchen_ASSET_MIGRATION_PLAN.md)
+
+## 许可说明
+
+当前仓库未附带独立的 `LICENSE` 文件。如需复制、修改或再发布项目内容，请联系仓库所有者确认授权范围。
