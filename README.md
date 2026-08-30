@@ -15,6 +15,12 @@
   <strong>接收订单 → 处理食材 → 烹饪 → 按序装盘 → 出餐结算</strong>
 </p>
 
+<p>
+  <strong>简体中文</strong>
+  ·
+  <a href="README.en.md">English</a>
+</p>
+
 </div>
 
 ---
