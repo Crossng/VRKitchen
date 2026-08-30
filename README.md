@@ -4,6 +4,15 @@
 
 完整 Unreal 工程资源通过云盘/网盘单独交付。请不要在这里提交大型二进制项目资源。
 
+## 完整工程下载
+
+完整工程源文件（`VRCrazyKitchen.zip` 等 2 个文件）通过百度网盘分享：
+
+- [打开百度网盘分享](https://pan.baidu.com/s/1FlrQ5vl0GHLvo42fHb5gmA?pwd=rdnf)
+- 提取码：`rdnf`
+
+下载并解压完整工程后，再按照下面的“使用方式”打开 Unreal 项目。GitHub 仓库只维护代码、配置和工具，完整资源仍保留在网盘中。
+
 ## 当前 Demo 范围
 
 - 目标环境：UE 5.5.4、Windows PCVR、通过 OpenXR 使用 SteamVR。
